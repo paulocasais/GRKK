@@ -1,0 +1,250 @@
+import os
+import json
+import uuid
+from datetime import datetime
+from dotenv import load_dotenv
+from supabase import create_client, Client
+
+load_dotenv()
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+
+# Verifica se o Supabase está configurado com chaves válidas ou se usará o emulador mock
+is_mock_mode = (
+    not SUPABASE_URL 
+    or not SUPABASE_KEY 
+    or "sua-url-do-supabase" in SUPABASE_URL 
+    or "seu-anon-key-do-supabase" in SUPABASE_KEY
+)
+
+supabase: Client = None
+if not is_mock_mode:
+    try:
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("Conectado ao Supabase oficial.")
+    except Exception as e:
+        print(f"Erro ao conectar ao Supabase oficial (mudando para modo Mock): {e}")
+        is_mock_mode = True
+else:
+    print("Modo de emulação offline (Mock) ativado.")
+
+# Caminho do arquivo mock-db.json
+MOCK_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mock-db.json")
+
+class MockDb:
+    def __init__(self):
+        self.data = {}
+        self.load()
+
+    def load(self):
+        if os.path.exists(MOCK_DB_PATH):
+            try:
+                with open(MOCK_DB_PATH, "r", encoding="utf-8") as f:
+                    self.data = json.load(f)
+            except Exception as e:
+                print(f"Erro ao carregar banco de dados mock local: {e}")
+                self.data = {}
+        else:
+            print(f"Aviso: mock-db.json não encontrado em {MOCK_DB_PATH}")
+            self.data = {}
+
+    def save(self):
+        try:
+            with open(MOCK_DB_PATH, "w", encoding="utf-8") as f:
+                json.dump(self.data, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            print(f"Erro ao salvar banco de dados mock local: {e}")
+
+mock_db = MockDb()
+
+class SupabaseService:
+    @staticmethod
+    def is_mock():
+        return is_mock_mode
+
+    @staticmethod
+    def get_all(table_name, order_by=None, ascending=True, filter_dict=None):
+        """Busca todos os registros de uma tabela, com suporte a filtros e ordenação simples"""
+        if is_mock_mode:
+            items = mock_db.data.get(table_name, [])
+            # Aplica filtros
+            if filter_dict:
+                filtered_items = []
+                for item in items:
+                    match = True
+                    for k, v in filter_dict.items():
+                        if str(item.get(k)).lower() != str(v).lower():
+                            match = False
+                            break
+                    if match:
+                        filtered_items.append(item)
+                items = filtered_items
+
+            # Resolve joins nos mocks
+            items = json.loads(json.dumps(items))  # Clone para evitar mutação direta
+            for item in items:
+                if table_name == "noticias" and "autor_id" in item:
+                    profiles = mock_db.data.get("profiles", [])
+                    for p in profiles:
+                        if p["id"] == item["autor_id"]:
+                            item["profiles"] = {"nome": p.get("nome"), "avatar_url": p.get("avatar_url")}
+                            break
+
+            # Aplica ordenação
+            if order_by:
+                items.sort(key=lambda x: x.get(order_by, ""), reverse=not ascending)
+            return items, None
+        else:
+            try:
+                query = supabase.table(table_name).select("*")
+                if filter_dict:
+                    for k, v in filter_dict.items():
+                        query = query.eq(k, v)
+                if order_by:
+                    query = query.order(order_by, ascending=ascending)
+                res = query.execute()
+                return res.data, None
+            except Exception as e:
+                return None, str(e)
+
+    @staticmethod
+    def insert(table_name, item):
+        """Insere um novo item na tabela correspondente"""
+        if is_mock_mode:
+            items = mock_db.data.setdefault(table_name, [])
+            if "id" not in item:
+                item["id"] = str(uuid.uuid4())
+            item["created_at"] = datetime.utcnow().isoformat()
+            items.append(item)
+            mock_db.save()
+            return item, None
+        else:
+            try:
+                res = supabase.table(table_name).insert(item).execute()
+                return res.data[0] if res.data else None, None
+            except Exception as e:
+                return None, str(e)
+
+    @staticmethod
+    def update(table_name, item_id, update_data):
+        """Atualiza um item existente na tabela pelo ID"""
+        if is_mock_mode:
+            items = mock_db.data.get(table_name, [])
+            for item in items:
+                if str(item.get("id")) == str(item_id):
+                    item.update(update_data)
+                    mock_db.save()
+                    return item, None
+            return None, "Item não encontrado."
+        else:
+            try:
+                res = supabase.table(table_name).update(update_data).eq("id", item_id).execute()
+                return res.data[0] if res.data else None, None
+            except Exception as e:
+                return None, str(e)
+
+    @staticmethod
+    def delete(table_name, item_id):
+        """Remove um item existente na tabela pelo ID"""
+        if is_mock_mode:
+            items = mock_db.data.get(table_name, [])
+            filtered_items = [item for item in items if str(item.get("id")) != str(item_id)]
+            if len(filtered_items) < len(items):
+                mock_db.data[table_name] = filtered_items
+                mock_db.save()
+                return {"sucesso": True}, None
+            return None, "Item não encontrado."
+        else:
+            try:
+                res = supabase.table(table_name).delete().eq("id", item_id).execute()
+                return {"sucesso": True}, None
+            except Exception as e:
+                return None, str(e)
+
+
+    @staticmethod
+    def login(email, password=None):
+        """Verifica a existência do perfil para fins de login na fase 1"""
+        if is_mock_mode:
+            profiles = mock_db.data.get("profiles", [])
+            for p in profiles:
+                if p["email"].lower() == email.lower():
+                    # Sucesso no login mockado (sem senha)
+                    user_data = dict(p)
+                    # Enriquece com dados adicionais se for atleta ou filial
+                    if p["tipo"] == "atleta":
+                        atletas = mock_db.data.get("atletas", [])
+                        for a in atletas:
+                            if a["id"] == p["id"]:
+                                user_data.update(a)
+                                break
+                    elif p["tipo"] == "filial":
+                        filiais = mock_db.data.get("filiais", [])
+                        for f in filiais:
+                            if f["id"] == p["id"]:
+                                user_data.update(f)
+                                break
+                    return user_data, None
+            return None, "Usuário não encontrado."
+        else:
+            try:
+                # Login real usando o auth do Supabase
+                res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                if res.user:
+                    # Busca as informações estendidas do profile
+                    profile_res = supabase.table("profiles").select("*").eq("id", res.user.id).single().execute()
+                    if profile_res.data:
+                        user_data = dict(profile_res.data)
+                        if user_data["tipo"] == "atleta":
+                            atleta_res = supabase.table("atletas").select("*").eq("id", res.user.id).maybe_single().execute()
+                            if atleta_res.data:
+                                user_data.update(atleta_res.data)
+                        elif user_data["tipo"] == "filial":
+                            filial_res = supabase.table("filiais").select("*").eq("id", res.user.id).maybe_single().execute()
+                            if filial_res.data:
+                                user_data.update(filial_res.data)
+                        return user_data, None
+                return None, "Credenciais inválidas."
+            except Exception as e:
+                return None, str(e)
+
+    @staticmethod
+    def get_profile_by_id(user_id):
+        """Recupera o perfil correspondente ao ID"""
+        if is_mock_mode:
+            profiles = mock_db.data.get("profiles", [])
+            for p in profiles:
+                if p["id"] == user_id:
+                    user_data = dict(p)
+                    if p["tipo"] == "atleta":
+                        atletas = mock_db.data.get("atletas", [])
+                        for a in atletas:
+                            if a["id"] == p["id"]:
+                                user_data.update(a)
+                                break
+                    elif p["tipo"] == "filial":
+                        filiais = mock_db.data.get("filiais", [])
+                        for f in filiais:
+                            if f["id"] == p["id"]:
+                                user_data.update(f)
+                                break
+                    return user_data, None
+            return None, "Perfil não encontrado."
+        else:
+            try:
+                profile_res = supabase.table("profiles").select("*").eq("id", user_id).single().execute()
+                if profile_res.data:
+                    user_data = dict(profile_res.data)
+                    if user_data["tipo"] == "atleta":
+                        atleta_res = supabase.table("atletas").select("*").eq("id", user_id).maybe_single().execute()
+                        if atleta_res.data:
+                            user_data.update(atleta_res.data)
+                    elif user_data["tipo"] == "filial":
+                        filial_res = supabase.table("filiais").select("*").eq("id", user_id).maybe_single().execute()
+                        if filial_res.data:
+                            user_data.update(filial_res.data)
+                    return user_data, None
+                return None, "Perfil não encontrado."
+            except Exception as e:
+                return None, str(e)

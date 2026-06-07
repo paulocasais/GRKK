@@ -1,0 +1,185 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Raleway:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Raleway', sans-serif;
+  --font-sans: 'Raleway', sans-serif;
+
+  --color-primary: #c41e2a;
+  --color-primary-dark: #8B0000;
+  --color-primary-light: #e53e3e;
+
+  --color-gold: #c8a96e;
+  --color-gold-light: #e2c99a;
+  --color-gold-dark: #9a7a45;
+  --color-gold-50: #fcfaf2;
+  --color-gold-100: #f5efe0;
+  --color-gold-200: #e6dac1;
+  --color-gold-300: #d7c4a1;
+  --color-gold-400: #c8a96e;
+  --color-gold-500: #c8a96e;
+  --color-gold-600: #b89559;
+  --color-gold-700: #9a7a45;
+  --color-gold-800: #7a5f33;
+  --color-gold-900: #5a4522;
+
+  --color-dark: #0a0a0a;
+  --color-dark-card: #141414;
+  --color-dark-border: #1e1e1e;
+  --color-dark-muted: #2a2a2a;
+  --color-dark-50: #2a2a2a;
+  --color-dark-100: #202020;
+  --color-dark-200: #141414;
+  --color-dark-300: #0a0a0a;
+  --color-dark-400: #050505;
+  --color-dark-900: #020202;
+
+  --color-cobalt: #1a56db;
+  --color-cobalt-50: #eff6ff;
+  --color-cobalt-100: #dbeafe;
+  --color-cobalt-200: #bfdbfe;
+  --color-cobalt-300: #93c5fd;
+  --color-cobalt-400: #60a5fa;
+  --color-cobalt-500: #1a56db;
+  --color-cobalt-600: #2563eb;
+  --color-cobalt-700: #1d4ed8;
+  --color-cobalt-800: #1e40af;
+  --color-cobalt-900: #1e3a8a;
+
+  --animate-fade-up: fadeUp 0.8s ease forwards;
+  --animate-fade-in: fadeIn 1s ease forwards;
+  --animate-slide-in: slideIn 0.6s ease forwards;
+  --animate-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in-scale: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-blob: blob 7s infinite;
+
+  @keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes slideIn {
+    0% { opacity: 0; transform: translateX(-20px); }
+    100% { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInScale {
+    0% { opacity: 0; transform: scale(0.95); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes blob {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+  }
+}
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #c41e2a;
+  border-radius: 3px;
+}
+
+/* Selection */
+::selection {
+  background: #c41e2a;
+  color: #ffffff;
+}
+
+/* Section padding */
+.section-pad {
+  @apply py-20 md:py-28 px-4 md:px-8 lg:px-16;
+}
+
+/* Divider line */
+.divider-red {
+  @apply w-16 h-0.5 bg-primary mx-auto my-6;
+}
+
+/* Cinzel font helper */
+.font-cinzel {
+  font-family: var(--font-display), serif;
+  letter-spacing: 0.05em;
+}
+
+.hover-underline-red {
+  position: relative;
+}
+.hover-underline-red::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #c41e2a;
+  transition: width 0.3s ease;
+}
+.hover-underline-red:hover::after {
+  width: 100%;
+}
+
+.hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.3) 40%,
+    rgba(0, 0, 0, 0.7) 80%,
+    rgba(10, 10, 10, 1) 100%
+  );
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:border-primary/50 hover:-translate-y-1;
+}
+
+/* Input styles */
+input, select, textarea {
+  color: #ffffff !important;
+  background-color: #141414 !important;
+}
+
+select option {
+  background-color: #141414 !important;
+  color: #ffffff !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #141414 inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}

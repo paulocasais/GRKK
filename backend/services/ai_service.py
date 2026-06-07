@@ -1,0 +1,73 @@
+import os
+import google.generativeai as genai
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Recupera a chave da API do Gemini das variáveis de ambiente
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
+has_gemini = False
+if GEMINI_API_KEY and "sua-chave-api" not in GEMINI_API_KEY and GEMINI_API_KEY.strip() != "":
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        has_gemini = True
+        print("SDK do Gemini configurado com sucesso (Modelo gratuito).")
+    except Exception as e:
+        print(f"Erro ao configurar o SDK do Gemini: {e}")
+
+# Base de conhecimento baseada em regras para fallback offline / sem chave
+FALLBACK_RESPONSES = {
+    "sanchin": "Sanchin (Três Batalhas) é o Kata fundamental do Goju-Ryu. Ele foca na respiração ibuki, postura estável (Sanchin-dachi) e fortalecimento corporal através de contração isométrica rígida (Go).",
+    "tensho": "Tensho (Mãos Rotativas) é o Kata que complementa o Sanchin no Goju-Ryu. Criado pelo Mestre Chojun Miyagi, foca na suavidade (Ju), movimentos circulares de mão aberta e respiração profunda e suave.",
+    "origem": "O Karate Goju-Ryu foi fundado pelo Mestre Chojun Miyagi em Okinawa, Japão, no início do século XX. Miyagi combinou técnicas tradicionais de Okinawa (Naha-te) com estilos chineses de Kung Fu (como o Estilo da Garça Branca).",
+    "fundador": "O fundador do Karate Goju-Ryu foi o Sensei Chojun Miyagi (1888-1953). Ele herdou os ensinamentos do Sensei Kanryo Higaonna e batizou o estilo com base no poema chinês Kempo Hakku (Os Oito Preceitos do Boxe).",
+    "criador": "O fundador do Karate Goju-Ryu foi o Sensei Chojun Miyagi (1888-1953). Ele herdou os ensinamentos do Sensei Kanryo Higaonna e batizou o estilo com base no poema chinês Kempo Hakku (Os Oito Preceitos do Boxe).",
+    "goju": "Goju-Ryu significa estilo da força (Go) e da suavidade (Ju). 'Go' representa o ataque direto, a firmeza e o bloqueio rígido. 'Ju' representa o desvio circular, as esquivas, agarres e a flexibilidade.",
+    "diferença de go e ju": "No Goju-Ryu, o 'Go' (força) e o 'Ju' (suavidade) são complementares. O 'Go' é visto no Kata Sanchin (força rígida, tensão), enquanto o 'Ju' é visto no Kata Tensho (suavidade circular, flexibilidade). O praticante deve equilibrar ambos os aspectos.",
+    "ibuki": "A respiração Ibuki é a respiração abdominal sonora e profunda característica do Goju-Ryu. Ela serve para canalizar a energia (Ki), estabilizar o core abdominal e absorver impactos no corpo durante o combate.",
+    "saifa": "Saifa (Destruir e Esmagar) é o primeiro Kata Kaishugata (avançado de combate) do Goju-Ryu. Ele ensina técnicas rápidas de libertação de agarres, golpes circulares de punho (Uraken) e movimentação ágil.",
+    "seiyunchin": "Seiyunchin (Controlar e Puxar) é um Kata longo focado em posturas baixas (Shiko-dachi) e combate de curta distância. Ele não possui chutes, focando inteiramente no equilíbrio, agarres e projeções."
+}
+
+def ask_sensei(message_text):
+    """
+    Função principal para interagir com o Sensei virtual.
+    Utiliza o Gemini 1.5 Flash (Gratuito) caso configurado,
+    caso contrário recorre à lógica local.
+    """
+    if not message_text or message_text.strip() == "":
+        return "Olá! Sou o Sensei Virtual. Como posso ajudar você no seu caminho (Do) do Karate Goju-Ryu hoje?"
+
+    # Se a chave do Gemini estiver configurada e funcional
+    if has_gemini:
+        try:
+            # Configura o modelo gratuito gemini-1.5-flash
+            model = genai.GenerativeModel(
+                model_name="gemini-1.5-flash",
+                system_instruction=(
+                    "Você é o Sensei Virtual da Federação de Karatê Goju-Ryu (GRKKK). "
+                    "Sua personalidade é sábia, disciplinada, respeitosa e prestativa. "
+                    "Responda a perguntas sobre a história, Katas (como Sanchin, Tensho, Saifa), "
+                    "princípios (Go e Ju) e regras do Karatê Goju-Ryu tradicional de Okinawa. "
+                    "Mantenha suas respostas claras, diretas e sempre em português do Brasil. "
+                    "Se o usuário perguntar algo fora do contexto de Karatê ou artes marciais, "
+                    "relembre-o cordialmente de manter o foco no Caminho (Dojo-Kun)."
+                )
+            )
+            response = model.generate_content(message_text)
+            return response.text.strip()
+        except Exception as e:
+            print(f"Erro ao chamar a API do Gemini: {e}. Usando fallback local.")
+    
+    # Fallback baseado em palavras-chave se o Gemini falhar ou não estiver ativado
+    lower_text = message_text.lower()
+    for key, value in FALLBACK_RESPONSES.items():
+        if key in lower_text:
+            return value
+
+    return (
+        f"Interessante sua dúvida sobre '{message_text}'. Como o Sensei Virtual, busco sempre "
+        "equilibrar o forte (Go) e o suave (Ju). Experimente me perguntar sobre os Katas "
+        "'Sanchin' ou 'Tensho', sobre a 'origem' do estilo ou sobre o significado de 'Goju-Ryu'."
+    )

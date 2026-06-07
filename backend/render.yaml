@@ -1,0 +1,18 @@
+# Arquivo de configuração Render.com para o backend do Goju-Ryu Karate Kai
+services:
+  - type: web
+    name: goju-ryu-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: SUPABASE_URL
+        sync: false # Definido manualmente no painel do Render
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
