@@ -111,10 +111,11 @@ class SupabaseService:
     @staticmethod
     def insert(table_name, item):
         """Insere um novo item na tabela correspondente"""
+        if "id" not in item:
+            item["id"] = str(uuid.uuid4())
+            
         if is_mock_mode:
             items = mock_db.data.setdefault(table_name, [])
-            if "id" not in item:
-                item["id"] = str(uuid.uuid4())
             item["created_at"] = datetime.utcnow().isoformat()
             items.append(item)
             mock_db.save()

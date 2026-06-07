@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Trophy, CalendarDays,
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
-  Medal, CreditCard,
+  Medal, CreditCard, MessageSquare,
 } from 'lucide-react';
 
 const NAV_ADMIN = [
@@ -22,6 +22,7 @@ const NAV_ADMIN = [
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
+  { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
   { href: '/admin', label: 'Gerenciar Site (CMS)', icon: Settings },
 ];
 
@@ -35,6 +36,7 @@ const NAV_FILIAL = [
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
+  { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
 ];
 
 const NAV_ATLETA = [
@@ -43,8 +45,11 @@ const NAV_ATLETA = [
   { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
+  { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
+
+
 
 interface SidebarProps {
   open: boolean;

@@ -32,6 +32,7 @@ interface Candidato {
   dados_banca?: {
     examinadores?: string;
     nota_tecnica?: number;
+    nota_kihon?: number;
     nota_kata?: number;
     nota_combate?: number;
     parecer?: string;
@@ -75,7 +76,7 @@ export default function ExamesPage() {
   // Forms
   const [inscricaoForm, setInscricaoForm] = useState({ exame_id: '', graduacao_pretendida: 'Amarela' });
   const [novoExameForm, setNovoExameForm] = useState({ titulo: '', descricao: '', data_exame: '', status: 'agendado' as const });
-  const [bancaForm, setBancaForm] = useState({ examinadores: '', nota_tecnica: '7.0', nota_kata: '7.0', nota_combate: '7.0', parecer: '', aprovado: true });
+  const [bancaForm, setBancaForm] = useState({ examinadores: '', nota_tecnica: '7.0', nota_kihon: '7.0', nota_kata: '7.0', nota_combate: '7.0', parecer: '', aprovado: true });
 
   const [notif, setNotif] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: '' });
 
@@ -201,6 +202,7 @@ export default function ExamesPage() {
     setBancaForm({
       examinadores: candidato.dados_banca?.examinadores || '',
       nota_tecnica: String(candidato.dados_banca?.nota_tecnica || '7.0'),
+      nota_kihon: String(candidato.dados_banca?.nota_kihon || '7.0'),
       nota_kata: String(candidato.dados_banca?.nota_kata || '7.0'),
       nota_combate: String(candidato.dados_banca?.nota_combate || '7.0'),
       parecer: candidato.dados_banca?.parecer || '',
@@ -219,6 +221,7 @@ export default function ExamesPage() {
         dados_banca: {
           examinadores: bancaForm.examinadores,
           nota_tecnica: parseFloat(bancaForm.nota_tecnica),
+          nota_kihon: parseFloat(bancaForm.nota_kihon),
           nota_kata: parseFloat(bancaForm.nota_kata),
           nota_combate: parseFloat(bancaForm.nota_combate),
           parecer: bancaForm.parecer
@@ -243,6 +246,7 @@ export default function ExamesPage() {
         dados_banca: {
           examinadores: bancaForm.examinadores,
           nota_tecnica: parseFloat(bancaForm.nota_tecnica),
+          nota_kihon: parseFloat(bancaForm.nota_kihon),
           nota_kata: parseFloat(bancaForm.nota_kata),
           nota_combate: parseFloat(bancaForm.nota_combate),
           parecer: bancaForm.parecer
@@ -371,6 +375,25 @@ export default function ExamesPage() {
                               Pagamento: {c.pagamento_status}
                             </span>
                           </div>
+                          {c.dados_banca && (c.dados_banca.nota_tecnica !== undefined || c.dados_banca.nota_kihon !== undefined || c.dados_banca.nota_kata !== undefined || c.dados_banca.nota_combate !== undefined) && (
+                            <div className="mt-3 text-[10px] text-zinc-400 bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800 space-y-1.5 max-w-[240px]">
+                              <p className="font-black text-zinc-300 text-[8px] uppercase tracking-wider">Notas da Banca</p>
+                              <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-zinc-400">
+                                <div>Técnica: <strong className="text-white">{c.dados_banca.nota_tecnica ?? '-'}</strong></div>
+                                <div>Kihon: <strong className="text-white">{c.dados_banca.nota_kihon ?? '-'}</strong></div>
+                                <div>Kata: <strong className="text-white">{c.dados_banca.nota_kata ?? '-'}</strong></div>
+                                <div>Combate: <strong className="text-white">{c.dados_banca.nota_combate ?? '-'}</strong></div>
+                              </div>
+                              {c.dados_banca.examinadores && (
+                                <p className="text-[8px] text-zinc-500 border-t border-zinc-800/60 pt-1 mt-1">
+                                  Banca: <span className="text-zinc-400 font-medium">{c.dados_banca.examinadores}</span>
+                                </p>
+                              )}
+                              {c.dados_banca.parecer && (
+                                <p className="text-[8px] text-zinc-500 italic">"{c.dados_banca.parecer}"</p>
+                              )}
+                            </div>
+                          )}
                         </div>
 
                         {/* Ações baseadas no tipo de usuário */}
@@ -424,13 +447,22 @@ export default function ExamesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Técnica *</label>
                   <input
                     type="number" step="0.1" required
                     value={bancaForm.nota_tecnica}
                     onChange={(e) => setBancaForm({ ...bancaForm, nota_tecnica: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Kihon *</label>
+                  <input
+                    type="number" step="0.1" required
+                    value={bancaForm.nota_kihon}
+                    onChange={(e) => setBancaForm({ ...bancaForm, nota_kihon: e.target.value })}
                     className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
                   />
                 </div>

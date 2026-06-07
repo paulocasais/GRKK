@@ -29,7 +29,7 @@ export default function EntrarPage() {
       if (data.tipo === 'admin') {
         router.push('/admin');
       } else {
-        router.push('/dashboard/atleta'); // Rota padrão de membros
+        router.push('/home'); // Rota padrão de membros
       }
     } catch (err: any) {
       setError(err.message || 'E-mail ou senha inválidos.');

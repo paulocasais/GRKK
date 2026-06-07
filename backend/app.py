@@ -327,6 +327,8 @@ def chat_ia():
     resposta = ask_sensei(mensagem)
     return jsonify({"resposta": resposta}), 200
 
+
+
 # --- VALIDAÇÃO DE CERTIFICADOS ---
 
 @app.route("/api/certificados/validar/<codigo>", methods=["GET"])

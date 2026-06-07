@@ -59,7 +59,7 @@ export default function Navbar() {
       if (loginForm.type === 'filial' || usuario?.tipo === 'admin') {
         router.push('/admin');
       } else {
-        router.push('/dashboard/atleta');
+        router.push('/home');
       }
       setShowLoginDropdown(false);
     } catch (err: any) {
@@ -171,7 +171,7 @@ export default function Navbar() {
             {autenticado ? (
               <div className="flex items-center gap-3">
                 <Link
-                  href={usuario?.tipo === 'admin' ? '/admin' : '/dashboard/atleta'}
+                  href={usuario?.tipo === 'admin' ? '/admin' : '/home'}
                   className="bg-primary border border-primary text-white text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-transparent hover:text-primary transition-all duration-300"
                 >
                   Minha Área
@@ -341,7 +341,7 @@ export default function Navbar() {
           {autenticado ? (
             <>
               <Link
-                href={usuario?.tipo === 'admin' ? '/admin' : '/dashboard/atleta'}
+                href={usuario?.tipo === 'admin' ? '/admin' : '/home'}
                 className="mt-4 text-center bg-primary border border-primary text-white text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-transparent hover:text-primary transition-all duration-300"
               >
                 Minha Área

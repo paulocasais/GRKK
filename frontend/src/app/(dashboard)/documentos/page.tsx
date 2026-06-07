@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FileText, Download, ShieldAlert, Award, BookOpen, AlertCircle } from 'lucide-react';
+import { FileText, Download, ShieldAlert, Award, BookOpen } from 'lucide-react';
 
 export default function DocumentosPage() {
   const docs = [
