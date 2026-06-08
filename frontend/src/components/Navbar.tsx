@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 
 const institucionalLinks = [
   { label: 'A Academia', href: '/sobre' },
+  { label: 'Dojo Kun', href: '/dojo-kun' },
   { label: 'Equipe', href: '/equipe' },
   { label: 'Eventos', href: '/eventos' },
   { label: 'Transparência', href: '/transparencia' },

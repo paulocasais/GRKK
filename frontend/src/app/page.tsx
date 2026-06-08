@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
+import Link from "next/link";
 import Footer from "@/components/Footer";
 import { 
   Send, 
@@ -241,6 +242,19 @@ export default function Home() {
               </ul>
             </div>
           </div>
+
+          {/* Dojo Kun Callout */}
+          <div className="mt-16 text-center">
+            <Link 
+              href="/dojo-kun" 
+              className="inline-flex items-center gap-3 px-6 py-3.5 border border-zinc-850 hover:border-primary/40 bg-zinc-900/20 hover:bg-zinc-900/40 rounded-2xl text-sm font-semibold font-cinzel tracking-wider text-zinc-300 hover:text-white transition duration-300 group"
+            >
+              <BookOpen size={16} className="text-primary group-hover:scale-110 transition-transform" />
+              Conheça os 5 Preceitos do Dojo Kun (道場訓)
+              <ArrowRight size={14} className="text-zinc-500 group-hover:translate-x-1.5 transition-transform" />
+            </Link>
+          </div>
+
         </div>
       </section>
 
