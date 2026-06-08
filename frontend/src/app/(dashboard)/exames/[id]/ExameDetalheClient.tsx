@@ -69,7 +69,7 @@ const PROXIMOS_STATUS: Record<string, string[]> = {
 export default function ExameDetalheClient({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const { usuario, tipo, isAdmin } = useAuth();
+  const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial'; // Na GRKK, representantes de filial atuam como examinadores no tatame
   const isAtleta = tipo === 'atleta';
 
@@ -112,8 +112,13 @@ export default function ExameDetalheClient({ params }: { params: Promise<{ id: s
   };
 
   useEffect(() => {
+    if (carregando) return;
+    if (!usuario) {
+      router.push('/auth');
+      return;
+    }
     carregarDados();
-  }, [id]);
+  }, [id, usuario, carregando]);
 
   const handleSalvarExaminadores = async (e: React.FormEvent) => {
     e.preventDefault();
