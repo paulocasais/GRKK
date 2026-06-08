@@ -27,7 +27,7 @@ interface Candidato {
 export default function AvaliarBancaClient({ params }: { params: Promise<{ id: string }> }) {
   const { id: exameId } = use(params);
   const router = useRouter();
-  const { usuario, tipo, isAdmin } = useAuth();
+  const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial';
 
   const [exame, setExame] = useState<Exame | null>(null);
@@ -62,6 +62,8 @@ export default function AvaliarBancaClient({ params }: { params: Promise<{ id: s
   };
 
   useEffect(() => {
+    if (carregando) return;
+
     if (!usuario) {
       router.push('/auth');
       return;
@@ -73,7 +75,7 @@ export default function AvaliarBancaClient({ params }: { params: Promise<{ id: s
     }
 
     carregarDados();
-  }, [exameId, usuario]);
+  }, [exameId, usuario, carregando]);
 
   if (loading) {
     return (

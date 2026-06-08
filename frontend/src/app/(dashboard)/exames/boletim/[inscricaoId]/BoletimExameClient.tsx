@@ -39,7 +39,7 @@ interface Candidato {
 export default function BoletimExameClient({ params }: { params: Promise<{ inscricaoId: string }> }) {
   const { inscricaoId } = use(params);
   const router = useRouter();
-  const { usuario, tipo, isAdmin } = useAuth();
+  const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial';
 
   const [candidato, setCandidato] = useState<Candidato | null>(null);
@@ -48,6 +48,8 @@ export default function BoletimExameClient({ params }: { params: Promise<{ inscr
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (carregando) return;
+
     if (!usuario) {
       router.push('/auth');
       return;
@@ -71,7 +73,7 @@ export default function BoletimExameClient({ params }: { params: Promise<{ inscr
     };
 
     carregarDados();
-  }, [inscricaoId, usuario]);
+  }, [inscricaoId, usuario, carregando]);
 
   const handlePrint = () => {
     window.print();

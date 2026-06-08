@@ -26,7 +26,7 @@ interface Candidato {
 export default function AvaliarAtletaClient({ params }: { params: Promise<{ id: string; inscricaoId: string }> }) {
   const { id: exameId, inscricaoId } = use(params);
   const router = useRouter();
-  const { usuario, tipo, isAdmin } = useAuth();
+  const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial'; // Na GRKK, representantes de filial atuam como examinadores
 
   const [exame, setExame] = useState<Exame | null>(null);
@@ -34,6 +34,8 @@ export default function AvaliarAtletaClient({ params }: { params: Promise<{ id: 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (carregando) return;
+
     if (!usuario) {
       router.push('/auth');
       return;
@@ -83,7 +85,7 @@ export default function AvaliarAtletaClient({ params }: { params: Promise<{ id: 
     };
 
     carregarDados();
-  }, [exameId, inscricaoId, usuario]);
+  }, [exameId, inscricaoId, usuario, carregando]);
 
   if (loading) {
     return (
