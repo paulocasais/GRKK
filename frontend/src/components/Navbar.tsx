@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Instagram, Facebook, Phone, Mail, Lock, Loader2, ChevronDown, UserPlus } from 'lucide-react';
+import { Menu, X, Instagram, Facebook, Phone, Mail, Lock, Loader2, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 const institucionalLinks = [
@@ -28,22 +28,17 @@ export default function Navbar() {
   const [showInstDropdown, setShowInstDropdown] = useState(false);
   const [mobileInstOpen, setMobileInstOpen] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
-  const [showAssocieDropdown, setShowAssocieDropdown] = useState(false);
   const [loginDropdownMode, setLoginDropdownMode] = useState<'login' | 'register'>('login');
   const [loginForm, setLoginForm] = useState({ identifier: '', password: '', type: 'atleta' as 'atleta' | 'filial' });
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const associeRef = useRef<HTMLDivElement>(null);
 
-  // Fecha dropdowns ao clicar fora
+  // Fecha dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowLoginDropdown(false);
-      }
-      if (associeRef.current && !associeRef.current.contains(event.target as Node)) {
-        setShowAssocieDropdown(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -191,69 +186,6 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                {/* Botão Associe-se com Dropdown */}
-                <div className="relative" ref={associeRef}>
-                  <button
-                    onClick={() => { setShowAssocieDropdown(!showAssocieDropdown); setShowLoginDropdown(false); }}
-                    className="flex items-center gap-1.5 border border-gold text-gold text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-gold hover:text-white transition-all duration-300 cursor-pointer"
-                  >
-                    <UserPlus size={13} />
-                    Associe-se
-                  </button>
-
-                  {showAssocieDropdown && (
-                    <div className="absolute left-0 mt-3 w-80 bg-dark/95 backdrop-blur-md border border-dark-border rounded-xl p-5 shadow-2xl text-left z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <h4 className="font-cinzel text-white text-sm font-semibold tracking-wider mb-2 text-center">Junte-se a Nós</h4>
-                      <p className="text-[10px] text-gray-400 text-center mb-4 leading-relaxed">
-                        Faça parte da família Goju-Ryu Karate Kai.
-                      </p>
-
-                      <div className="space-y-2.5">
-                        {/* Atleta */}
-                        <Link
-                          href="/auth/cadastro-atleta"
-                          onClick={() => setShowAssocieDropdown(false)}
-                          className="flex items-center gap-3 w-full p-3.5 border border-gold/30 hover:border-gold bg-gold/5 hover:bg-gold/10 transition-all duration-200 rounded-lg group"
-                        >
-                          <div className="w-9 h-9 rounded-full bg-gold/20 flex items-center justify-center shrink-0 group-hover:bg-gold/30 transition">
-                            <span className="text-base">🥋</span>
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-white uppercase tracking-wider">Sou Atleta</p>
-                            <p className="text-[9px] text-gray-400 mt-0.5">Cadastre-se como praticante</p>
-                          </div>
-                          <ChevronDown size={12} className="ml-auto text-gold -rotate-90 opacity-50 group-hover:opacity-100" />
-                        </Link>
-
-                        {/* Filial */}
-                        <Link
-                          href="/auth/cadastro-filial"
-                          onClick={() => setShowAssocieDropdown(false)}
-                          className="flex items-center gap-3 w-full p-3.5 border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-all duration-200 rounded-lg group"
-                        >
-                          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/30 transition">
-                            <span className="text-base">🏯</span>
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-bold text-white uppercase tracking-wider">Sou Filial / Dojo</p>
-                            <p className="text-[9px] text-gray-400 mt-0.5">Associe seu dojo à federação</p>
-                          </div>
-                          <ChevronDown size={12} className="ml-auto text-primary -rotate-90 opacity-50 group-hover:opacity-100" />
-                        </Link>
-                      </div>
-
-                      <div className="text-center mt-3 pt-3 border-t border-dark-border">
-                        <button
-                          onClick={() => { setShowAssocieDropdown(false); setShowLoginDropdown(true); setLoginDropdownMode('login'); }}
-                          className="text-[10px] text-gray-500 hover:text-white transition cursor-pointer"
-                        >
-                          ← Já sou membro
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 {/* Botão Área do Membro + Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
@@ -502,12 +434,6 @@ export default function Navbar() {
                 className="mt-4 text-center border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-primary hover:text-white transition-all duration-300"
               >
                 Área do Membro
-              </Link>
-              <Link
-                href="/auth/cadastro-atleta"
-                className="mt-2 text-center border border-gold text-gold text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-gold hover:text-white transition-all duration-300"
-              >
-                Associe-se
               </Link>
             </>
           )}

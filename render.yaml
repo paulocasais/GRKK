@@ -1,6 +1,7 @@
+# Arquivo de configuração Render.com (Blueprint) para o repositório raiz
 services:
   - type: web
-    name: grkk-backend
+    name: grkk
     env: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
@@ -19,3 +20,4 @@ services:
         value: production
       - key: PYTHONUNBUFFERED
         value: 1
+
