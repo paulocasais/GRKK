@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import {
-  Trophy, Plus, Calendar, User, Star, Clock,
-  CheckCircle2, AlertCircle, Award, Loader2,
-  Building2, ChevronDown, ChevronRight, X
+  Trophy, Plus, Calendar, MapPin, Loader2,
+  AlertCircle, ClipboardList, CheckCircle2, ChevronRight
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -15,137 +15,114 @@ interface Exame {
   titulo: string;
   descricao: string;
   data_exame: string;
-  status: 'agendado' | 'realizado' | 'cancelado';
+  local: string;
+  modalidade: string;
+  faixa_alvo: string;
+  taxa_valor?: number;
+  status: 'rascunho' | 'publicado' | 'em_andamento' | 'concluido' | 'cancelado';
 }
 
-interface Candidato {
-  id: string | number;
-  exame_id: string | number;
-  atleta_id: string;
-  atleta_nome: string;
-  filial_nome: string;
-  faixa_atual: string;
-  graduacao_pretendida: string;
-  status: 'pendente' | 'inscrito' | 'aprovado' | 'reprovado';
-  autorizacao_tecnica: boolean;
-  pagamento_status: 'pendente' | 'pago';
-  dados_banca?: {
-    examinadores?: string;
-    nota_tecnica?: number;
-    nota_kihon?: number;
-    nota_kata?: number;
-    nota_combate?: number;
-    parecer?: string;
-    bancada?: string;
-  };
-}
-
-function formatDate(isoString: string) {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return isoString;
-  return date.toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-}
-
-const FAIXAS = ['Branca', 'Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+const statusConfig: Record<string, { label: string; color: string }> = {
+  rascunho:     { label: 'Rascunho',     color: 'bg-zinc-800 text-zinc-400 border border-zinc-700/50' },
+  publicado:    { label: 'Publicado',    color: 'bg-blue-950/40 text-blue-300 border border-blue-900/30' },
+  em_andamento: { label: 'Em Andamento', color: 'bg-yellow-950/40 text-yellow-300 border border-yellow-900/30' },
+  concluido:    { label: 'Concluído',    color: 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30' },
+  cancelado:    { label: 'Cancelado',    color: 'bg-red-950/40 text-red-400 border border-red-900/30' },
+};
 
 export default function ExamesPage() {
   const { usuario, tipo, isAdmin } = useAuth();
-  const isFilial = tipo === 'filial';
   const isAtleta = tipo === 'atleta';
 
   const [exames, setExames] = useState<Exame[]>([]);
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Filtros
-  const [exameFiltro, setExameFiltro] = useState<'todos' | 'agendado' | 'realizado'>('todos');
-  const [busca, setBusca] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Modais
-  const [showInscricaoModal, setShowInscricaoModal] = useState(false);
   const [showNovoExameModal, setShowNovoExameModal] = useState(false);
-  const [showBancaModal, setShowBancaModal] = useState(false);
-  
-  const [selectedCandidato, setSelectedCandidato] = useState<Candidato | null>(null);
+  const [showInscricaoModal, setShowInscricaoModal] = useState(false);
 
   // Forms
-  const [inscricaoForm, setInscricaoForm] = useState({ exame_id: '', graduacao_pretendida: 'Amarela' });
-  const [novoExameForm, setNovoExameForm] = useState({ titulo: '', descricao: '', data_exame: '', status: 'agendado' as const });
-  const [bancaForm, setBancaForm] = useState({ examinadores: '', nota_tecnica: '7.0', nota_kihon: '7.0', nota_kata: '7.0', nota_combate: '7.0', parecer: '', aprovado: true });
+  const [novoExameForm, setNovoExameForm] = useState({
+    titulo: '',
+    descricao: '',
+    data_exame: '',
+    local: 'Sede Central GRKK',
+    modalidade: 'Karate Goju-Ryu',
+    faixa_alvo: 'Amarela',
+    taxa_valor: '50.00',
+    status: 'rascunho' as const
+  });
+
+  const [inscricaoForm, setInscricaoForm] = useState({
+    exame_id: '',
+    graduacao_pretendida: 'Amarela'
+  });
 
   const [notif, setNotif] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: '' });
 
-  const carregarDados = async () => {
+  const carregarExames = async () => {
     try {
-      const [resExames, resCandidatos] = await Promise.all([
-        fetch(`${API_URL}/api/exames`, { credentials: 'include' }),
-        fetch(`${API_URL}/api/exames/candidatos`, { credentials: 'include' }).catch(() => null)
-      ]);
-
-      if (resExames.ok) {
-        const data = await resExames.json();
-        setExames(data.exames || []);
-      }
-
-      if (resCandidatos && resCandidatos.ok) {
-        const data = await resCandidatos.json();
-        setCandidatos(data.candidatos || []);
-      }
-    } catch (err) {
-      console.error("Erro ao carregar exames, usando dados mockados:", err);
-      // Fallback offline estruturado
-      setExames([
-        { id: 1, titulo: "Exame de Faixas Coloridas - Capital", descricao: "Exame oficial de graduação para Kyu", data_exame: "2026-06-25", status: "agendado" },
-        { id: 2, titulo: "Exame Geral de Faixas Pretas 2026", descricao: "Banca avaliadora para Dan", data_exame: "2026-04-12", status: "realizado" }
-      ]);
-      setCandidatos([
-        { id: 1, exame_id: 1, atleta_id: "user-1", atleta_nome: "Pedro Albuquerque", filial_nome: "Dojo Salvador Centro", faixa_atual: "Branca", graduacao_pretendida: "Amarela", status: "pendente", autorizacao_tecnica: true, pagamento_status: "pendente" },
-        { id: 2, exame_id: 1, atleta_id: "user-2", atleta_nome: "Maria Fernanda", filial_nome: "Goju-Ryu Lauro", faixa_atual: "Amarela", graduacao_pretendida: "Laranja", status: "inscrito", autorizacao_tecnica: true, pagamento_status: "pago" }
-      ]);
+      const res = await fetch(`${API_URL}/api/exames`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Não foi possível carregar os exames.');
+      const data = await res.json();
+      setExames(data.exames || []);
+    } catch (err: any) {
+      console.error(err);
+      setErrorMsg(err.message || 'Erro ao carregar exames.');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    carregarDados();
+    carregarExames();
   }, []);
 
   const handleCriarExame = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNotif({ type: null, msg: '' });
     try {
+      const payload = {
+        ...novoExameForm,
+        taxa_valor: parseFloat(novoExameForm.taxa_valor) || 0
+      };
+
       const res = await fetch(`${API_URL}/api/exames`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(novoExameForm)
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.erro);
+      if (!res.ok) throw new Error(data.error || 'Erro ao agendar exame.');
+
       setExames([data, ...exames]);
       setShowNovoExameModal(false);
-      setNovoExameForm({ titulo: '', descricao: '', data_exame: '', status: 'agendado' });
+      setNovoExameForm({
+        titulo: '',
+        descricao: '',
+        data_exame: '',
+        local: 'Sede Central GRKK',
+        modalidade: 'Karate Goju-Ryu',
+        faixa_alvo: 'Amarela',
+        taxa_valor: '50.00',
+        status: 'rascunho'
+      });
+      setNotif({ type: 'success', msg: 'Exame agendado com sucesso!' });
     } catch (err: any) {
-      // Simulação local
-      const mockExame: Exame = {
-        id: Date.now(),
-        titulo: novoExameForm.titulo,
-        descricao: novoExameForm.descricao,
-        data_exame: novoExameForm.data_exame,
-        status: novoExameForm.status
-      };
-      setExames([mockExame, ...exames]);
-      setShowNovoExameModal(false);
+      setNotif({ type: 'error', msg: err.message || 'Falha ao agendar exame.' });
     }
   };
 
   const handleInscreverAtleta = async (e: React.FormEvent) => {
     e.preventDefault();
+    setNotif({ type: null, msg: '' });
+    if (!inscricaoForm.exame_id) {
+      setNotif({ type: 'error', msg: 'Selecione um exame válido.' });
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/api/exames/candidatos`, {
         method: 'POST',
@@ -158,114 +135,23 @@ export default function ExamesPage() {
         })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.erro);
-      setCandidatos([data, ...candidatos]);
+      if (!res.ok) throw new Error(data.error || 'Erro ao solicitar inscrição.');
+
       setShowInscricaoModal(false);
+      setNotif({ type: 'success', msg: 'Inscrição enviada para aprovação!' });
     } catch (err: any) {
-      // Simulação local
-      const mockCandidato: Candidato = {
-        id: Date.now(),
-        exame_id: Number(inscricaoForm.exame_id),
-        atleta_id: usuario?.id || 'me',
-        atleta_nome: usuario?.nome || 'Atleta Logado',
-        filial_nome: usuario?.filial_nome || 'Dojo Central',
-        faixa_atual: usuario?.faixa || 'Branca',
-        graduacao_pretendida: inscricaoForm.graduacao_pretendida,
-        status: 'pendente',
-        autorizacao_tecnica: false,
-        pagamento_status: 'pendente'
-      };
-      setCandidatos([mockCandidato, ...candidatos]);
-      setShowInscricaoModal(false);
+      setNotif({ type: 'error', msg: err.message || 'Falha ao realizar inscrição.' });
     }
   };
 
-  const handleAutorizarCandidato = async (candidatoId: string | number, atual: boolean) => {
-    try {
-      const res = await fetch(`${API_URL}/api/exames/candidatos/${candidatoId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ autorizacao_tecnica: !atual })
-      });
-      if (res.ok) {
-        setCandidatos(candidatos.map(c => c.id === candidatoId ? { ...c, autorizacao_tecnica: !atual } : c));
-      }
-    } catch (err) {
-      // Fallback local
-      setCandidatos(candidatos.map(c => c.id === candidatoId ? { ...c, autorizacao_tecnica: !atual } : c));
-    }
-  };
-
-  const handleAbrirBancaModal = (candidato: Candidato) => {
-    setSelectedCandidato(candidato);
-    setBancaForm({
-      examinadores: candidato.dados_banca?.examinadores || '',
-      nota_tecnica: String(candidato.dados_banca?.nota_tecnica || '7.0'),
-      nota_kihon: String(candidato.dados_banca?.nota_kihon || '7.0'),
-      nota_kata: String(candidato.dados_banca?.nota_kata || '7.0'),
-      nota_combate: String(candidato.dados_banca?.nota_combate || '7.0'),
-      parecer: candidato.dados_banca?.parecer || '',
-      aprovado: candidato.status === 'aprovado'
-    });
-    setShowBancaModal(true);
-  };
-
-  const handleSalvarBancaAvaliacao = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedCandidato) return;
-
-    try {
-      const payload = {
-        status: bancaForm.aprovado ? 'aprovado' : 'reprovado',
-        dados_banca: {
-          examinadores: bancaForm.examinadores,
-          nota_tecnica: parseFloat(bancaForm.nota_tecnica),
-          nota_kihon: parseFloat(bancaForm.nota_kihon),
-          nota_kata: parseFloat(bancaForm.nota_kata),
-          nota_combate: parseFloat(bancaForm.nota_combate),
-          parecer: bancaForm.parecer
-        }
-      };
-
-      const res = await fetch(`${API_URL}/api/exames/candidatos/${selectedCandidato.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload)
-      });
-      if (res.ok) {
-        setCandidatos(candidatos.map(c => c.id === selectedCandidato.id ? { ...c, status: payload.status as any, dados_banca: payload.dados_banca } : c));
-      }
-      setShowBancaModal(false);
-    } catch (err) {
-      // Fallback local
-      setCandidatos(candidatos.map(c => c.id === selectedCandidato.id ? { 
-        ...c, 
-        status: (bancaForm.aprovado ? 'aprovado' : 'reprovado') as any, 
-        dados_banca: {
-          examinadores: bancaForm.examinadores,
-          nota_tecnica: parseFloat(bancaForm.nota_tecnica),
-          nota_kihon: parseFloat(bancaForm.nota_kihon),
-          nota_kata: parseFloat(bancaForm.nota_kata),
-          nota_combate: parseFloat(bancaForm.nota_combate),
-          parecer: bancaForm.parecer
-        }
-      } : c));
-      setShowBancaModal(false);
-    }
-  };
-
-  const examesFiltrados = exames.filter(ex => {
-    const matchesFiltro = exameFiltro === 'todos' || ex.status === exameFiltro;
-    const matchesBusca = ex.titulo.toLowerCase().includes(busca.toLowerCase());
-    return matchesFiltro && matchesBusca;
-  });
+  const FAIXAS = ['Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+  const MODALIDADES = ['Karate Goju-Ryu', 'Kobudo', 'Defesa Pessoal'];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[70vh]">
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-zinc-500 font-cinzel text-xs tracking-widest uppercase">Carregando exames...</p>
       </div>
     );
   }
@@ -274,255 +160,303 @@ export default function ExamesPage() {
     <main className="p-4 sm:p-6 lg:p-8 xl:p-10 space-y-8 w-full max-w-7xl mx-auto">
       
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-900 pb-6">
         <div>
-          <h1 className="text-2xl font-black text-white font-cinzel tracking-wider">Exames de Faixa</h1>
-          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Inscrições, avaliações e homologações da Federação</p>
+          <h1 className="text-2xl font-bold text-white font-cinzel tracking-wider flex items-center gap-2.5">
+            <Trophy className="text-primary" size={24} />
+            Exames de Faixa
+          </h1>
+          <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-semibold">
+            Inscrições, cronograma e bancas de avaliação da federação
+          </p>
         </div>
-        
+
         <div className="flex gap-2">
           {isAdmin && (
             <button
               onClick={() => setShowNovoExameModal(true)}
-              className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-102 cursor-pointer shadow-lg shadow-red-950/20"
             >
-              Agendar Exame
+              Novo Exame
             </button>
           )}
 
           {isAtleta && (
             <button
               onClick={() => {
-                if (exames.length > 0) {
-                  setInscricaoForm(prev => ({ ...prev, exame_id: String(exames[0].id) }));
+                const examesPublicados = exames.filter(e => e.status === 'publicado');
+                if (examesPublicados.length > 0) {
+                  setInscricaoForm(prev => ({ ...prev, exame_id: String(examesPublicados[0].id) }));
                 }
                 setShowInscricaoModal(true);
               }}
-              className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer"
+              className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-102 cursor-pointer shadow-lg shadow-gold/10"
             >
-              Solicitar Inscrição
+              Solicitar Graduação
             </button>
           )}
         </div>
       </div>
 
-      {/* Abas e Filtros */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl">
-          {(['todos', 'agendado', 'realizado'] as const).map(f => (
-            <button
-              key={f}
-              onClick={() => setExameFiltro(f)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
-                exameFiltro === f ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-              }`}
-            >
-              {f === 'todos' ? 'Todos' : f === 'agendado' ? 'Agendados' : 'Realizados'}
-            </button>
-          ))}
+      {/* Notificações */}
+      {notif.type && (
+        <div className={`p-4 rounded-xl flex items-start gap-3 text-xs border ${
+          notif.type === 'success' 
+            ? 'bg-emerald-950/30 border-emerald-900/30 text-emerald-400' 
+            : 'bg-red-950/30 border-red-900/30 text-red-400'
+        }`}>
+          {notif.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+          <span>{notif.msg}</span>
         </div>
+      )}
 
-        <input
-          type="text"
-          placeholder="Buscar exame..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          className="px-4 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none w-full sm:max-w-xs"
-        />
-      </div>
-
-      {/* Grid Exames */}
-      <div className="grid grid-cols-1 gap-6">
-        {examesFiltrados.map(exame => {
-          const candList = candidatos.filter(c => c.exame_id === exame.id);
-          return (
-            <div key={exame.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-6">
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-white font-cinzel">{exame.titulo}</h3>
-                  <p className="text-xs text-zinc-400 mt-1">{exame.descricao}</p>
-                  <p className="text-[10px] text-zinc-500 font-mono mt-2 flex items-center gap-1">
-                    <Calendar size={11} /> {formatDate(exame.data_exame)}
-                  </p>
-                </div>
-                <span className={`px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider rounded-full ${
-                  exame.status === 'agendado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-gold/10 text-gold border border-gold/20'
-                }`}>
-                  {exame.status}
-                </span>
-              </div>
-
-              {/* Lista Candidatos */}
-              {candList.length > 0 && (
-                <div className="border-t border-zinc-800/60 pt-4 space-y-3">
-                  <h4 className="text-[10px] font-black uppercase tracking-wider text-zinc-500">Candidatos Inscritos</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {candList.map(c => (
-                      <div key={c.id} className="p-4 bg-zinc-950 border border-zinc-850 rounded-xl flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-xs font-bold text-white">{c.atleta_nome}</p>
-                          <p className="text-[9px] text-zinc-500">{c.filial_nome} · {c.faixa_atual} → <strong className="text-gold">{c.graduacao_pretendida}</strong></p>
-                          <div className="flex gap-2 mt-2">
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
-                              c.status === 'aprovado' ? 'bg-emerald-500/10 text-emerald-400' :
-                              c.status === 'reprovado' ? 'bg-red-500/10 text-red-400' : 'bg-zinc-800 text-zinc-400'
-                            }`}>
-                              {c.status}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase ${
-                              c.pagamento_status === 'pago' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                            }`}>
-                              Pagamento: {c.pagamento_status}
-                            </span>
-                          </div>
-                          {c.dados_banca && (c.dados_banca.nota_tecnica !== undefined || c.dados_banca.nota_kihon !== undefined || c.dados_banca.nota_kata !== undefined || c.dados_banca.nota_combate !== undefined) && (
-                            <div className="mt-3 text-[10px] text-zinc-400 bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800 space-y-1.5 max-w-[240px]">
-                              <p className="font-black text-zinc-300 text-[8px] uppercase tracking-wider">Notas da Banca</p>
-                              <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[9px] text-zinc-400">
-                                <div>Técnica: <strong className="text-white">{c.dados_banca.nota_tecnica ?? '-'}</strong></div>
-                                <div>Kihon: <strong className="text-white">{c.dados_banca.nota_kihon ?? '-'}</strong></div>
-                                <div>Kata: <strong className="text-white">{c.dados_banca.nota_kata ?? '-'}</strong></div>
-                                <div>Combate: <strong className="text-white">{c.dados_banca.nota_combate ?? '-'}</strong></div>
-                              </div>
-                              {c.dados_banca.examinadores && (
-                                <p className="text-[8px] text-zinc-500 border-t border-zinc-800/60 pt-1 mt-1">
-                                  Banca: <span className="text-zinc-400 font-medium">{c.dados_banca.examinadores}</span>
-                                </p>
-                              )}
-                              {c.dados_banca.parecer && (
-                                <p className="text-[8px] text-zinc-500 italic">"{c.dados_banca.parecer}"</p>
-                              )}
-                            </div>
-                          )}
+      {/* Lista de Exames */}
+      <div className="bg-zinc-950/40 rounded-2xl border border-zinc-900 overflow-hidden shadow-xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-zinc-900 bg-zinc-900/20 text-zinc-400 text-xs font-cinzel uppercase tracking-wider">
+                <th className="px-6 py-4 font-bold">Exame</th>
+                <th className="px-6 py-4 font-bold hidden md:table-cell">Data / Local</th>
+                <th className="px-6 py-4 font-bold hidden lg:table-cell">Modalidade / Faixa</th>
+                <th className="px-6 py-4 font-bold">Status</th>
+                <th className="px-6 py-4 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900/50">
+              {exames.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-16 text-zinc-500">
+                    <ClipboardList size={32} className="mx-auto mb-3 opacity-30 text-primary" />
+                    <p className="font-cinzel text-xs tracking-wider">Nenhum exame cadastrado no momento.</p>
+                  </td>
+                </tr>
+              ) : (
+                exames.map((exame) => {
+                  const cfg = statusConfig[exame.status] || { label: exame.status, color: 'bg-zinc-900 text-zinc-400' };
+                  return (
+                    <tr key={exame.id} className="hover:bg-zinc-900/10 transition-colors">
+                      <td className="px-6 py-5">
+                        <p className="font-semibold text-white font-cinzel tracking-wide">{exame.titulo}</p>
+                        {exame.taxa_valor ? (
+                          <p className="text-[11px] text-zinc-500 mt-0.5">Taxa: R$ {Number(exame.taxa_valor).toFixed(2)}</p>
+                        ) : (
+                          <p className="text-[11px] text-zinc-500 mt-0.5">Sem taxa associada</p>
+                        )}
+                      </td>
+                      <td className="px-6 py-5 hidden md:table-cell space-y-1">
+                        <div className="flex items-center gap-1.5 text-zinc-300 text-xs">
+                          <Calendar size={13} className="text-zinc-500" />
+                          {exame.data_exame.includes('T') ? exame.data_exame.split('T')[0].split('-').reverse().join('/') : exame.data_exame.split('-').reverse().join('/')}
                         </div>
-
-                        {/* Ações baseadas no tipo de usuário */}
-                        <div className="flex gap-2 shrink-0">
-                          {isFilial && !c.autorizacao_tecnica && (
-                            <button
-                              onClick={() => handleAutorizarCandidato(c.id, false)}
-                              className="px-2.5 py-1.5 bg-gold/10 hover:bg-gold text-gold hover:text-white border border-gold/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer"
-                            >
-                              Recomendar
-                            </button>
-                          )}
-                          {isAdmin && (
-                            <button
-                              onClick={() => handleAbrirBancaModal(c)}
-                              className="px-2.5 py-1.5 bg-primary/10 hover:bg-primary text-white border border-primary/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer"
-                            >
-                              Avaliar Banca
-                            </button>
-                          )}
+                        <div className="flex items-center gap-1.5 text-zinc-500 text-[11px]">
+                          <MapPin size={12} />
+                          {exame.local}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                      </td>
+                      <td className="px-6 py-5 hidden lg:table-cell text-xs space-y-1">
+                        <p className="text-zinc-350">{exame.modalidade}</p>
+                        <p className="text-zinc-500">Graduação: <strong className="text-gold font-normal">{exame.faixa_alvo}</strong></p>
+                      </td>
+                      <td className="px-6 py-5">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${cfg.color}`}>
+                          {cfg.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-5 text-right">
+                        <Link
+                          href={`/exames/${exame.id}`}
+                          className="inline-flex items-center gap-1 text-xs font-bold font-cinzel text-primary hover:text-primary-light transition-colors uppercase tracking-wider"
+                        >
+                          Ver Detalhes
+                          <ChevronRight size={13} />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
-            </div>
-          );
-        })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* MODAL BANCA EXAMINADORA */}
-      {showBancaModal && selectedCandidato && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl w-full max-w-md p-6 relative">
-            <button onClick={() => setShowBancaModal(false)} className="absolute right-4 top-4 text-zinc-500 hover:text-white cursor-pointer">
-              <X size={16} />
-            </button>
-            <h3 className="text-lg font-bold text-white font-cinzel mb-2">Banca Examinadora</h3>
-            <p className="text-[10px] text-zinc-400 uppercase tracking-wider mb-5">Atleta: <strong className="text-white">{selectedCandidato.atleta_nome}</strong></p>
-            
-            <form onSubmit={handleSalvarBancaAvaliacao} className="space-y-4">
+      {/* MODAL: NOVO EXAME (ADMIN) */}
+      {showNovoExameModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-900 rounded-3xl w-full max-w-xl p-6 sm:p-8 space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Glowing red accent */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex justify-between items-start">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Examinador(es) *</label>
+                <h3 className="text-lg font-bold text-white font-cinzel tracking-wider">Novo Exame</h3>
+                <p className="text-xs text-zinc-500 mt-1">Cadastre um exame no sistema. Ele será criado como rascunho.</p>
+              </div>
+              <button 
+                onClick={() => setShowNovoExameModal(false)}
+                className="w-8 h-8 rounded-xl bg-zinc-900/50 flex items-center justify-center text-zinc-400 hover:text-white border border-zinc-800/80 hover:border-zinc-700 transition cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleCriarExame} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Título do Exame *</label>
                 <input
                   type="text" required
-                  placeholder="Ex: Sensei Paulo Roberto, Sensei Cássio"
-                  value={bancaForm.examinadores}
-                  onChange={(e) => setBancaForm({ ...bancaForm, examinadores: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  placeholder="Ex: Exame de Faixas Coloridas - Salvador"
+                  value={novoExameForm.titulo}
+                  onChange={(e) => setNovoExameForm({ ...novoExameForm, titulo: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary placeholder-zinc-650"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Técnica *</label>
-                  <input
-                    type="number" step="0.1" required
-                    value={bancaForm.nota_tecnica}
-                    onChange={(e) => setBancaForm({ ...bancaForm, nota_tecnica: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Kihon *</label>
-                  <input
-                    type="number" step="0.1" required
-                    value={bancaForm.nota_kihon}
-                    onChange={(e) => setBancaForm({ ...bancaForm, nota_kihon: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Kata *</label>
-                  <input
-                    type="number" step="0.1" required
-                    value={bancaForm.nota_kata}
-                    onChange={(e) => setBancaForm({ ...bancaForm, nota_kata: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Combate *</label>
-                  <input
-                    type="number" step="0.1" required
-                    value={bancaForm.nota_combate}
-                    onChange={(e) => setBancaForm({ ...bancaForm, nota_combate: e.target.value })}
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none text-center"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Parecer / Observações</label>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Descrição</label>
                 <textarea
-                  placeholder="Observações técnicas..." rows={3}
-                  value={bancaForm.parecer}
-                  onChange={(e) => setBancaForm({ ...bancaForm, parecer: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none"
+                  placeholder="Instruções e avisos para os atletas candidatos..."
+                  value={novoExameForm.descricao}
+                  onChange={(e) => setNovoExameForm({ ...novoExameForm, descricao: e.target.value })}
+                  rows={2}
+                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary placeholder-zinc-650 resize-none"
                 />
               </div>
 
-              <div className="flex gap-2 p-1 bg-zinc-950 border border-zinc-850 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setBancaForm({ ...bancaForm, aprovado: true })}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
-                    bancaForm.aprovado ? 'bg-emerald-500/10 text-emerald-400' : 'text-zinc-500'
-                  }`}
-                >
-                  Aprovar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBancaForm({ ...bancaForm, aprovado: false })}
-                  className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer ${
-                    !bancaForm.aprovado ? 'bg-red-500/10 text-red-400' : 'text-zinc-500'
-                  }`}
-                >
-                  Reprovar
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Data do Exame *</label>
+                  <input
+                    type="date" required
+                    value={novoExameForm.data_exame}
+                    onChange={(e) => setNovoExameForm({ ...novoExameForm, data_exame: e.target.value })}
+                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Local *</label>
+                  <input
+                    type="text" required
+                    placeholder="Ex: Sede Central GRKK"
+                    value={novoExameForm.local}
+                    onChange={(e) => setNovoExameForm({ ...novoExameForm, local: e.target.value })}
+                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary placeholder-zinc-650"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Modalidade *</label>
+                  <select
+                    value={novoExameForm.modalidade}
+                    onChange={(e) => setNovoExameForm({ ...novoExameForm, modalidade: e.target.value })}
+                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                  >
+                    {MODALIDADES.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Faixa Alvo *</label>
+                  <select
+                    value={novoExameForm.faixa_alvo}
+                    onChange={(e) => setNovoExameForm({ ...novoExameForm, faixa_alvo: e.target.value })}
+                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                  >
+                    {FAIXAS.map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Taxa de Inscrição (R$)</label>
+                  <input
+                    type="number" step="0.01" min="0"
+                    placeholder="50.00"
+                    value={novoExameForm.taxa_valor}
+                    onChange={(e) => setNovoExameForm({ ...novoExameForm, taxa_valor: e.target.value })}
+                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                  />
+                </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer"
+              <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowNovoExameModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-zinc-900 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900/50 transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:bg-primary-dark cursor-pointer shadow-lg shadow-red-950/20 font-cinzel"
+                >
+                  Criar Exame
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: SOLICITAR GRADUAÇÃO (ATLETA) */}
+      {showInscricaoModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-900 rounded-3xl w-full max-w-md p-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Glowing gold accent */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-gold/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h3 className="text-lg font-bold text-white font-cinzel tracking-wider">Solicitar Graduação</h3>
+                <p className="text-xs text-zinc-500 mt-1">Inscreva-se em um exame de faixa publicado pela federação.</p>
+              </div>
+              <button 
+                onClick={() => setShowInscricaoModal(false)}
+                className="w-8 h-8 rounded-xl bg-zinc-900/50 flex items-center justify-center text-zinc-400 hover:text-white border border-zinc-800/80 hover:border-zinc-700 transition cursor-pointer"
               >
-                Salvar Avaliação
+                &times;
               </button>
+            </div>
+
+            <form onSubmit={handleInscreverAtleta} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Selecione o Exame *</label>
+                <select
+                  value={inscricaoForm.exame_id}
+                  onChange={(e) => setInscricaoForm({ ...inscricaoForm, exame_id: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                >
+                  <option value="">Selecione um exame...</option>
+                  {exames.filter(e => e.status === 'publicado').map(e => (
+                    <option key={e.id} value={e.id}>{e.titulo} ({e.data_exame.split('-').reverse().join('/')})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Graduação Pretendida *</label>
+                <select
+                  value={inscricaoForm.graduacao_pretendida}
+                  onChange={(e) => setInscricaoForm({ ...inscricaoForm, graduacao_pretendida: e.target.value })}
+                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
+                >
+                  {FAIXAS.map(f => <option key={f} value={f}>{f}</option>)}
+                </select>
+              </div>
+
+              <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowInscricaoModal(false)}
+                  className="px-5 py-2.5 rounded-xl border border-zinc-900 text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900/50 transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 bg-gold text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:bg-gold-dark cursor-pointer shadow-lg shadow-gold/15 font-cinzel"
+                >
+                  Inscrever-se
+                </button>
+              </div>
             </form>
           </div>
         </div>

@@ -514,6 +514,70 @@ def handle_ranking():
 
 # --- ADICIONAL: ENDPOINTS DE EXAMES (ERP) ---
 
+# --- ADICIONAL: ENDPOINTS DE EXAMES (ERP) ---
+
+def distribuir_proximos_fila(exame_id):
+    """
+    Algoritmo de distribuição dinâmica de bancas examinadoras.
+    Distribui candidatos da fila (pendentes) para examinadores vinculados que tenham menos de 3 atletas ativos.
+    """
+    # 1. Busca os examinadores do exame
+    examiners_data, _ = SupabaseService.get_all("examinadores_exame", filter_dict={"exame_id": exame_id})
+    if not examiners_data:
+        return
+        
+    examiner_ids = [ex["examinador_id"] for ex in examiners_data]
+    
+    # 2. Busca todas as inscrições ativas deste exame
+    candidatos, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"exame_id": exame_id})
+    if not candidatos:
+        candidatos, _ = SupabaseService.get_all("candidatos", filter_dict={"exame_id": exame_id})
+        
+    if not candidatos:
+        return
+        
+    # Filtra os que não têm resultado definitivo ainda
+    ativos = [c for c in candidatos if c.get("status") in ["inscrito", "pendente"]]
+    
+    # Separa designados de fila (unassigned)
+    designados = [c for c in ativos if c.get("avaliado_por") is not None]
+    fila = [c for c in ativos if c.get("avaliado_por") is None]
+    
+    # Ordena fila por data de criação
+    fila.sort(key=lambda x: x.get("created_at", ""))
+    
+    if not fila:
+        return
+        
+    # 3. Mapeia a carga atual de cada examinador
+    load_map = {ex_id: 0 for ex_id in examiner_ids}
+    for desig in designados:
+        ev_id = desig.get("avaliado_por")
+        if ev_id in load_map:
+            load_map[ev_id] += 1
+            
+    # 4. Distribui os candidatos da fila equilibrando as cargas (máximo 3 por examinador)
+    tabela = "candidatos_exame"
+    cands_test, _ = SupabaseService.get_all("candidatos_exame")
+    if not cands_test:
+        tabela = "candidatos"
+        
+    for cand in fila:
+        # Filtra examinadores que ainda têm espaço (< 3)
+        available_examiners = [ex_id for ex_id, load in load_map.items() if load < 3]
+        if not available_examiners:
+            break
+            
+        # Escolhe o examinador com a menor carga
+        min_examiner_id = min(available_examiners, key=lambda ex_id: load_map[ex_id])
+        
+        # Atribui o examinador ao candidato e altera status para inscrito
+        SupabaseService.update(tabela, cand["id"], {
+            "avaliado_por": min_examiner_id,
+            "status": "inscrito"
+        })
+        load_map[min_examiner_id] += 1
+
 @app.route("/api/exames", methods=["GET", "POST"])
 def handle_exames():
     if request.method == "GET":
@@ -523,7 +587,6 @@ def handle_exames():
         return jsonify({"exames": exames}), 200
         
     elif request.method == "POST":
-        # Apenas admin pode criar exames
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -534,17 +597,121 @@ def handle_exames():
             return jsonify({"error": error}), 500
         return jsonify(res), 201
 
-@app.route("/api/exames/<id>", methods=["PATCH"])
-def handle_exame_edit(id):
+@app.route("/api/exames/<id>", methods=["GET", "PATCH"])
+def handle_exame_detail(id):
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Não autenticado"}), 401
+
+    if request.method == "GET":
+        exames, error = SupabaseService.get_all("exames")
+        if error:
+            return jsonify({"error": error}), 500
+            
+        exame = next((ex for ex in (exames or []) if str(ex["id"]) == id), None)
+        if not exame:
+            return jsonify({"error": "Exame não encontrado"}), 404
+            
+        # Busca examinadores vinculados
+        vinculos, _ = SupabaseService.get_all("examinadores_exame", filter_dict={"exame_id": id})
+        examinadores_ids = [v["examinador_id"] for v in (vinculos or [])]
+        
+        # Busca candidatos
+        candidatos, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"exame_id": id})
+        if not candidatos:
+            candidatos, _ = SupabaseService.get_all("candidatos", filter_dict={"exame_id": id})
+            
+        return jsonify({
+            "exame": exame,
+            "examinadores_ids": examinadores_ids,
+            "candidatos": candidatos or []
+        }), 200
+
+    elif request.method == "PATCH":
+        if user.get("tipo") != "admin":
+            return jsonify({"error": "Não autorizado"}), 403
+            
+        data = request.json or {}
+        res, error = SupabaseService.update("exames", id, data)
+        if error:
+            return jsonify({"error": error}), 500
+            
+        # Se status mudou para em_andamento, distribui a fila
+        if data.get("status") == "em_andamento":
+            distribuir_proximos_fila(id)
+            
+        return jsonify(res), 200
+
+@app.route("/api/exames/<id>/examinadores", methods=["POST"])
+def vincular_examinadores(id):
     user = get_current_user()
     if not user or user.get("tipo") != "admin":
         return jsonify({"error": "Não autorizado"}), 403
         
     data = request.json or {}
-    res, error = SupabaseService.update("exames", id, data)
+    examinador_ids = data.get("examinador_ids", [])
+    
+    # Remove vínculos existentes
+    ex_existentes, _ = SupabaseService.get_all("examinadores_exame", filter_dict={"exame_id": id})
+    for ee in (ex_existentes or []):
+        SupabaseService.delete("examinadores_exame", ee["id"])
+        
+    # Insere os novos
+    for ex_id in examinador_ids:
+        SupabaseService.insert("examinadores_exame", {
+            "exame_id": id,
+            "examinador_id": ex_id
+        })
+        
+    return jsonify({"success": True}), 200
+
+@app.route("/api/exames/<id>/certificados", methods=["POST"])
+def emitir_certificados_exame(id):
+    user = get_current_user()
+    if not user or user.get("tipo") != "admin":
+        return jsonify({"error": "Não autorizado"}), 403
+        
+    # Busca candidatos
+    candidatos, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"exame_id": id})
+    if not candidatos:
+        candidatos, _ = SupabaseService.get_all("candidatos", filter_dict={"exame_id": id})
+        
+    if not candidatos:
+        return jsonify({"error": "Nenhum candidato localizado."}), 404
+        
+    # Filtra aprovados
+    aprovados = [c for c in candidatos if c.get("status") == "aprovado"]
+    if not aprovados:
+        return jsonify({"error": "Nenhum candidato aprovado para emitir certificados."}), 400
+        
+    # Certificados existentes
+    certificados_existentes, _ = SupabaseService.get_all("certificados")
+    atletas_com_cert = set(c.get("atleta_id") for c in (certificados_existentes or []))
+    
+    count = 0
+    for c in aprovados:
+        if c["atleta_id"] not in atletas_com_cert:
+            import hashlib
+            import time
+            hash_code = hashlib.md5(f"{c['atleta_id']}-{time.time()}".encode()).hexdigest()[:12].upper()
+            
+            SupabaseService.insert("certificados", {
+                "atleta_id": c["atleta_id"],
+                "codigo_validacao": hash_code,
+                "data_emissao": datetime.utcnow().date().isoformat() if 'datetime' in globals() else "2026-06-08"
+            })
+            count += 1
+            
+    return jsonify({"success": True, "emitidos": count}), 200
+
+@app.route("/api/examinadores", methods=["GET"])
+def get_examinadores():
+    profiles, error = SupabaseService.get_all("profiles")
     if error:
         return jsonify({"error": error}), 500
-    return jsonify(res), 200
+    # Admins e filiais atuam como examinadores
+    examinadores = [p for p in (profiles or []) if p.get("tipo") in ["admin", "filial"]]
+    return jsonify({"examinadores": examinadores}), 200
 
 @app.route("/api/exames/candidatos", methods=["GET", "POST"])
 def handle_candidatos():
@@ -559,15 +726,12 @@ def handle_candidatos():
             
         filtrados = []
         for c in (candidatos or []):
-            # Filtra conforme permissões
             if user.get("tipo") == "admin":
                 filtrados.append(c)
             elif user.get("tipo") == "filial":
-                # Vê os candidatos da sua filial
                 if c.get("filial_id") == user["id"]:
                     filtrados.append(c)
             else:
-                # Atleta vê apenas a si mesmo
                 if c.get("atleta_id") == user["id"]:
                     filtrados.append(c)
                     
@@ -575,21 +739,25 @@ def handle_candidatos():
         
     elif request.method == "POST":
         data = request.json or {}
-        # Preenche dados adicionais do perfil do atleta
         atleta_perfil, _ = SupabaseService.get_profile_by_id(data.get("atleta_id") or user["id"])
+        
+        # Pega a data atual para criação
+        import time
+        created_at_val = datetime.utcnow().isoformat() if 'datetime' in globals() else "2026-06-08T00:00:00.000Z"
         
         novo_candidato = {
             "exame_id": data.get("exame_id"),
             "atleta_id": data.get("atleta_id") or user["id"],
-            "atleta_nome": atleta_perfil.get("nome", "Atleta"),
-            "filial_id": atleta_perfil.get("filial_id", "dojo-central"),
-            "filial_nome": atleta_perfil.get("filial_nome", "Dojo Central"),
-            "faixa_atual": atleta_perfil.get("faixa", "Branca"),
+            "atleta_nome": atleta_perfil.get("nome", "Atleta") if atleta_perfil else "Atleta",
+            "filial_id": atleta_perfil.get("filial_id", "dojo-central") if atleta_perfil else "dojo-central",
+            "filial_nome": atleta_perfil.get("filial_nome", "Dojo Central") if atleta_perfil else "Dojo Central",
+            "faixa_atual": atleta_perfil.get("faixa", "Branca") if atleta_perfil else "Branca",
             "graduacao_pretendida": data.get("graduacao_pretendida", "Amarela"),
             "status": "pendente",
             "autorizacao_tecnica": True if user.get("tipo") in ["admin", "filial"] else False,
             "pagamento_status": "pendente",
-            "dados_banca": {}
+            "dados_banca": {},
+            "created_at": created_at_val
         }
         res, error = SupabaseService.insert("candidatos_exame", novo_candidato)
         if error:
@@ -599,20 +767,46 @@ def handle_candidatos():
             return jsonify({"error": error}), 500
         return jsonify(res), 201
 
-@app.route("/api/exames/candidatos/<id>", methods=["PATCH", "DELETE"])
+@app.route("/api/exames/candidatos/<id>", methods=["GET", "PATCH", "DELETE"])
 def handle_candidato_actions(id):
     user = get_current_user()
     if not user:
         return jsonify({"error": "Não autenticado"}), 401
         
-    if request.method == "PATCH":
+    if request.method == "GET":
+        candidatos, _ = SupabaseService.get_all("candidatos_exame")
+        if not candidatos:
+            candidatos, _ = SupabaseService.get_all("candidatos")
+            
+        cand = next((c for c in (candidatos or []) if str(c["id"]) == id), None)
+        if not cand:
+            return jsonify({"error": "Candidato não encontrado"}), 404
+            
+        # Busca detalhes do exame
+        exames, _ = SupabaseService.get_all("exames")
+        exame = next((ex for ex in (exames or []) if str(ex["id"]) == cand.get("exame_id")), None)
+        
+        # Busca examinador nome
+        examinador_nome = "Banca Examinadora"
+        if cand.get("avaliado_por"):
+            prof, _ = SupabaseService.get_profile_by_id(cand.get("avaliado_por"))
+            if prof:
+                examinador_nome = prof.get("nome", examinador_nome)
+                
+        return jsonify({
+            "candidato": cand,
+            "exame": exame,
+            "examinador_nome": examinador_nome
+        }), 200
+        
+    elif request.method == "PATCH":
         data = request.json or {}
         
-        # Resolve tabela correta
         candidatos, _ = SupabaseService.get_all("candidatos_exame")
         tabela = "candidatos_exame"
         if not candidatos:
             tabela = "candidatos"
+            candidatos, _ = SupabaseService.get_all("candidatos")
             
         res, error = SupabaseService.update(tabela, id, data)
         if error:
@@ -620,11 +814,18 @@ def handle_candidato_actions(id):
             
         # Se aprovado na banca, atualiza a faixa do atleta automaticamente
         if data.get("status") == "aprovado":
-            candidato_info, _ = SupabaseService.get_profile_by_id(res.get("atleta_id"))
-            if candidato_info:
-                nova_faixa = res.get("graduacao_pretendida", "Amarela")
-                SupabaseService.update("atletas", res.get("atleta_id"), {"faixa": nova_faixa})
+            atleta_perfil, _ = SupabaseService.update("atletas", res.get("atleta_id"), {
+                "faixa": res.get("graduacao_pretendida", "Amarela")
+            })
+            # Atualiza também o profile
+            SupabaseService.update("profiles", res.get("atleta_id"), {
+                "faixa": res.get("graduacao_pretendida", "Amarela")
+            })
                 
+        # Distribui os próximos da fila se foi avaliado
+        if data.get("status") in ["aprovado", "reprovado"] or "avaliado_por" in data:
+            distribuir_proximos_fila(res.get("exame_id"))
+            
         return jsonify(res), 200
         
     elif request.method == "DELETE":
@@ -632,10 +833,18 @@ def handle_candidato_actions(id):
         tabela = "candidatos_exame"
         if not candidatos:
             tabela = "candidatos"
+            candidatos, _ = SupabaseService.get_all("candidatos")
             
+        cand = next((c for c in (candidatos or []) if str(c["id"]) == id), None)
+        exame_id = cand.get("exame_id") if cand else None
+        
         res, error = SupabaseService.delete(tabela, id)
         if error:
             return jsonify({"error": error}), 500
+            
+        if exame_id:
+            distribuir_proximos_fila(exame_id)
+            
         return jsonify({"sucesso": True}), 200
 
 # --- ADICIONAL: ENDPOINTS FINANCEIROS (ERP) ---

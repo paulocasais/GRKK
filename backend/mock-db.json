@@ -552,21 +552,25 @@
   ],
   "exames": [
     {
-      "id": "ex-1",
-      "titulo": "Exame de Faixas Preto - 1º Semestre",
-      "descricao": "Exame para faixas pretas e marrons.",
-      "data_exame": "2026-06-30",
-      "status": "cancelado",
-      "updated_at": "2026-05-31T00:33:25.651Z"
+      "id": "exame-1",
+      "titulo": "Exame de Kyu - Primeiro Semestre 2026",
+      "descricao": "Avaliação oficial para todas as faixas coloridas (Kyus). Local: Sede Central.",
+      "data_exame": "2026-06-25",
+      "status": "publicado"
     },
     {
-      "id": "m2ee0n73k",
-      "created_at": "2026-05-31T00:33:53.645Z",
-      "updated_at": "2026-05-31T00:39:25.157Z",
-      "titulo": "Exame de Graduação",
-      "descricao": "",
-      "data_exame": "2026-05-30",
-      "status": "agendado"
+      "id": "exame-2",
+      "titulo": "Exame Nacional de Faixas Pretas (Dan)",
+      "descricao": "Banca especial para candidatos a Shodan, Nidan e Sandan. IOGKF Brasil.",
+      "data_exame": "2026-08-15",
+      "status": "rascunho"
+    },
+    {
+      "id": "exame-3",
+      "titulo": "Exame de Graduação de Lauro de Freitas",
+      "descricao": "Exame descentralizado. Instrutor Responsável: Sensei Paulo.",
+      "data_exame": "2026-04-10",
+      "status": "realizado"
     }
   ],
   "exames_candidatos": [
@@ -6314,6 +6318,86 @@
       "subtitulo": "Força e suavidade unidas na busca do autodomínio.",
       "link": "/sobre",
       "imagem_url": "https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&q=80&w=1200"
+    }
+  ],
+  "candidatos_exame": [
+    {
+      "id": "cand-1",
+      "exame_id": "exame-1",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Filial Salvador Centro",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "pendente",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pago",
+      "dados_banca": {},
+      "created_at": "2026-06-05T10:00:00.000Z"
+    },
+    {
+      "id": "cand-2",
+      "exame_id": "exame-3",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Filial Salvador Centro",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pago",
+      "dados_banca": {
+        "criterios": [
+          {
+            "nome": "1° TESTE: KIHON ESPECÍFICO",
+            "conceito": "B",
+            "nota": 8.0,
+            "observacoes": "Boa postura"
+          },
+          {
+            "nome": "2° TESTE: CONTROLE DE GOLPES",
+            "conceito": "B",
+            "nota": 7.5,
+            "observacoes": "Controlou bem"
+          },
+          {
+            "nome": "3° TESTE: KATA",
+            "conceito": "E",
+            "nota": 9.0,
+            "observacoes": "Excelente ritmo"
+          },
+          {
+            "nome": "4° TESTE: KUMITE",
+            "conceito": "R",
+            "nota": 6.5,
+            "observacoes": "Precisa treinar mais esquivas"
+          },
+          {
+            "nome": "5° TESTE: CONHECIMENTOS GERAIS",
+            "conceito": "B",
+            "nota": 8.0,
+            "observacoes": "Respondeu tudo"
+          }
+        ],
+        "nota_final": 7.8,
+        "observacoes": "Candidato demonstrou bom nível técnico no Kata e Kihon.",
+        "passing_count": 4,
+        "total_tests": 5,
+        "required_passing": 3,
+        "approved_by_formula": true
+      },
+      "avaliado_por": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "avaliado_em": "2026-04-10T11:30:00.000Z",
+      "created_at": "2026-04-01T09:00:00.000Z"
+    }
+  ],
+  "examinadores_exame": [
+    {
+      "id": "vinculo-1",
+      "exame_id": "exame-1",
+      "examinador_id": "7513aa27-452f-462e-8f5a-b3f2052612f0"
     }
   ]
 }
