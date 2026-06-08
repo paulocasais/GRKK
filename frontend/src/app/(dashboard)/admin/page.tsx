@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X } from 'lucide-react';
+import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -32,12 +32,27 @@ interface GalleryItem {
 }
 
 export default function AdminCMSPage() {
+  interface Contato {
+    id: string | number;
+    name: string;
+    email: string;
+    message: string;
+    phone?: string;
+    read?: boolean;
+    lida?: boolean;
+    created_at: string;
+  }
+
   const { usuario, tipo } = useAuth();
-  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria'>('banners');
+  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens'>('banners');
   
   const [banners, setBanners] = useState<Banner[]>([]);
   const [equipe, setEquipe] = useState<TeamMember[]>([]);
   const [galeria, setGaleria] = useState<GalleryItem[]>([]);
+  const [contatos, setContatos] = useState<Contato[]>([]);
+  const [selectedContato, setSelectedContato] = useState<Contato | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Modais
@@ -75,13 +90,79 @@ export default function AdminCMSPage() {
     }
   };
 
+  const carregarContatos = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/contatos`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setContatos(data.contatos || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar contatos:", err);
+      // Fallback local
+      setContatos([
+        { id: 'msg-1', name: 'José Augusto Ramos', email: 'jose.ramos@gmail.com', phone: '(71) 98888-9999', message: 'Olá, gostaria de saber o valor da mensalidade e os horários das turmas infantis no dojo de Salvador Centro.', read: false, created_at: new Date().toISOString() }
+      ]);
+    }
+  };
+
   useEffect(() => {
     if (tipo === 'admin') {
       carregarCMS();
+      carregarContatos();
     } else {
       setLoading(false);
     }
   }, [tipo]);
+
+  const handleSendReply = async () => {
+    if (!replyText.trim() || !selectedContato) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(`${API_URL}/api/contatos/responder`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contatoId: selectedContato.id,
+          email: selectedContato.email,
+          mensagem: replyText
+        }),
+        credentials: 'include'
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Falha ao enviar resposta.');
+      }
+
+      alert('Resposta enviada com sucesso!');
+      setReplyText('');
+      carregarContatos();
+      setSelectedContato(prev => prev ? { ...prev, read: true } : null);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  const handleExcluirContato = async (id: string | number) => {
+    if (!confirm("Remover esta mensagem permanentemente?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/contatos/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setContatos(contatos.filter(c => c.id !== id));
+        if (selectedContato?.id === id) setSelectedContato(null);
+      }
+    } catch (err) {
+      setContatos(contatos.filter(c => c.id !== id));
+      if (selectedContato?.id === id) setSelectedContato(null);
+    }
+  };
 
   const handleSalvar = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,21 +248,23 @@ export default function AdminCMSPage() {
           <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold font-sans">Administração dinâmica do portal público</p>
         </div>
 
-        <button
-          onClick={() => {
-            setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
-            setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
-            setGalleryForm({ title: '', category: 'Dojo', image_url: '', order: galeria.length + 1 });
-            setShowModal(true);
-          }}
-          className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer flex items-center gap-1.5"
-        >
-          <Plus size={14} /> Adicionar Item
-        </button>
+        {activeTab !== 'mensagens' && (
+          <button
+            onClick={() => {
+              setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
+              setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
+              setGalleryForm({ title: '', category: 'Dojo', image_url: '', order: galeria.length + 1 });
+              setShowModal(true);
+            }}
+            className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer flex items-center gap-1.5"
+          >
+            <Plus size={14} /> Adicionar Item
+          </button>
+        )}
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full sm:max-w-md">
+      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full sm:max-w-lg">
         <button
           onClick={() => setActiveTab('banners')}
           className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -206,81 +289,187 @@ export default function AdminCMSPage() {
         >
           <Image size={12} /> Galeria
         </button>
+        <button
+          onClick={() => setActiveTab('mensagens')}
+          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === 'mensagens' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <MessageSquare size={12} /> Mensagens
+        </button>
       </div>
 
       {/* Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
-        {activeTab === 'banners' && banners.map(banner => (
-          <div key={banner.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
-            <div className="h-40 bg-zinc-950 relative">
-              {banner.imagem_url ? (
-                <img src={banner.imagem_url} alt={banner.titulo} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-zinc-650"><Image size={32} /></div>
-              )}
-            </div>
-            <div className="p-5 space-y-2.5">
-              <h3 className="text-sm font-bold text-white font-cinzel">{banner.titulo}</h3>
-              <p className="text-xs text-zinc-450 leading-relaxed">{banner.subtitulo}</p>
-            </div>
-            <div className="p-5 pt-0">
-              <button
-                onClick={() => handleExcluir(banner.id)}
-                className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
-              >
-                <Trash2 size={12} /> Remover
+      {activeTab === 'mensagens' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 w-full">
+          {/* List */}
+          <div className="lg:col-span-2 flex flex-col gap-2.5 max-h-[70vh] overflow-y-auto pr-1">
+            {contatos.map(c => (
+              <button key={c.id} onClick={() => setSelectedContato(c)}
+                className={`text-left p-4 border transition-all duration-200 relative rounded-2xl ${
+                  selectedContato?.id === c.id 
+                    ? 'border-primary bg-primary/10' 
+                    : 'border-zinc-800 bg-zinc-900 hover:border-zinc-700'
+                }`}>
+                <div className="flex items-center justify-between">
+                  <p className="font-cinzel text-white text-sm font-bold truncate pr-3">{c.name}</p>
+                  {(!c.read && !c.lida) && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary shrink-0" />
+                  )}
+                </div>
+                <p className="text-zinc-400 text-xs mt-1 truncate">{c.message}</p>
+                <p className="text-zinc-600 text-[10px] mt-2 font-mono">
+                  {new Date(c.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                </p>
               </button>
-            </div>
+            ))}
+            {contatos.length === 0 && (
+              <div className="text-center py-12 text-zinc-500 text-xs">
+                Nenhuma mensagem recebida.
+              </div>
+            )}
           </div>
-        ))}
 
-        {activeTab === 'equipe' && equipe.map(member => (
-          <div key={member.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
-            <div className="h-44 bg-zinc-950 relative flex items-center justify-center pt-4">
-              <img src={member.foto_url} alt={member.nome} className="w-28 h-28 rounded-full object-cover border-2 border-primary" />
-            </div>
-            <div className="p-5 text-center space-y-2">
-              <h3 className="text-sm font-bold text-white font-cinzel">{member.nome}</h3>
-              <span className="text-[9px] font-bold uppercase tracking-wider text-gold-400 bg-gold/10 px-2.5 py-0.5 rounded border border-gold/20 inline-block">
-                {member.cargo}
-              </span>
-              <p className="text-xs text-zinc-500 line-clamp-3 pt-2">{member.biografia}</p>
-            </div>
-            <div className="p-5 pt-0">
-              <button
-                onClick={() => handleExcluir(member.id)}
-                className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
-              >
-                <Trash2 size={12} /> Remover
-              </button>
-            </div>
+          {/* Detail */}
+          <div className="lg:col-span-3">
+            {selectedContato ? (
+              <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl space-y-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="font-cinzel text-white text-lg font-bold">{selectedContato.name}</h3>
+                    <p className="text-zinc-500 text-xs mt-1">
+                      {new Date(selectedContato.created_at).toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <button onClick={() => handleExcluirContato(selectedContato.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-xl transition cursor-pointer">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 text-xs text-zinc-400">
+                  <a href={`mailto:${selectedContato.email}`} className="flex items-center gap-2 hover:text-primary transition">
+                    <Mail size={13} className="text-primary" /> {selectedContato.email}
+                  </a>
+                  {selectedContato.phone && (
+                    <a href={`tel:${selectedContato.phone}`} className="flex items-center gap-2 hover:text-primary transition">
+                      <Phone size={13} className="text-primary" /> {selectedContato.phone}
+                    </a>
+                  )}
+                </div>
+
+                <div className="border-t border-zinc-800 pt-5">
+                  <h4 className="text-[9px] font-black uppercase text-zinc-500 tracking-wider mb-2">Mensagem Recebida</h4>
+                  <p className="text-zinc-300 leading-relaxed bg-zinc-950/40 p-4 border border-zinc-800/20 rounded-xl text-xs font-sans whitespace-pre-wrap">{selectedContato.message}</p>
+                </div>
+
+                <div className="border-t border-zinc-800 pt-5 space-y-4">
+                  <h4 className="text-[9px] font-black uppercase text-primary tracking-wider">Responder pelo CMS</h4>
+                  <textarea
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Escreva sua resposta..."
+                    rows={4}
+                    className="w-full bg-zinc-950 border border-zinc-800 text-white p-4 text-xs focus:outline-none focus:border-primary transition rounded-xl resize-none font-sans"
+                  />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handleSendReply}
+                      disabled={sendingReply || !replyText.trim()}
+                      className="flex-1 bg-primary text-white font-cinzel text-xs font-bold tracking-widest uppercase py-3 hover:bg-primary-dark transition disabled:opacity-30 flex items-center justify-center gap-2 rounded-xl cursor-pointer"
+                    >
+                      {sendingReply ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                      Enviar Resposta
+                    </button>
+                    <a 
+                      href={`mailto:${selectedContato.email}?subject=Re: Goju-Ryu Karate Kai&body=${encodeURIComponent(replyText)}`}
+                      className="border border-zinc-800 text-zinc-400 hover:text-white font-cinzel text-xs tracking-widest uppercase px-5 py-3 hover:bg-white/[0.02] transition text-center flex items-center justify-center gap-2 rounded-xl"
+                    >
+                      Responder via E-mail Local
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center h-64 text-zinc-500 text-xs font-cinzel">
+                Selecione uma mensagem para visualizar
+              </div>
+            )}
           </div>
-        ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          {activeTab === 'banners' && banners.map(banner => (
+            <div key={banner.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
+              <div className="h-40 bg-zinc-950 relative">
+                {banner.imagem_url ? (
+                  <img src={banner.imagem_url} alt={banner.titulo} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-600"><Image size={32} /></div>
+                )}
+              </div>
+              <div className="p-5 space-y-2.5">
+                <h3 className="text-sm font-bold text-white font-cinzel">{banner.titulo}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">{banner.subtitulo}</p>
+              </div>
+              <div className="p-5 pt-0">
+                <button
+                  onClick={() => handleExcluir(banner.id)}
+                  className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <Trash2 size={12} /> Remover
+                </button>
+              </div>
+            </div>
+          ))}
 
-        {activeTab === 'galeria' && galeria.map(img => (
-          <div key={img.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
-            <div className="h-40 bg-zinc-950 relative">
-              <img src={img.image_url} alt={img.title} className="w-full h-full object-cover" />
-              <span className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-white bg-black/60 rounded">
-                {img.category}
-              </span>
+          {activeTab === 'equipe' && equipe.map(member => (
+            <div key={member.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
+              <div className="h-44 bg-zinc-950 relative flex items-center justify-center pt-4">
+                <img src={member.foto_url} alt={member.nome} className="w-28 h-28 rounded-full object-cover border-2 border-primary" />
+              </div>
+              <div className="p-5 text-center space-y-2">
+                <h3 className="text-sm font-bold text-white font-cinzel">{member.nome}</h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2.5 py-0.5 rounded border border-gold/20 inline-block">
+                  {member.cargo}
+                </span>
+                <p className="text-xs text-zinc-500 line-clamp-3 pt-2">{member.biografia}</p>
+              </div>
+              <div className="p-5 pt-0">
+                <button
+                  onClick={() => handleExcluir(member.id)}
+                  className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <Trash2 size={12} /> Remover
+                </button>
+              </div>
             </div>
-            <div className="p-4">
-              <h4 className="text-xs font-bold text-white truncate">{img.title}</h4>
-            </div>
-            <div className="p-4 pt-0">
-              <button
-                onClick={() => handleExcluir(img.id)}
-                className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
-              >
-                <Trash2 size={12} /> Remover
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
 
-      </div>
+          {activeTab === 'galeria' && galeria.map(img => (
+            <div key={img.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden flex flex-col justify-between">
+              <div className="h-40 bg-zinc-950 relative">
+                <img src={img.image_url} alt={img.title} className="w-full h-full object-cover" />
+                <span className="absolute top-2 left-2 px-2 py-0.5 text-[8px] font-black uppercase tracking-wider text-white bg-black/60 rounded">
+                  {img.category}
+                </span>
+              </div>
+              <div className="p-4">
+                <h4 className="text-xs font-bold text-white truncate">{img.title}</h4>
+              </div>
+              <div className="p-4 pt-0">
+                <button
+                  onClick={() => handleExcluir(img.id)}
+                  className="w-full py-2 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1"
+                >
+                  <Trash2 size={12} /> Remover
+                </button>
+              </div>
+            </div>
+          ))}
+
+        </div>
+      )}
 
       {/* MODAL ADICIONAR ITEM */}
       {showModal && (

@@ -235,3 +235,15 @@ CREATE TABLE IF NOT EXISTS certificados (
     data_emissao DATE NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- 18. Tabela CMS_BANNERS
+CREATE TABLE IF NOT EXISTS cms_banners (
+    id TEXT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    subtitulo VARCHAR(255) NOT NULL,
+    link TEXT,
+    imagem_url TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+

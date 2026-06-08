@@ -717,7 +717,26 @@
       "dados_banca": {}
     }
   ],
-  "contacts": [],
+  "contacts": [
+    {
+      "id": "msg-1",
+      "name": "José Augusto Ramos",
+      "email": "jose.ramos@gmail.com",
+      "phone": "(71) 98888-9999",
+      "message": "Olá, gostaria de saber o valor da mensalidade e os horários das turmas infantis no dojo de Salvador Centro.",
+      "read": false,
+      "created_at": "2026-06-07T14:30:00.000Z"
+    },
+    {
+      "id": "msg-2",
+      "name": "Fernanda Lins Albuquerque",
+      "email": "fernanda.lins@outlook.com",
+      "phone": "(71) 97777-5555",
+      "message": "Gostaria de filiar o meu dojo (Goju-Ryu Lauro de Freitas) à federação. Quais os documentos necessários?",
+      "read": true,
+      "created_at": "2026-06-06T10:15:00.000Z"
+    }
+  ],
   "noticias": [
     {
       "id": "n-1",
@@ -752,40 +771,20 @@
   "team_members": [
     {
       "id": "tm-1",
-      "name": "Sensei Paulo Roberto",
-      "role": "Instrutor Chefe",
-      "belt": "Preta 2º Dan",
-      "bio": "Mais de 20 anos de experiência...",
-      "photo_url": null,
-      "order": 1,
-      "updated_at": "2026-05-27T01:20:17.732Z"
-    },
-    {
-      "id": "tm-2",
-      "name": "Senpai Carlos Silva",
-      "role": "Instrutor Auxiliar",
-      "belt": "Preta 1º Dan",
-      "bio": "Praticante desde 2012...",
-      "photo_url": null,
-      "order": 2
+      "nome": "Sensei Paulo Roberto",
+      "cargo": "Instrutor Chefe (Preta 2º Dan)",
+      "biografia": "Mais de 20 anos de experiência no ensino de Karate Goju-Ryu em Salvador.",
+      "foto_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
+      "order": 1
     }
   ],
   "gallery_items": [
     {
       "id": "gi-1",
       "title": "Exame de Faixa 2025",
-      "url": "https://images.unsplash.com/photo-1555597673-b21d5c935865",
-      "type": "photo",
-      "category": "Eventos",
+      "image_url": "https://images.unsplash.com/photo-1555597673-b21d5c935865",
+      "category": "Exames",
       "order": 1
-    },
-    {
-      "id": "gi-2",
-      "title": "Treino Especial de Fim de Ano",
-      "url": "https://images.unsplash.com/photo-1517649763962-0c623066013b",
-      "type": "photo",
-      "category": "Treinos",
-      "order": 2
     }
   ],
   "documentos": [],
@@ -6306,6 +6305,15 @@
       "valor": 120,
       "data_vencimento": "2026-06-02",
       "status": "pendente"
+    }
+  ],
+  "cms_banners": [
+    {
+      "id": "b-1",
+      "titulo": "Karatê Tradicional Goju-Ryu",
+      "subtitulo": "Força e suavidade unidas na busca do autodomínio.",
+      "link": "/sobre",
+      "imagem_url": "https://images.unsplash.com/photo-1555597673-b21d5c935865?auto=format&fit=crop&q=80&w=1200"
     }
   ]
 }

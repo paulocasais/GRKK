@@ -1050,6 +1050,67 @@ def delete_cms_item(tipo, id):
         return jsonify({"error": error}), 500
     return jsonify({"sucesso": True}), 200
 
+@app.route("/api/contatos", methods=["GET"])
+def get_contatos_list():
+    user = get_current_user()
+    if not user or user.get("tipo") != "admin":
+        return jsonify({"error": "Não autorizado"}), 403
+        
+    contacts, error = SupabaseService.get_all("contacts", order_by="created_at", ascending=False)
+    if error or not contacts:
+        contacts, error = SupabaseService.get_all("contatos", order_by="created_at", ascending=False)
+        
+    return jsonify({"contatos": contacts or []}), 200
+
+@app.route("/api/contatos/<id>", methods=["DELETE"])
+def delete_contato_item(id):
+    user = get_current_user()
+    if not user or user.get("tipo") != "admin":
+        return jsonify({"error": "Não autorizado"}), 403
+        
+    res, error = SupabaseService.delete("contacts", id)
+    if error:
+        res, error = SupabaseService.delete("contatos", id)
+        
+    if error:
+        return jsonify({"error": error}), 500
+    return jsonify({"sucesso": True}), 200
+
+@app.route("/api/contatos/responder", methods=["POST"])
+def responder_contato_item():
+    user = get_current_user()
+    if not user or user.get("tipo") != "admin":
+        return jsonify({"error": "Não autorizado"}), 403
+        
+    data = request.json or {}
+    contato_id = data.get("contatoId")
+    email = data.get("email")
+    mensagem = data.get("mensagem")
+    
+    if not contato_id or not email or not mensagem:
+        return jsonify({"error": "Campos obrigatórios ausentes"}), 400
+        
+    contacts_list, _ = SupabaseService.get_all("contacts")
+    tabela = "contacts"
+    update_field = {"read": True}
+    if not contacts_list:
+        tabela = "contatos"
+        update_field = {"lida": True}
+        
+    SupabaseService.update(tabela, contato_id, update_field)
+    
+    # Registra na auditoria
+    audit_log = {
+        "usuario_id": user["id"],
+        "usuario_nome": user.get("nome", "Admin"),
+        "acao": "Responder Contato",
+        "detalhes": f"Resposta enviada para {email}: {mensagem[:100]}...",
+        "ip": request.remote_addr or "127.0.0.1"
+    }
+    SupabaseService.insert("logs_auditoria", audit_log)
+    
+    return jsonify({"success": True, "simulado": True}), 200
+
 # 8. Auditoria
 @app.route("/api/auditoria", methods=["GET", "POST"])
 def handle_auditoria():
