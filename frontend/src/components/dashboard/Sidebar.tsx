@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Trophy, CalendarDays,
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
-  Medal, CreditCard, MessageSquare,
+  Medal, CreditCard, MessageSquare, BookOpen
 } from 'lucide-react';
 
 const NAV_ADMIN = [
@@ -23,6 +23,7 @@ const NAV_ADMIN = [
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
+  { href: '/dojo-kun', label: 'Dojo Kun', icon: BookOpen },
   { href: '/admin', label: 'Gerenciar Site (CMS)', icon: Settings },
 ];
 
@@ -37,6 +38,7 @@ const NAV_FILIAL = [
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
+  { href: '/dojo-kun', label: 'Dojo Kun', icon: BookOpen },
 ];
 
 const NAV_ATLETA = [
@@ -46,6 +48,7 @@ const NAV_ATLETA = [
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
+  { href: '/dojo-kun', label: 'Dojo Kun', icon: BookOpen },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 
