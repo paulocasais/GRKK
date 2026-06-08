@@ -28,6 +28,7 @@ export default function Navbar() {
   const [showInstDropdown, setShowInstDropdown] = useState(false);
   const [mobileInstOpen, setMobileInstOpen] = useState(false);
   const [showLoginDropdown, setShowLoginDropdown] = useState(false);
+  const [loginDropdownMode, setLoginDropdownMode] = useState<'login' | 'register'>('login');
   const [loginForm, setLoginForm] = useState({ identifier: '', password: '', type: 'atleta' as 'atleta' | 'filial' });
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -184,105 +185,186 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setShowLoginDropdown(!showLoginDropdown)}
-                  className="border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer"
+              <div className="flex items-center gap-2">
+                {/* Botão Associe-se */}
+                <Link
+                  href="/auth/cadastro-atleta"
+                  className="border border-gold text-gold text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-gold hover:text-white transition-all duration-300"
                 >
-                  Área do Membro
-                </button>
+                  Associe-se
+                </Link>
 
-                {showLoginDropdown && (
-                  <div className="absolute right-0 mt-3 w-80 bg-dark/95 backdrop-blur-md border border-dark-border rounded-xl p-5 shadow-2xl text-left z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h4 className="font-cinzel text-white text-sm font-semibold tracking-wider mb-4 text-center">Acesso Rápido</h4>
+                {/* Botão Área do Membro + Dropdown */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => { setShowLoginDropdown(!showLoginDropdown); setLoginDropdownMode('login'); }}
+                    className="border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer"
+                  >
+                    Área do Membro
+                  </button>
 
-                    {/* Toggles */}
-                    <div className="flex gap-2 mb-4 bg-dark/40 p-1 border border-dark-border rounded-lg">
-                      <button
-                        type="button"
-                        onClick={() => setLoginForm(prev => ({ ...prev, type: 'atleta', identifier: '' }))}
-                        className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
-                          loginForm.type === 'atleta' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        Atleta
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setLoginForm(prev => ({ ...prev, type: 'filial', identifier: '' }))}
-                        className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
-                          loginForm.type === 'filial' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
-                        }`}
-                      >
-                        Filial / Admin
-                      </button>
-                    </div>
+                  {showLoginDropdown && (
+                    <div className="absolute right-0 mt-3 w-80 bg-dark/95 backdrop-blur-md border border-dark-border rounded-xl p-5 shadow-2xl text-left z-50 animate-in fade-in slide-in-from-top-2 duration-200">
 
-                    <form onSubmit={handleQuickLogin} className="space-y-3.5">
-                      <div>
-                        <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                          {loginForm.type === 'atleta' ? 'Telefone (login)' : 'E-mail'}
-                        </label>
-                        <div className="relative">
-                          {loginForm.type === 'atleta' ? (
-                            <Phone size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                          ) : (
-                            <Mail size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                          )}
-                          <input
-                            required
-                            type={loginForm.type === 'atleta' ? 'text' : 'email'}
-                            placeholder={loginForm.type === 'atleta' ? '(71) 99999-0003' : 'email@exemplo.com'}
-                            value={loginForm.identifier}
-                            onChange={(e) => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
-                            className="w-full bg-dark border border-dark-border text-white text-xs pl-8 pr-3 py-2 focus:outline-none focus:border-primary transition"
-                          />
-                        </div>
+                      {/* Abas Login / Cadastro */}
+                      <div className="flex gap-2 mb-4 bg-dark/40 p-1 border border-dark-border rounded-lg">
+                        <button
+                          type="button"
+                          onClick={() => setLoginDropdownMode('login')}
+                          className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
+                            loginDropdownMode === 'login' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          Login
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLoginDropdownMode('register')}
+                          className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
+                            loginDropdownMode === 'register' ? 'bg-gold text-white' : 'text-gray-400 hover:text-white'
+                          }`}
+                        >
+                          Associe-se
+                        </button>
                       </div>
 
-                      <div>
-                        <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                          Senha
-                        </label>
-                        <div className="relative">
-                          <Lock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                          <input
-                            required
-                            type="password"
-                            placeholder="••••••••"
-                            value={loginForm.password}
-                            onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                            className="w-full bg-dark border border-dark-border text-white text-xs pl-8 pr-3 py-2 focus:outline-none focus:border-primary transition"
-                          />
-                        </div>
-                      </div>
+                      {loginDropdownMode === 'login' ? (
+                        <>
+                          <h4 className="font-cinzel text-white text-sm font-semibold tracking-wider mb-4 text-center">Acesso Rápido</h4>
 
-                      {loginError && (
-                        <p className="text-[11px] text-red-400 bg-red-400/10 border border-red-400/20 px-3 py-1.5 rounded-lg">
-                          {loginError}
-                        </p>
+                          {/* Toggles Atleta / Filial */}
+                          <div className="flex gap-2 mb-4 bg-dark/40 p-1 border border-dark-border rounded-lg">
+                            <button
+                              type="button"
+                              onClick={() => setLoginForm(prev => ({ ...prev, type: 'atleta', identifier: '' }))}
+                              className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
+                                loginForm.type === 'atleta' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                              }`}
+                            >
+                              Atleta
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setLoginForm(prev => ({ ...prev, type: 'filial', identifier: '' }))}
+                              className={`flex-1 text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-md transition cursor-pointer ${
+                                loginForm.type === 'filial' ? 'bg-primary text-white' : 'text-gray-400 hover:text-white'
+                              }`}
+                            >
+                              Filial / Admin
+                            </button>
+                          </div>
+
+                          <form onSubmit={handleQuickLogin} className="space-y-3.5">
+                            <div>
+                              <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                                {loginForm.type === 'atleta' ? 'Telefone (login)' : 'E-mail'}
+                              </label>
+                              <div className="relative">
+                                {loginForm.type === 'atleta' ? (
+                                  <Phone size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                ) : (
+                                  <Mail size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                )}
+                                <input
+                                  required
+                                  type={loginForm.type === 'atleta' ? 'text' : 'email'}
+                                  placeholder={loginForm.type === 'atleta' ? '(71) 99999-0003' : 'email@exemplo.com'}
+                                  value={loginForm.identifier}
+                                  onChange={(e) => setLoginForm(prev => ({ ...prev, identifier: e.target.value }))}
+                                  className="w-full bg-dark border border-dark-border text-white text-xs pl-8 pr-3 py-2 focus:outline-none focus:border-primary transition"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                                Senha
+                              </label>
+                              <div className="relative">
+                                <Lock size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                                <input
+                                  required
+                                  type="password"
+                                  placeholder="••••••••"
+                                  value={loginForm.password}
+                                  onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
+                                  className="w-full bg-dark border border-dark-border text-white text-xs pl-8 pr-3 py-2 focus:outline-none focus:border-primary transition"
+                                />
+                              </div>
+                            </div>
+
+                            {loginError && (
+                              <p className="text-[11px] text-red-400 bg-red-400/10 border border-red-400/20 px-3 py-1.5 rounded-lg">
+                                {loginError}
+                              </p>
+                            )}
+
+                            <button
+                              type="submit"
+                              disabled={loginLoading}
+                              className="w-full bg-primary text-white font-cinzel text-[10px] tracking-widest uppercase py-2.5 hover:bg-primary-dark transition disabled:opacity-60 flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              {loginLoading ? (
+                                <><Loader2 size={12} className="animate-spin" /> Entrando...</>
+                              ) : (
+                                'Acessar'
+                              )}
+                            </button>
+                          </form>
+
+                          <div className="text-center mt-3 pt-3 border-t border-dark-border">
+                            <Link href="/auth" onClick={() => setShowLoginDropdown(false)} className="text-[10px] text-gray-500 hover:text-white transition">
+                              Entrar em tela cheia →
+                            </Link>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h4 className="font-cinzel text-white text-sm font-semibold tracking-wider mb-2 text-center">Junte-se a Nós</h4>
+                          <p className="text-[10px] text-gray-400 text-center mb-4 leading-relaxed">
+                            Faça parte da família Goju-Ryu Karate Kai. Escolha como deseja se associar:
+                          </p>
+                          <div className="space-y-2.5">
+                            <Link
+                              href="/auth/cadastro-atleta"
+                              onClick={() => setShowLoginDropdown(false)}
+                              className="flex items-center gap-3 w-full p-3 border border-gold/30 hover:border-gold bg-gold/5 hover:bg-gold/10 transition-all duration-200 group"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center shrink-0 group-hover:bg-gold/30 transition">
+                                <span className="text-gold text-sm">🥋</span>
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-bold text-white uppercase tracking-wider">Sou Atleta</p>
+                                <p className="text-[9px] text-gray-400 mt-0.5">Cadastre-se como praticante</p>
+                              </div>
+                            </Link>
+                            <Link
+                              href="/auth/cadastro-filial"
+                              onClick={() => setShowLoginDropdown(false)}
+                              className="flex items-center gap-3 w-full p-3 border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-all duration-200 group"
+                            >
+                              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0 group-hover:bg-primary/30 transition">
+                                <span className="text-primary text-sm">🏯</span>
+                              </div>
+                              <div>
+                                <p className="text-[11px] font-bold text-white uppercase tracking-wider">Sou Filial / Dojo</p>
+                                <p className="text-[9px] text-gray-400 mt-0.5">Associe seu dojo à federação</p>
+                              </div>
+                            </Link>
+                          </div>
+                          <div className="text-center mt-3 pt-3 border-t border-dark-border">
+                            <button
+                              onClick={() => setLoginDropdownMode('login')}
+                              className="text-[10px] text-gray-500 hover:text-white transition cursor-pointer"
+                            >
+                              ← Já tenho conta
+                            </button>
+                          </div>
+                        </>
                       )}
-
-                      <button
-                        type="submit"
-                        disabled={loginLoading}
-                        className="w-full bg-primary text-white font-cinzel text-[10px] tracking-widest uppercase py-2.5 hover:bg-primary-dark transition disabled:opacity-60 flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        {loginLoading ? (
-                          <><Loader2 size={12} className="animate-spin" /> Entrando...</>
-                        ) : (
-                          'Acessar'
-                        )}
-                      </button>
-                    </form>
-
-                    <div className="text-center mt-3 pt-3 border-t border-dark-border">
-                      <Link href="/auth" onClick={() => setShowLoginDropdown(false)} className="text-[10px] text-gray-500 hover:text-white transition">
-                        Entrar em tela cheia →
-                      </Link>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -354,12 +436,20 @@ export default function Navbar() {
               </button>
             </>
           ) : (
-            <Link
-              href="/auth"
-              className="mt-4 text-center border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-primary hover:text-white transition-all duration-300"
-            >
-              Área do Membro
-            </Link>
+            <>
+              <Link
+                href="/auth"
+                className="mt-4 text-center border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-primary hover:text-white transition-all duration-300"
+              >
+                Área do Membro
+              </Link>
+              <Link
+                href="/auth/cadastro-atleta"
+                className="mt-2 text-center border border-gold text-gold text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-gold hover:text-white transition-all duration-300"
+              >
+                Associe-se
+              </Link>
+            </>
           )}
           <div className="flex items-center justify-center gap-4 mt-4">
             <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"
