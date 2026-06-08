@@ -2,3 +2,4 @@ next
 pyton
 tailwindcss
 supabase
+gunicorn
