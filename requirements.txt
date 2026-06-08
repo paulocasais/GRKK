@@ -1,1 +1,4 @@
-
+next
+pyton
+tailwindcss
+supabase
