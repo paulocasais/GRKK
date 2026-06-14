@@ -7,5 +7,8 @@
     "build": "npm run build --prefix frontend",
     "start": "npm run start --prefix frontend",
     "backend": "cd backend && .venv\\Scripts\\python app.py"
+  },
+  "devDependencies": {
+    "cypress": "^15.17.0"
   }
 }

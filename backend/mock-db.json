@@ -24,7 +24,8 @@
       "telefone": "71999990003",
       "tipo": "atleta",
       "status": "ativo",
-      "updated_at": "2026-06-01T21:59:04.635Z"
+      "updated_at": "2026-06-01T21:59:04.635Z",
+      "faixa": "Amarela"
     },
     {
       "id": "pending-athlete-id",
@@ -165,6 +166,212 @@
       "telefone": "(71) 98888-2009",
       "tipo": "atleta",
       "status": "ativo"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "b58282e5-0912-4924-a2ac-1a29046d1ed6",
+      "created_at": "2026-06-14T16:16:09.039205"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "9910e2a2-577e-4fca-88ff-c74a074c925a",
+      "created_at": "2026-06-14T16:16:09.181629"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "fabe48c0-76c5-4a4e-84e6-de6051a07da4",
+      "created_at": "2026-06-14T16:18:03.321775"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "24b2b392-a2b7-4e39-9714-e81c5cc807f9",
+      "created_at": "2026-06-14T16:18:03.420576"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "5fad5607-cd0a-490a-bd3f-de4cdc57e541",
+      "created_at": "2026-06-14T16:18:15.756662"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "d5ea8a4a-8c53-433c-a8af-9d34b9093680",
+      "created_at": "2026-06-14T16:18:15.844557"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "3c41973d-b635-40c7-becb-4762da08d5cf",
+      "created_at": "2026-06-14T16:18:59.532889"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "00362f43-9910-41ab-a53f-c2d938028abd",
+      "created_at": "2026-06-14T16:18:59.628057"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "f5b414eb-f0f6-4efe-b064-601fca36b4c7",
+      "created_at": "2026-06-14T16:19:09.070672"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "d9311510-545b-4503-972a-6f42159f09ca",
+      "created_at": "2026-06-14T16:19:09.175843"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "353afcb0-453e-4fb6-bfb8-72345aaa9227",
+      "created_at": "2026-06-14T16:53:56.568985"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "47cac4a5-181e-4286-a437-2d020017b818",
+      "created_at": "2026-06-14T16:53:56.677936"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "b428d635-d8e1-432e-b16e-a626fed7a1ee",
+      "created_at": "2026-06-14T16:54:09.035767"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "4439de57-fd4a-4c52-b3a0-fa6763df6a05",
+      "created_at": "2026-06-14T16:54:09.113307"
+    },
+    {
+      "id": "acf3de96-fb64-40d8-8b6d-fe7b2e617785",
+      "nome": "Check",
+      "email": "check@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T17:02:33.969825"
+    },
+    {
+      "id": "9361bf5d-e873-488c-a73c-66797a049732",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-9361bf5d@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:03:44.774655",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "b40e3034-d861-44ab-89b7-dccab10324a7",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-b40e3034@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:25:33.687864",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "767c281f-791f-48af-89d7-842d047dcd88",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-767c281f@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:28:33.609609",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-7e9d9a16@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:29:33.573445",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-eb6172e3@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:31:01.883772",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-b26cfdf0@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:57:26.531430",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "bfbc51cb-2e3e-4d86-abc6-b54501ee7327",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-bfbc51cb@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T19:52:02.005905",
+      "faixa": "Amarela"
+    },
+    {
+      "id": "7daaab0f-0d64-4465-a358-5706e45e9938",
+      "nome": "Atleta Teste Fluxo",
+      "email": "atleta-test-7daaab0f@example.com",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-06-14T19:52:12.687573",
+      "faixa": "Amarela"
     }
   ],
   "atletas": [
@@ -177,7 +384,7 @@
       "email": "atleta@grkk.com.br",
       "telefone": "71999990003",
       "nome_professor": "Mestre Goju",
-      "faixa": "Branca",
+      "faixa": "Amarela",
       "status": "ativo",
       "endereco": "",
       "cidade": "",
@@ -475,6 +682,150 @@
         }
       ],
       "historico_competitivo": []
+    },
+    {
+      "id": "b58282e5-0912-4924-a2ac-1a29046d1ed6",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:16:09.111766"
+    },
+    {
+      "id": "fabe48c0-76c5-4a4e-84e6-de6051a07da4",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:18:03.370578"
+    },
+    {
+      "id": "5fad5607-cd0a-490a-bd3f-de4cdc57e541",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:18:15.803290"
+    },
+    {
+      "id": "3c41973d-b635-40c7-becb-4762da08d5cf",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:18:59.577530"
+    },
+    {
+      "id": "f5b414eb-f0f6-4efe-b064-601fca36b4c7",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:19:09.124986"
+    },
+    {
+      "id": "353afcb0-453e-4fb6-bfb8-72345aaa9227",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:53:56.619492"
+    },
+    {
+      "id": "b428d635-d8e1-432e-b16e-a626fed7a1ee",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-14T16:54:09.078730"
+    },
+    {
+      "id": "acf3de96-fb64-40d8-8b6d-fe7b2e617785",
+      "filial_id": "dojo-x",
+      "email": "check@example.com",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T17:02:34.050659"
+    },
+    {
+      "id": "9361bf5d-e873-488c-a73c-66797a049732",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-9361bf5d@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:03:44.823022"
+    },
+    {
+      "id": "b40e3034-d861-44ab-89b7-dccab10324a7",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-b40e3034@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:25:33.727882"
+    },
+    {
+      "id": "767c281f-791f-48af-89d7-842d047dcd88",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-767c281f@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:28:33.655337"
+    },
+    {
+      "id": "7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-7e9d9a16@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:29:33.607718"
+    },
+    {
+      "id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-eb6172e3@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:31:01.932091"
+    },
+    {
+      "id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-b26cfdf0@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T18:57:26.593487"
+    },
+    {
+      "id": "bfbc51cb-2e3e-4d86-abc6-b54501ee7327",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-bfbc51cb@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T19:52:02.032452"
+    },
+    {
+      "id": "7daaab0f-0d64-4465-a358-5706e45e9938",
+      "filial_id": "dojo-central",
+      "email": "atleta-test-7daaab0f@example.com",
+      "telefone": "",
+      "nome_professor": "Mestre Teste",
+      "faixa": "Amarela",
+      "status": "ativo",
+      "created_at": "2026-06-14T19:52:12.724478"
     }
   ],
   "filiais": [
@@ -524,6 +875,69 @@
       "created_at": "2026-06-01T05:26:18.340Z",
       "updated_at": "2026-06-01T21:51:33.824Z",
       "motivo_reprovacao": null
+    },
+    {
+      "id": "9910e2a2-577e-4fca-88ff-c74a074c925a",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-9910E",
+      "created_at": "2026-06-14T16:16:09.244761"
+    },
+    {
+      "id": "24b2b392-a2b7-4e39-9714-e81c5cc807f9",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-24B2B",
+      "created_at": "2026-06-14T16:18:03.469128"
+    },
+    {
+      "id": "d5ea8a4a-8c53-433c-a8af-9d34b9093680",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-D5EA8",
+      "created_at": "2026-06-14T16:18:15.876807"
+    },
+    {
+      "id": "00362f43-9910-41ab-a53f-c2d938028abd",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-00362",
+      "created_at": "2026-06-14T16:18:59.672341"
+    },
+    {
+      "id": "d9311510-545b-4503-972a-6f42159f09ca",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-D9311",
+      "created_at": "2026-06-14T16:19:09.220426"
+    },
+    {
+      "id": "47cac4a5-181e-4286-a437-2d020017b818",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-47CAC",
+      "created_at": "2026-06-14T16:53:56.732673"
+    },
+    {
+      "id": "4439de57-fd4a-4c52-b3a0-fa6763df6a05",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-4439D",
+      "created_at": "2026-06-14T16:54:09.150958"
     }
   ],
   "eventos": [
@@ -571,6 +985,150 @@
       "descricao": "Exame descentralizado. Instrutor Responsável: Sensei Paulo.",
       "data_exame": "2026-04-10",
       "status": "realizado"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "agendado",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "2963177f-c2e6-41a8-9cfc-60aef8e196bc",
+      "created_at": "2026-06-14T16:58:24.892669"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "0c7e512e-5b1e-4fae-8525-627da6669a5d",
+      "created_at": "2026-06-14T16:59:04.566365"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "d",
+      "status": "em_andamento",
+      "titulo": "E",
+      "id": "eac41a07-223e-495a-bce0-ea2000b9b897",
+      "created_at": "2026-06-14T17:00:27.703866"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "3074b030-3aa3-40ff-aa48-0060f6b12448",
+      "created_at": "2026-06-14T17:01:32.376032"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "d2",
+      "status": "em_andamento",
+      "titulo": "E2",
+      "id": "7209448b-66b3-42c6-9192-b6f49e1dffcc",
+      "created_at": "2026-06-14T17:02:11.581680"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "d2",
+      "status": "em_andamento",
+      "titulo": "E2",
+      "id": "cd11d313-ce4b-4367-881f-61625083dd82",
+      "created_at": "2026-06-14T17:02:55.267897"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "d2",
+      "status": "em_andamento",
+      "titulo": "E2",
+      "id": "9629aede-2bbf-4107-a8d6-a0d0671e81eb",
+      "created_at": "2026-06-14T17:03:16.008971"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "d6a339df-4dfb-4512-9298-5e937099ba92",
+      "created_at": "2026-06-14T18:01:56.745710"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "f37df09b-17fc-4a10-8e48-d4a2bbef87d9",
+      "created_at": "2026-06-14T18:02:48.252827"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "8d4b7895-5b67-40d9-b943-5c6877f4dcb5",
+      "created_at": "2026-06-14T18:03:17.597009"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "1747c5ec-df6a-460b-8971-57d221b5d5c2",
+      "created_at": "2026-06-14T18:03:44.738485"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "ddf7c4ca-7842-4688-beef-36b91b0a4c9c",
+      "created_at": "2026-06-14T18:25:33.652278"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "9b3fb9b1-6da6-44cf-aaa7-6338d51ae0b1",
+      "created_at": "2026-06-14T18:28:33.562726"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "45a4de3c-3c92-4a9d-8daf-be264c88bc5b",
+      "created_at": "2026-06-14T18:29:33.528435"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "dd96e184-514a-4704-a6cd-985801f90fa4",
+      "created_at": "2026-06-14T18:31:01.826491"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "ecd00367-7313-451e-acb3-472a044dcb40",
+      "created_at": "2026-06-14T18:57:26.459718"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "2abc73b8-4f14-4e0b-a870-69cf073a5f9d",
+      "created_at": "2026-06-14T19:52:01.969266"
+    },
+    {
+      "data_exame": "2026-07-01",
+      "descricao": "Exame automatizado",
+      "status": "em_andamento",
+      "titulo": "Exame de Faixa - Teste E2",
+      "id": "66b0701a-dc74-4879-9db9-c929bb9cf15a",
+      "created_at": "2026-06-14T19:52:12.652153"
     }
   ],
   "exames_candidatos": [
@@ -739,6 +1297,69 @@
       "message": "Gostaria de filiar o meu dojo (Goju-Ryu Lauro de Freitas) à federação. Quais os documentos necessários?",
       "read": true,
       "created_at": "2026-06-06T10:15:00.000Z"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "0b65d093-51f0-4f3b-ad65-0ebff67e407c",
+      "created_at": "2026-06-14T16:16:09.520843"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "e1d222f0-3bf2-4574-9d57-4b78e2e8c7f2",
+      "created_at": "2026-06-14T16:18:03.519280"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "992001be-a1c1-424e-872e-ce1ebae0b3bd",
+      "created_at": "2026-06-14T16:18:15.930789"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "edad8b6b-92db-4cce-a2b3-6cbcf1d4f3d9",
+      "created_at": "2026-06-14T16:18:59.713351"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "395ec506-3777-4741-8170-c691b3fda958",
+      "created_at": "2026-06-14T16:19:09.378985"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "14889f6e-b473-4128-90ae-f969bdc92183",
+      "created_at": "2026-06-14T16:53:56.789980"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "38755558-7984-4c93-ba60-fad21e7b7200",
+      "created_at": "2026-06-14T16:54:09.182844"
     }
   ],
   "noticias": [
@@ -6284,6 +6905,62 @@
       "titulo": "Certificado de Graduação — Amarela",
       "descricao": "Aprovado no exame de graduação para a faixa Amarela na modalidade Karatê Goju-Ryu.",
       "url_pdf": "/certificados/a8aw1jrqd"
+    },
+    {
+      "atleta_id": "9361bf5d-e873-488c-a73c-66797a049732",
+      "codigo_validacao": "63065C2C9A5D",
+      "data_emissao": "2026-06-14",
+      "id": "9526b765-1356-45fd-905e-116a0b8d9b49",
+      "created_at": "2026-06-14T18:03:45.157081"
+    },
+    {
+      "atleta_id": "b40e3034-d861-44ab-89b7-dccab10324a7",
+      "codigo_validacao": "08C984E25094",
+      "data_emissao": "2026-06-14",
+      "id": "b47f30e3-e050-4df6-9cb5-69e4b80ca8dd",
+      "created_at": "2026-06-14T18:25:33.985730"
+    },
+    {
+      "atleta_id": "767c281f-791f-48af-89d7-842d047dcd88",
+      "codigo_validacao": "AA38B9CBCD1D",
+      "data_emissao": "2026-06-14",
+      "id": "2facf5ae-e143-4a0b-a272-e5fbefc81487",
+      "created_at": "2026-06-14T18:28:34.141431"
+    },
+    {
+      "atleta_id": "7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef",
+      "codigo_validacao": "ABFF3BDF07F2",
+      "data_emissao": "2026-06-14",
+      "id": "776faceb-e338-4c37-892a-c99a987d584b",
+      "created_at": "2026-06-14T18:29:33.856185"
+    },
+    {
+      "atleta_id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
+      "codigo_validacao": "3E1C2D493135",
+      "data_emissao": "2026-06-14",
+      "id": "c35dbe6c-f5df-43df-bc56-0ae1dd0cfade",
+      "created_at": "2026-06-14T18:31:02.328254"
+    },
+    {
+      "atleta_id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
+      "codigo_validacao": "2A84446BE08C",
+      "data_emissao": "2026-06-14",
+      "id": "48701d2d-8f15-416c-b91f-97e21a6a7388",
+      "created_at": "2026-06-14T18:57:27.104817"
+    },
+    {
+      "atleta_id": "bfbc51cb-2e3e-4d86-abc6-b54501ee7327",
+      "codigo_validacao": "53FEA69187D3",
+      "data_emissao": "2026-06-14",
+      "id": "5a50374f-b558-44ce-94b5-5a2752acfa72",
+      "created_at": "2026-06-14T19:52:02.255446"
+    },
+    {
+      "atleta_id": "7daaab0f-0d64-4465-a358-5706e45e9938",
+      "codigo_validacao": "28B192C69321",
+      "data_emissao": "2026-06-14",
+      "id": "5354d66c-8f83-457d-af4a-38491448f54b",
+      "created_at": "2026-06-14T19:52:12.937652"
     }
   ],
   "ranking_pontos": [
@@ -6391,6 +7068,278 @@
       "avaliado_por": "7513aa27-452f-462e-8f5a-b3f2052612f0",
       "avaliado_em": "2026-04-10T11:30:00.000Z",
       "created_at": "2026-04-01T09:00:00.000Z"
+    },
+    {
+      "exame_id": "0c7e512e-5b1e-4fae-8525-627da6669a5d",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": "atleta-6hs7wr0vy9o",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T16:59:04.613215",
+      "id": "131454da-cb12-43fe-8121-4b81f8c8a96c",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "eac41a07-223e-495a-bce0-ea2000b9b897",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": "atleta-6hs7wr0vy9o",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Amarela",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T17:00:27.826661",
+      "id": "f0fa893b-32c9-4968-ab0b-e8cde2089933",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "3074b030-3aa3-40ff-aa48-0060f6b12448",
+      "atleta_id": "004aa83d-e9f4-464e-ad69-c748592fe8ef",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T17:01:32.528067",
+      "id": "aab523fd-6f55-4477-8ad6-7a4a60133496",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "7209448b-66b3-42c6-9192-b6f49e1dffcc",
+      "atleta_id": "2968912d-4e34-4632-8ca5-abcd603aadeb",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T17:02:11.712559",
+      "id": "5fb8b9c8-63f4-408c-b02a-6033c0c5b2ac",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "cd11d313-ce4b-4367-881f-61625083dd82",
+      "atleta_id": "f31e23ba-6613-4260-b9d3-c7df42b2b333",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T17:02:55.440394",
+      "id": "e7505b5f-53fb-49b0-80a9-c0ade9b4c387",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "9629aede-2bbf-4107-a8d6-a0d0671e81eb",
+      "atleta_id": "d104a03e-50b5-456e-8ec4-fd4d771786d5",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T17:03:16.128819",
+      "id": "f44f9394-8866-43b1-b569-48082fad8515",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "d6a339df-4dfb-4512-9298-5e937099ba92",
+      "atleta_id": "af701bbc-e2d6-4189-ae26-f4a5e0c6e843",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:01:56.860330",
+      "id": "2def450a-546f-4ac9-8731-3aa59842ff0a",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "f37df09b-17fc-4a10-8e48-d4a2bbef87d9",
+      "atleta_id": "67a81b2a-3512-423e-8599-19af4f6eec4e",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:02:48.448890",
+      "id": "14b7df2f-7a4a-43a5-88da-9af3bfbaa908",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "8d4b7895-5b67-40d9-b943-5c6877f4dcb5",
+      "atleta_id": "65b21aac-eb3f-45ba-a8e4-3c6529cbf755",
+      "atleta_nome": "Atleta",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:03:17.833133",
+      "id": "fc798f19-0971-4fed-841a-4a04fe1d60b6",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "1747c5ec-df6a-460b-8971-57d221b5d5c2",
+      "atleta_id": "9361bf5d-e873-488c-a73c-66797a049732",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:03:44.875718",
+      "id": "cfd9f1b7-2b92-439d-ba29-d3b3b07c9d75",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "ddf7c4ca-7842-4688-beef-36b91b0a4c9c",
+      "atleta_id": "b40e3034-d861-44ab-89b7-dccab10324a7",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:25:33.766100",
+      "id": "e21ab9ae-358d-447a-ab23-78c116e679ad",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "9b3fb9b1-6da6-44cf-aaa7-6338d51ae0b1",
+      "atleta_id": "767c281f-791f-48af-89d7-842d047dcd88",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:28:33.693587",
+      "id": "df3e3ac0-642c-4c10-ad64-f504070e0d0e",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "45a4de3c-3c92-4a9d-8daf-be264c88bc5b",
+      "atleta_id": "7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:29:33.652746",
+      "id": "7b8fec1c-cbff-4f8a-8486-76fd8f7fa81a",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "dd96e184-514a-4704-a6cd-985801f90fa4",
+      "atleta_id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:31:01.985130",
+      "id": "1e13ac4e-1be0-4551-bc19-d150c3345973",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "ecd00367-7313-451e-acb3-472a044dcb40",
+      "atleta_id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T18:57:26.697906",
+      "id": "61b751e0-9b64-4c4b-9fb2-352898984ed9",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "2abc73b8-4f14-4e0b-a870-69cf073a5f9d",
+      "atleta_id": "bfbc51cb-2e3e-4d86-abc6-b54501ee7327",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T19:52:02.067827",
+      "id": "a5ca84c6-2cfe-4723-9377-dade42f49fb6",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
+    },
+    {
+      "exame_id": "66b0701a-dc74-4879-9db9-c929bb9cf15a",
+      "atleta_id": "7daaab0f-0d64-4465-a358-5706e45e9938",
+      "atleta_nome": "Atleta Teste Fluxo",
+      "filial_id": "dojo-central",
+      "filial_nome": "Dojo Central",
+      "faixa_atual": "Branca",
+      "graduacao_pretendida": "Amarela",
+      "status": "aprovado",
+      "autorizacao_tecnica": true,
+      "pagamento_status": "pendente",
+      "dados_banca": {},
+      "created_at": "2026-06-14T19:52:12.749280",
+      "id": "4f2f507c-89b8-4f39-8d74-e9f2fd07b704",
+      "avaliado_por": "6513aa27-452f-462e-8f5a-b3f2052612f9"
     }
   ],
   "examinadores_exame": [
