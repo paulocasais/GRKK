@@ -25,7 +25,8 @@
       "tipo": "atleta",
       "status": "ativo",
       "updated_at": "2026-06-01T21:59:04.635Z",
-      "faixa": "Amarela"
+      "faixa": "Amarela",
+      "cidade": ""
     },
     {
       "id": "pending-athlete-id",
@@ -378,9 +379,9 @@
     {
       "id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
       "filial_id": "atleta-6hs7wr0vy9o",
-      "cpf": "123.456.789-01",
+      "cpf": "12345678901",
       "sexo": "M",
-      "data_nascimento": "2000-01-01",
+      "data_nascimento": "2011-06-15",
       "email": "atleta@grkk.com.br",
       "telefone": "71999990003",
       "nome_professor": "Mestre Goju",
@@ -390,19 +391,23 @@
       "cidade": "",
       "uf": "",
       "modalidades": [],
-      "responsavel_nome": null,
-      "responsavel_cpf": null,
-      "responsavel_email": null,
-      "responsavel_telefone": null,
+      "responsavel_nome": "Responsavel de Teste",
+      "responsavel_cpf": "11111111111",
+      "responsavel_email": "responsavel@grkk.com.br",
+      "responsavel_telefone": "71999999999",
       "updated_at": "2026-06-01T21:59:04.643Z",
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "Alergia a poeira e camarao",
+      "medico_plano": "Bradesco Saude",
+      "medico_restricoes": "Sem restricoes graves",
+      "medico_diagnosticos": "Nenhum"
     },
     {
       "id": "pending-athlete-id",
       "filial_id": "atleta-6hs7wr0vy9o",
       "cpf": "987.654.321-09",
       "sexo": "F",
-      "data_nascimento": "2005-05-15",
+      "data_nascimento": "2012-10-10",
       "email": "atleta-pendente@grkk.com.br",
       "telefone": "71988888888",
       "nome_professor": "Mestre Goju",
@@ -413,11 +418,15 @@
       "endereco": "",
       "cidade": "",
       "uf": "",
-      "responsavel_nome": null,
-      "responsavel_cpf": null,
-      "responsavel_email": null,
-      "responsavel_telefone": null,
-      "historico_competitivo": []
+      "responsavel_nome": "Maria de Souza",
+      "responsavel_cpf": "111.222.333-44",
+      "responsavel_email": "maria@souza.com",
+      "responsavel_telefone": "71977777777",
+      "historico_competitivo": [],
+      "medico_alergias": "Dipirona",
+      "medico_plano": "Unimed",
+      "medico_restricoes": "Evitar esforço cardíaco excessivo",
+      "medico_diagnosticos": "Sopro cardíaco leve"
     },
     {
       "id": "atleta-s9rxjaztv1q",
@@ -441,7 +450,11 @@
       "responsavel_cpf": "729.168.484-60",
       "responsavel_email": "paulorobertocasais@gmail.com",
       "responsavel_telefone": "71987414819",
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "bp-1",
@@ -461,7 +474,11 @@
           "data_graduacao": "2020-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "bp-2",
@@ -481,7 +498,11 @@
           "data_graduacao": "2020-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "bp-3",
@@ -501,7 +522,11 @@
           "data_graduacao": "2020-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-1",
@@ -521,7 +546,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-2",
@@ -541,7 +570,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-3",
@@ -561,7 +594,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-4",
@@ -581,7 +618,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-5",
@@ -601,7 +642,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-6",
@@ -621,7 +666,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-7",
@@ -641,7 +690,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-8",
@@ -661,7 +714,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "st-9",
@@ -681,7 +738,11 @@
           "data_graduacao": "2024-01-01"
         }
       ],
-      "historico_competitivo": []
+      "historico_competitivo": [],
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "b58282e5-0912-4924-a2ac-1a29046d1ed6",
@@ -689,7 +750,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:16:09.111766"
+      "created_at": "2026-06-14T16:16:09.111766",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "fabe48c0-76c5-4a4e-84e6-de6051a07da4",
@@ -697,7 +762,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:18:03.370578"
+      "created_at": "2026-06-14T16:18:03.370578",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "5fad5607-cd0a-490a-bd3f-de4cdc57e541",
@@ -705,7 +774,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:18:15.803290"
+      "created_at": "2026-06-14T16:18:15.803290",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "3c41973d-b635-40c7-becb-4762da08d5cf",
@@ -713,7 +786,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:18:59.577530"
+      "created_at": "2026-06-14T16:18:59.577530",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "f5b414eb-f0f6-4efe-b064-601fca36b4c7",
@@ -721,7 +798,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:19:09.124986"
+      "created_at": "2026-06-14T16:19:09.124986",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "353afcb0-453e-4fb6-bfb8-72345aaa9227",
@@ -729,7 +810,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:53:56.619492"
+      "created_at": "2026-06-14T16:53:56.619492",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "b428d635-d8e1-432e-b16e-a626fed7a1ee",
@@ -737,7 +822,11 @@
       "telefone": "123456789",
       "status": "pendente",
       "faixa": "Branca",
-      "created_at": "2026-06-14T16:54:09.078730"
+      "created_at": "2026-06-14T16:54:09.078730",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "acf3de96-fb64-40d8-8b6d-fe7b2e617785",
@@ -745,7 +834,11 @@
       "email": "check@example.com",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T17:02:34.050659"
+      "created_at": "2026-06-14T17:02:34.050659",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "9361bf5d-e873-488c-a73c-66797a049732",
@@ -755,7 +848,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:03:44.823022"
+      "created_at": "2026-06-14T18:03:44.823022",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "b40e3034-d861-44ab-89b7-dccab10324a7",
@@ -765,7 +862,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:25:33.727882"
+      "created_at": "2026-06-14T18:25:33.727882",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "767c281f-791f-48af-89d7-842d047dcd88",
@@ -775,7 +876,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:28:33.655337"
+      "created_at": "2026-06-14T18:28:33.655337",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef",
@@ -785,7 +890,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:29:33.607718"
+      "created_at": "2026-06-14T18:29:33.607718",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
@@ -795,7 +904,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:31:01.932091"
+      "created_at": "2026-06-14T18:31:01.932091",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
@@ -805,7 +918,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T18:57:26.593487"
+      "created_at": "2026-06-14T18:57:26.593487",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "bfbc51cb-2e3e-4d86-abc6-b54501ee7327",
@@ -815,7 +932,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T19:52:02.032452"
+      "created_at": "2026-06-14T19:52:02.032452",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     },
     {
       "id": "7daaab0f-0d64-4465-a358-5706e45e9938",
@@ -825,7 +946,11 @@
       "nome_professor": "Mestre Teste",
       "faixa": "Amarela",
       "status": "ativo",
-      "created_at": "2026-06-14T19:52:12.724478"
+      "created_at": "2026-06-14T19:52:12.724478",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
     }
   ],
   "filiais": [

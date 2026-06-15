@@ -15,6 +15,20 @@ interface Atleta {
   status: 'ativo' | 'pendente' | 'inativo';
   filial_nome?: string;
   cidade?: string;
+  cpf?: string;
+  sexo?: string;
+  data_nascimento?: string;
+  nome_professor?: string;
+  endereco?: string;
+  uf?: string;
+  responsavel_nome?: string;
+  responsavel_cpf?: string;
+  responsavel_email?: string;
+  responsavel_telefone?: string;
+  medico_alergias?: string;
+  medico_plano?: string;
+  medico_restricoes?: string;
+  medico_diagnosticos?: string;
 }
 
 const FAIXAS = ['Branca', 'Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
@@ -27,6 +41,7 @@ export default function AtletasPage() {
   const [statusFiltro, setStatusFiltro] = useState<'todos' | 'ativo' | 'pendente'>('todos');
   
   const [selectedAtleta, setSelectedAtleta] = useState<Atleta | null>(null);
+  const [viewingAtleta, setViewingAtleta] = useState<Atleta | null>(null);
   const [novaFaixa, setNovaFaixa] = useState('');
   const [salvando, setSalvando] = useState(false);
 
@@ -190,24 +205,32 @@ export default function AtletasPage() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4 border-t border-zinc-800/40">
+            <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/40">
               {atleta.status === 'pendente' && (
                 <button
                   onClick={() => handleHomologar(atleta.id)}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <CheckCircle2 size={12} /> Homologar
+                  <CheckCircle2 size={12} /> Homologar Atleta
                 </button>
               )}
-              <button
-                onClick={() => {
-                  setSelectedAtleta(atleta);
-                  setNovaFaixa(atleta.faixa);
-                }}
-                className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
-              >
-                Alterar Faixa
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setViewingAtleta(atleta)}
+                  className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
+                >
+                  Ver Ficha
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedAtleta(atleta);
+                    setNovaFaixa(atleta.faixa);
+                  }}
+                  className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
+                >
+                  Alterar Faixa
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -257,6 +280,95 @@ export default function AtletasPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Ficha Completa do Atleta */}
+      {viewingAtleta && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-950 border border-zinc-900 rounded-3xl w-full max-w-2xl p-6 sm:p-8 space-y-6 relative overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            {/* Top decorative gradient */}
+            <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex justify-between items-start border-b border-zinc-900 pb-4">
+              <div>
+                <h3 className="text-xl font-bold text-white font-cinzel tracking-wider">{viewingAtleta.nome}</h3>
+                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mt-1">Ficha Cadastral e Ficha Médica</p>
+              </div>
+              <button 
+                onClick={() => setViewingAtleta(null)}
+                className="w-8 h-8 rounded-xl bg-zinc-900/50 flex items-center justify-center text-zinc-400 hover:text-white border border-zinc-800/80 hover:border-zinc-700 transition cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Seção 1: Dados Pessoais */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold text-gold font-cinzel tracking-wider uppercase">Dados Pessoais e Contato</h4>
+                <div className="space-y-2.5 text-xs">
+                  <p className="text-zinc-400">CPF: <strong className="text-white font-mono">{viewingAtleta.cpf ? viewingAtleta.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado'}</strong></p>
+                  <p className="text-zinc-400">Data de Nascimento: <strong className="text-white font-mono">{viewingAtleta.data_nascimento ? viewingAtleta.data_nascimento.split('-').reverse().join('/') : 'Não informada'}</strong></p>
+                  <p className="text-zinc-400">Idade: <strong className="text-white">{viewingAtleta.data_nascimento ? (new Date().getFullYear() - new Date(viewingAtleta.data_nascimento).getFullYear()) : '—'} anos</strong></p>
+                  <p className="text-zinc-400">Sexo: <strong className="text-white">{viewingAtleta.sexo === 'M' ? 'Masculino' : viewingAtleta.sexo === 'F' ? 'Feminino' : 'Outro'}</strong></p>
+                  <p className="text-zinc-400">Celular: <strong className="text-white font-mono">{viewingAtleta.telefone || 'Não informado'}</strong></p>
+                  <p className="text-zinc-400">E-mail: <strong className="text-white font-mono">{viewingAtleta.email}</strong></p>
+                  <p className="text-zinc-400">Dojo / Filial: <strong className="text-white">{viewingAtleta.filial_nome || 'Dojo Central'}</strong></p>
+                  <p className="text-zinc-400">Professor / Sensei: <strong className="text-white">{viewingAtleta.nome_professor || 'Não informado'}</strong></p>
+                  <p className="text-zinc-400">Endereço: <strong className="text-white leading-relaxed">{viewingAtleta.endereco || 'Não cadastrado'} {viewingAtleta.cidade ? `, ${viewingAtleta.cidade} - ${viewingAtleta.uf || 'BA'}` : ''}</strong></p>
+                </div>
+              </div>
+
+              {/* Seção 2: Responsáveis e Dados Médicos */}
+              <div className="space-y-6">
+                {/* Seção Responsável (se for menor) */}
+                {viewingAtleta.data_nascimento && (new Date().getFullYear() - new Date(viewingAtleta.data_nascimento).getFullYear() < 18) ? (
+                  <div className="bg-zinc-900/40 border border-gold/15 rounded-2xl p-4 space-y-3">
+                    <h4 className="text-[11px] font-bold text-gold font-cinzel tracking-wider uppercase">Responsável Legal (Menor)</h4>
+                    <div className="space-y-2 text-xs">
+                      <p className="text-zinc-400">Nome: <strong className="text-white">{viewingAtleta.responsavel_nome || 'Não informado'}</strong></p>
+                      <p className="text-zinc-400">CPF: <strong className="text-white font-mono">{viewingAtleta.responsavel_cpf ? viewingAtleta.responsavel_cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : 'Não informado'}</strong></p>
+                      <p className="text-zinc-400">Celular: <strong className="text-white font-mono">{viewingAtleta.responsavel_telefone || 'Não informado'}</strong></p>
+                      <p className="text-zinc-400">E-mail: <strong className="text-white font-mono">{viewingAtleta.responsavel_email || 'Não informado'}</strong></p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Seção Ficha Médica */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold text-emerald-400 font-cinzel tracking-wider uppercase">Ficha Médica do Atleta</h4>
+                  <div className="space-y-3.5 text-xs">
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Alergias</p>
+                      <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_alergias || 'Nenhuma alergia relatada.'}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Plano de Saúde</p>
+                      <p className="text-white bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_plano || 'Sem informações de convênio médico.'}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Restrições Físicas / Médicas</p>
+                      <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_restricoes || 'Nenhuma restrição relatada.'}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Diagnósticos Clínicos</p>
+                      <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_diagnosticos || 'Nenhum diagnóstico clínico relatado.'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-zinc-900">
+              <button
+                onClick={() => setViewingAtleta(null)}
+                className="px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider font-cinzel transition cursor-pointer"
+              >
+                Fechar Ficha
+              </button>
+            </div>
           </div>
         </div>
       )}
