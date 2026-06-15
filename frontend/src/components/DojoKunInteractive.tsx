@@ -65,31 +65,51 @@ export default function DojoKunInteractive() {
   const [activeTab, setActiveTab] = useState(0);
   const [subTab, setSubTab] = useState<'filosofia' | 'dojo' | 'vida'>('filosofia');
   const [isPlaying, setIsPlaying] = useState(false);
-  const [waveProgress, setWaveProgress] = useState(0);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isPlaying) {
-      setWaveProgress(0);
-      interval = setInterval(() => {
-        setWaveProgress((prev) => {
-          if (prev >= 100) {
-            setIsPlaying(false);
-            clearInterval(interval);
-            return 0;
-          }
-          return prev + 2.5; // dura cerca de 4 segundos
-        });
-      }, 100);
-    } else {
-      setWaveProgress(0);
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, [activeTab]);
 
   const handlePlayAudio = () => {
-    setIsPlaying(true);
-    // Simula reprodução de áudio - no futuro pode integrar Web Audio API ou arquivo de áudio real
+    if (typeof window === 'undefined') return;
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(true);
+
+      // Pronuncia "Hitotsu" (一) antes do preceito, mantendo a tradição do Dojo
+      const textToSpeak = `一、${currentPrecept.kanji}`;
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.8; // Velocidade tradicional mais pausada
+
+      // Tenta selecionar uma voz japonesa ja-JP nativa
+      const voices = window.speechSynthesis.getVoices();
+      const jaVoice = voices.find(v => v.lang.startsWith('ja') || v.lang === 'ja-JP');
+      if (jaVoice) {
+        utterance.voice = jaVoice;
+      }
+
+      utterance.onend = () => {
+        setIsPlaying(false);
+      };
+
+      utterance.onerror = () => {
+        setIsPlaying(false);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      // Fallback de simulação visual se a API de síntese de voz não for suportada
+      setIsPlaying(true);
+      setTimeout(() => {
+        setIsPlaying(false);
+      }, 3000);
+    }
   };
 
   const handlePrint = () => {

@@ -250,4 +250,14 @@ CREATE TABLE IF NOT EXISTS cms_banners (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
+-- 19. Tabela DOCUMENTOS
+CREATE TABLE IF NOT EXISTS documentos (
+    id TEXT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    tipo VARCHAR(100) NOT NULL,
+    "desc" TEXT,
+    arquivo_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
 

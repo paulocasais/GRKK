@@ -58,6 +58,43 @@ export default function EventosDashboardPage() {
   const [bracket, setBracket] = useState<BracketsData | null>(null);
   const [loadingBracket, setLoadingBracket] = useState(false);
 
+  // Deletion states & handlers
+  const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
+  const [eventoToDelete, setEventoToDelete] = useState<Evento | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleConfirmarExcluir = (evento: Evento) => {
+    setEventoToDelete(evento);
+    setShowConfirmDeleteModal(true);
+  };
+
+  const handleExcluirEvento = async () => {
+    if (!eventoToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`${API_URL}/api/eventos/${eventoToDelete.id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        setEventos(eventos.filter(e => e.id !== eventoToDelete.id));
+        setShowConfirmDeleteModal(false);
+        setEventoToDelete(null);
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Erro ao excluir evento');
+      }
+    } catch (err) {
+      console.error(err);
+      // Fallback local caso offline
+      setEventos(eventos.filter(e => e.id !== eventoToDelete.id));
+      setShowConfirmDeleteModal(false);
+      setEventoToDelete(null);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const carregarDados = async () => {
     try {
       const [resEventos, resInscricoes] = await Promise.all([
@@ -282,9 +319,21 @@ export default function EventosDashboardPage() {
             <div key={evento.id} className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-5 flex flex-col justify-between">
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
-                  <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-gold bg-gold/10 rounded border border-gold/20">
-                    {evento.tipo}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-gold bg-gold/10 rounded border border-gold/20">
+                      {evento.tipo}
+                    </span>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleConfirmarExcluir(evento)}
+                        className="p-1 bg-red-650/10 border border-red-650/20 hover:bg-red-600 text-red-500 hover:text-white rounded-lg transition cursor-pointer flex items-center justify-center"
+                        title="Excluir Evento"
+                        id={`excluir-evento-btn-${evento.id}`}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    )}
+                  </div>
                   <p className="text-[10px] text-zinc-500 font-mono">
                     {evento.data_inicio} até {evento.data_fim}
                   </p>
@@ -684,6 +733,46 @@ export default function EventosDashboardPage() {
           {/* Dica */}
           <div className="mt-auto p-4 border-t border-zinc-850 text-center text-[10px] text-zinc-550">
             Dica do Sensei: Clique no nome do atleta do confronto para declará-lo vencedor e avançá-lo no bracket.
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação de Exclusão de Evento */}
+      {showConfirmDeleteModal && eventoToDelete && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl w-full max-w-sm p-6 relative">
+            <h3 className="text-base font-bold text-white font-cinzel mb-3">
+              Confirmar Exclusão
+            </h3>
+            <p className="text-xs text-zinc-450 mb-6 font-sans leading-relaxed">
+              Tem certeza que deseja remover o evento <strong className="text-white">"{eventoToDelete.titulo}"</strong> permanentemente? Esta ação não poderá ser desfeita e será registrada no histórico de auditoria.
+            </p>
+            <div className="flex gap-2.5 font-cinzel">
+              <button
+                type="button"
+                id="cancel-delete-evento-btn"
+                onClick={() => {
+                  setShowConfirmDeleteModal(false);
+                  setEventoToDelete(null);
+                }}
+                className="flex-1 py-2.5 bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                id="confirm-delete-evento-btn"
+                onClick={handleExcluirEvento}
+                disabled={deleting}
+                className="flex-1 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                {deleting ? (
+                  <><Loader2 size={12} className="animate-spin" /> Excluindo...</>
+                ) : (
+                  "Confirmar"
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_event_routes(app: Flask):
     """Cria e registra as rotas de eventos"""
@@ -20,9 +21,22 @@ def create_event_routes(app: Flask):
                 return jsonify({"error": "Acesso não autorizado"}), 403
 
             data = request.json or {}
+            titulo = data.get("titulo")
+            tipo = data.get("tipo")
+            if not titulo:
+                return jsonify({"error": "Título é obrigatório"}), 400
+
             evento, error = SupabaseService.insert("eventos", data)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Criação de Evento",
+                f"Evento '{titulo}' (Tipo: {tipo}) criado."
+            )
+
             return jsonify(evento), 201
 
     @app.route("/api/eventos/<id>", methods=["PATCH", "DELETE"])
@@ -38,12 +52,33 @@ def create_event_routes(app: Flask):
             evento, error = SupabaseService.update("eventos", id, data)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Edição de Evento",
+                f"Evento '{evento.get('titulo')}' (ID: {id}) modificado."
+            )
+
             return jsonify(evento), 200
 
         elif request.method == "DELETE":
+            # Busca o evento antes de deletar para obter o título para o log
+            eventos, _ = SupabaseService.get_all("eventos")
+            evento = next((e for e in (eventos or []) if str(e["id"]) == id), None)
+            titulo = evento.get("titulo") if evento else id
+
             res, error = SupabaseService.delete("eventos", id)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Exclusão de Evento",
+                f"Evento '{titulo}' (ID: {id}) excluído."
+            )
+
             return jsonify({"sucesso": True}), 200
 
     @app.route("/api/eventos/inscricoes", methods=["GET", "POST"])

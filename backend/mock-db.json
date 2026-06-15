@@ -375,6 +375,16 @@
       "faixa": "Amarela"
     }
   ],
+  "documentos": [
+    {
+      "titulo": "Certificado",
+      "tipo": "Certificado",
+      "desc": "",
+      "arquivo_url": "",
+      "id": "9ef14a79-7a1b-483c-b315-2f43885b82cf",
+      "created_at": "2026-06-15T17:53:55.956784"
+    }
+  ],
   "atletas": [
     {
       "id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
@@ -1537,7 +1547,6 @@
       "order": 1
     }
   ],
-  "documentos": [],
   "audit_logs": [
     {
       "id": "be4jok4gz",
@@ -7007,7 +7016,8 @@
       "user_id": "atleta-flyf7ymhpad",
       "titulo": "Graduação Aprovada! 🎉",
       "mensagem": "Parabéns! Sua aprovação para a faixa Preta Nidan foi homologada pela banca.",
-      "tipo": "sucesso"
+      "tipo": "sucesso",
+      "lida": true
     },
     {
       "id": "s76xzt9jg",
@@ -7510,6 +7520,87 @@
       "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
       "ip": "127.0.0.1",
       "created_at": "2026-06-15T00:13:03.801494"
+    },
+    {
+      "id": "b03cd496-07a9-4ddc-be29-f062601ec54d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:40:15.544763"
+    },
+    {
+      "id": "3be348bf-5f23-421b-9eea-3b5e42741099",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:41:15.152774"
+    },
+    {
+      "id": "de90fe95-a808-444a-8ab2-1d0b5bb3f64d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Documento",
+      "detalhes": "Documento 'Estatuto de Teste' (Tipo: Institucional) inserido.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:43:20.381241"
+    },
+    {
+      "id": "9f4f20ca-5357-4170-af12-88e1eca3e395",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Edição de Documento",
+      "detalhes": "Documento 'Estatuto de Teste Editado' (ID: 8867075f-124e-4351-836f-4c00a554f8ec) modificado.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:44:04.542616"
+    },
+    {
+      "id": "27d26adc-c91d-4780-9fed-0591ea3b6c80",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:45:24.660130"
+    },
+    {
+      "id": "ee67aac9-bada-43fc-8e40-ce4c237b85b9",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Documento",
+      "detalhes": "Documento 'Certificado' (Tipo: Certificado) inserido.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:54:01.581292"
+    },
+    {
+      "id": "f59c2c1a-6a39-4664-9a2b-43c506de584b",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:55:06.877426"
+    },
+    {
+      "id": "00e8ad82-1b61-4858-8af2-165e7d292e4b",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Documento",
+      "detalhes": "Documento 'Estatuto de Teste Editado' (ID: 8867075f-124e-4351-836f-4c00a554f8ec) excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T17:56:27.987387"
+    },
+    {
+      "id": "9fad07dd-c76f-4dce-87a5-84cd41c07f1a",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Evento",
+      "detalhes": "Evento 'ttttt' (ID: 7a168b9a-87d1-4280-ab51-3f099dd12ece) excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T18:01:23.201322"
     }
   ]
 }

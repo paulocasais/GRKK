@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_cms_routes(app: Flask):
     """Cria e registra as rotas do CMS (conteúdos do site)"""
@@ -148,3 +149,79 @@ def create_cms_routes(app: Flask):
         if error:
             return jsonify({"error": error}), 500
         return jsonify({"sucesso": True}), 200
+
+    @app.route("/api/documentos", methods=["GET", "POST"])
+    def manage_documentos():
+        from backend.app import get_current_user
+
+        if request.method == "GET":
+            docs, error = SupabaseService.get_all("documentos", order_by="created_at", ascending=False)
+            if error:
+                return jsonify({"error": error}), 500
+            return jsonify({"documentos": docs or []}), 200
+
+        elif request.method == "POST":
+            user = get_current_user()
+            if not user or user.get("tipo") != "admin":
+                return jsonify({"error": "Acesso não autorizado"}), 403
+
+            data = request.json or {}
+            titulo = data.get("titulo")
+            tipo = data.get("tipo")
+            if not titulo or not tipo:
+                return jsonify({"error": "Título e Tipo são obrigatórios"}), 400
+
+            res, error = SupabaseService.insert("documentos", data)
+            if error:
+                return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Criação de Documento",
+                f"Documento '{titulo}' (Tipo: {tipo}) inserido."
+            )
+
+            return jsonify(res), 201
+
+    @app.route("/api/documentos/<id>", methods=["PATCH", "DELETE"])
+    def gerenciar_documentos_id(id):
+        from backend.app import get_current_user
+
+        user = get_current_user()
+        if not user or user.get("tipo") != "admin":
+            return jsonify({"error": "Acesso não autorizado"}), 403
+
+        if request.method == "PATCH":
+            data = request.json or {}
+            res, error = SupabaseService.update("documentos", id, data)
+            if error:
+                return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Edição de Documento",
+                f"Documento '{res.get('titulo')}' (ID: {id}) modificado."
+            )
+
+            return jsonify(res), 200
+
+        elif request.method == "DELETE":
+            # Busca antes de deletar para obter o título no log
+            docs, _ = SupabaseService.get_all("documentos")
+            doc = next((d for d in (docs or []) if str(d["id"]) == id), None)
+            titulo = doc.get("titulo") if doc else id
+
+            res, error = SupabaseService.delete("documentos", id)
+            if error:
+                return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Exclusão de Documento",
+                f"Documento '{titulo}' (ID: {id}) excluído."
+            )
+
+            return jsonify({"sucesso": True}), 200
