@@ -34,3 +34,7 @@ Thumbs.db
 *.sln
 *.sw?
 .vercel
+
+# Production Build Outputs
+dist-backend/
+backend-production.zip
