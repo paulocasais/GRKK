@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_team_gallery_routes(app: Flask):
     """Cria e registra as rotas de equipe e galeria"""
@@ -37,6 +38,7 @@ def create_team_gallery_routes(app: Flask):
             }), 200
 
         elif request.method == "POST":
+            from backend.app import get_current_user
             user = get_current_user()
             if not user or user.get("tipo") != "admin":
                 return jsonify({"error": "Não autorizado"}), 403
@@ -61,8 +63,12 @@ def create_team_gallery_routes(app: Flask):
             item_id = payload.get("id")
             if item_id:
                 res, error = SupabaseService.update(tabela, item_id, payload)
+                if not error:
+                    registrar_log_auditoria(user, "CMS Modificado", f"Item {tipo_item} (ID: {item_id}) atualizado.")
             else:
                 res, error = SupabaseService.insert(tabela, payload)
+                if not error:
+                    registrar_log_auditoria(user, "CMS Criado", f"Novo item {tipo_item} (ID: {res.get('id')}) criado.")
 
             if error:
                 return jsonify({"error": error}), 500
@@ -70,6 +76,7 @@ def create_team_gallery_routes(app: Flask):
 
     @app.route("/api/cms/<tipo>/<id>", methods=["DELETE"])
     def delete_cms_item(tipo, id):
+        from backend.app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -87,4 +94,5 @@ def create_team_gallery_routes(app: Flask):
         res, error = SupabaseService.delete(tabela, id)
         if error:
             return jsonify({"error": error}), 500
+        registrar_log_auditoria(user, "CMS Excluído", f"Item {tipo} (ID: {id}) excluído.")
         return jsonify({"sucesso": True}), 200

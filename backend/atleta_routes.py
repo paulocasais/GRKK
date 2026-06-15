@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_atleta_routes(app: Flask):
     """Cria e registra as rotas de atletas"""
@@ -129,6 +130,14 @@ def create_atleta_routes(app: Flask):
         res, error = SupabaseService.update("atletas", id, update_atl)
         if error:
             return jsonify({"error": error}), 500
+
+        # Registrar log de auditoria
+        campos_atualizados = list(update_prof.keys()) + list(update_atl.keys())
+        registrar_log_auditoria(
+            user,
+            "Atualização de Atleta",
+            f"Perfil do atleta {existing_atleta.get('nome')} (ID: {id}) atualizado. Campos: {', '.join(set(campos_atualizados))}"
+        )
 
         updated_atleta, _ = SupabaseService.get_profile_by_id(id)
         return jsonify(updated_atleta), 200

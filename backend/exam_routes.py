@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from backend.services.supabase_service import SupabaseService
 from datetime import datetime
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_exam_routes(app: Flask):
     """Cria e registra as rotas de exames"""
@@ -24,6 +25,14 @@ def create_exam_routes(app: Flask):
             res, error = SupabaseService.insert("exames", data)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Criação de Exame",
+                f"Novo exame de faixa criado para data {res.get('data_exame')} (ID: {res.get('id')})"
+            )
+
             return jsonify(res), 201
 
     # Rotas fixas DEVEM vir antes das rotas com <id> para evitar shadowing
@@ -124,6 +133,14 @@ def create_exam_routes(app: Flask):
             if error:
                 return jsonify({"error": error}), 500
 
+            # Registrar log de auditoria
+            if "status" in data:
+                registrar_log_auditoria(
+                    user,
+                    "Avaliação de Candidato",
+                    f"Candidato {res.get('atleta_nome')} (ID: {res.get('atleta_id')}) status de exame atualizado para {data.get('status')} (Graduação pretendida: {res.get('graduacao_pretendida')})"
+                )
+
             if data.get("status") == "aprovado":
                 atleta_perfil, _ = SupabaseService.update("atletas", res.get("atleta_id"), {
                     "faixa": res.get("graduacao_pretendida", "Amarela")
@@ -194,6 +211,13 @@ def create_exam_routes(app: Flask):
             res, error = SupabaseService.update("exames", id, data)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Edição de Exame",
+                f"Exame de faixa (ID: {id}) atualizado. Status: {data.get('status', 'Sem alteração de status')}"
+            )
 
             if data.get("status") == "em_andamento":
                 distribuir_proximos_fila(id)

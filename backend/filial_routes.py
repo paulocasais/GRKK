@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_filial_routes(app: Flask):
     """Cria e registra as rotas de filiais"""
@@ -82,6 +83,13 @@ def create_filial_routes(app: Flask):
         res, error = SupabaseService.update("filiais", id, update_fil)
         if error:
             return jsonify({"error": error}), 500
+
+        # Registrar log de auditoria
+        registrar_log_auditoria(
+            user,
+            "Atualização de Filial",
+            f"Filial {updated_filial.get('nome') if updated_filial else id} (ID: {id}) atualizada. Status: {status or 'Sem alteração de status'}"
+        )
 
         updated_filial, _ = SupabaseService.get_profile_by_id(id)
         return jsonify(updated_filial), 200

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_messages_routes(app: Flask):
     """Cria e registra as rotas de mensagens e contatos"""
@@ -43,6 +44,7 @@ def create_messages_routes(app: Flask):
 
     @app.route("/api/contatos", methods=["GET"])
     def get_contatos_list():
+        from backend.app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -55,6 +57,7 @@ def create_messages_routes(app: Flask):
 
     @app.route("/api/contatos/<id>", methods=["DELETE"])
     def delete_contato_item(id):
+        from backend.app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -69,6 +72,7 @@ def create_messages_routes(app: Flask):
 
     @app.route("/api/contatos/responder", methods=["POST"])
     def responder_contato_item():
+        from backend.app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -90,13 +94,10 @@ def create_messages_routes(app: Flask):
 
         SupabaseService.update(tabela, contato_id, update_field)
 
-        audit_log = {
-            "usuario_id": user["id"],
-            "usuario_nome": user.get("nome", "Admin"),
-            "acao": "Responder Contato",
-            "detalhes": f"Resposta enviada para {email}: {mensagem[:100]}...",
-            "ip": request.remote_addr or "127.0.0.1"
-        }
-        SupabaseService.insert("logs_auditoria", audit_log)
+        registrar_log_auditoria(
+            user,
+            "Responder Contato",
+            f"Resposta enviada para {email}: {mensagem[:100]}..."
+        )
 
         return jsonify({"success": True, "simulado": True}), 200

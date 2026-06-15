@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from services.supabase_service import SupabaseService
+from backend.services.audit_service import registrar_log_auditoria
 
 def create_auth_routes(app: Flask):
     """Cria e registra as rotas de autenticação"""
@@ -18,6 +19,9 @@ def create_auth_routes(app: Flask):
         if error:
             return jsonify({"error": error}), 401
 
+        # Registrar log de auditoria do login bem-sucedido
+        registrar_log_auditoria(user_data, "Login", f"Usuário {email} realizou login com sucesso")
+
         response = make_response(jsonify({
             "autenticado": True,
             "usuario": user_data,
@@ -32,6 +36,11 @@ def create_auth_routes(app: Flask):
 
     @app.route("/api/auth/logout", methods=["POST"])
     def auth_logout():
+        from backend.app import get_current_user
+        user = get_current_user()
+        if user:
+            registrar_log_auditoria(user, "Logout", f"Usuário {user.get('email')} realizou logout")
+
         response = make_response(jsonify({"sucesso": True, "message": "Logout realizado com sucesso"}))
         response.delete_cookie("session_user")
         response.delete_cookie("sb-mock-session")
