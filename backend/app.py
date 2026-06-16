@@ -25,7 +25,7 @@ if frontend_origins_env:
     if "," in frontend_origins_env:
         origins = [o.strip() for o in frontend_origins_env.split(",") if o.strip()]
     else:
-        origins = frontend_origins_env
+        origins = [frontend_origins_env.strip()]
 else:
     # Ambiente de desenvolvimento padrão: permitir explicitamente localhost:3000 e 127.0.0.1:3000
     origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
