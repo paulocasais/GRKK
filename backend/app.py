@@ -80,6 +80,7 @@ from exam_routes import create_exam_routes
 from finance_routes import create_finance_routes
 from event_routes import create_event_routes
 from auditoria_routes import create_auditoria_routes
+from estoque_routes import create_estoque_routes
 
 # Registrar todas as rotas
 create_auth_routes(app)
@@ -95,6 +96,7 @@ create_exam_routes(app)
 create_finance_routes(app)
 create_event_routes(app)
 create_auditoria_routes(app)
+create_estoque_routes(app)
 
 @app.route("/api/health", methods=["GET"])
 def health_check():

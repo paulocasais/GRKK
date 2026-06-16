@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Trophy, CalendarDays,
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
-  Medal, CreditCard, MessageSquare, BookOpen
+  Medal, CreditCard, MessageSquare, BookOpen, Package
 } from 'lucide-react';
 
 const NAV_ADMIN = [
@@ -20,6 +20,7 @@ const NAV_ADMIN = [
   { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
+  { href: '/estoque', label: 'Estoque', icon: Package },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
@@ -35,6 +36,7 @@ const NAV_FILIAL = [
   { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
+  { href: '/estoque', label: 'Estoque', icon: Package },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },

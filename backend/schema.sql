@@ -267,4 +267,32 @@ CREATE TABLE IF NOT EXISTS cms_config (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
+-- 21. Tabela PRODUTOS_ESTOQUE
+CREATE TABLE IF NOT EXISTS produtos_estoque (
+    id TEXT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    descricao TEXT,
+    categoria VARCHAR(100) NOT NULL,
+    preco_compra NUMERIC(10, 2) DEFAULT 0,
+    preco_venda NUMERIC(10, 2) DEFAULT 0,
+    quantidade_estoque INTEGER DEFAULT 0,
+    estoque_minimo INTEGER DEFAULT 5,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- 22. Tabela MOVIMENTACOES_ESTOQUE
+CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
+    id TEXT PRIMARY KEY,
+    produto_id TEXT REFERENCES produtos_estoque(id) ON DELETE CASCADE,
+    produto_nome VARCHAR(255),
+    tipo VARCHAR(50) NOT NULL CHECK (tipo IN ('entrada', 'saida')),
+    quantidade INTEGER NOT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    usuario_id TEXT REFERENCES profiles(id) ON DELETE SET NULL,
+    usuario_nome VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+
 
