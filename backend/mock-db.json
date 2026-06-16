@@ -373,6 +373,24 @@
       "status": "ativo",
       "created_at": "2026-06-14T19:52:12.687573",
       "faixa": "Amarela"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "19a32345-b196-4002-8222-eba651166272",
+      "created_at": "2026-06-16T01:35:48.636522"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "c4bc2b9f-1a47-4796-a36d-5fb8a1f8fc6e",
+      "created_at": "2026-06-16T01:35:48.689349"
     }
   ],
   "documentos": [
@@ -961,6 +979,14 @@
       "medico_plano": "",
       "medico_restricoes": "",
       "medico_diagnosticos": ""
+    },
+    {
+      "id": "19a32345-b196-4002-8222-eba651166272",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-16T01:35:48.662070"
     }
   ],
   "filiais": [
@@ -1073,6 +1099,15 @@
       "status": "pendente",
       "codigo_interno": "MOCK-FILIAL-4439D",
       "created_at": "2026-06-14T16:54:09.150958"
+    },
+    {
+      "id": "c4bc2b9f-1a47-4796-a36d-5fb8a1f8fc6e",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-C4BC2",
+      "created_at": "2026-06-16T01:35:48.713456"
     }
   ],
   "eventos": [
@@ -1495,6 +1530,15 @@
       "read": false,
       "id": "38755558-7984-4c93-ba60-fad21e7b7200",
       "created_at": "2026-06-14T16:54:09.182844"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "529e27d6-24e1-4b86-a5d3-53856635d0ab",
+      "created_at": "2026-06-16T01:35:48.745884"
     }
   ],
   "noticias": [
@@ -7601,6 +7645,110 @@
       "detalhes": "Evento 'ttttt' (ID: 7a168b9a-87d1-4280-ab51-3f099dd12ece) excluído.",
       "ip": "127.0.0.1",
       "created_at": "2026-06-15T18:01:23.201322"
+    },
+    {
+      "id": "0c79a1a8-685a-491d-b28b-4cb5d334a759",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T18:40:00.488496"
+    },
+    {
+      "id": "224f6724-cc1a-44dd-b510-e3df6d8b7874",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T22:23:06.488703"
+    },
+    {
+      "id": "36bd542a-ac1b-42d8-b619-e16201dfae8e",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Edição de Exame",
+      "detalhes": "Exame de faixa (ID: 3074b030-3aa3-40ff-aa48-0060f6b12448) atualizado. Status: cancelado",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T23:16:59.590606"
+    },
+    {
+      "id": "c0dfd6b0-3e7a-4b80-968a-db74067b7f7a",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Configuração do Site",
+      "detalhes": "Seção 'katas' da página inicial atualizada.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-15T23:18:20.277398"
+    },
+    {
+      "id": "bd43d6d7-e7fb-4fb8-b60b-30c5b50d23a9",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Edição de Glossário do Sensei IA",
+      "detalhes": "Termo 'tsuki' adicionado ou atualizado no glossário da IA.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T01:50:09.534851"
+    }
+  ],
+  "cms_config": [
+    {
+      "chave": "hero",
+      "valor": {
+        "badge": "Tradição de Okinawa & IA Moderna",
+        "titulo": "Onde a Força (Go) encontra a Suavidade (Ju)",
+        "descricao": "O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes."
+      }
+    },
+    {
+      "chave": "principios",
+      "valor": {
+        "subtitulo": "O Goju-Ryu é construído sobre o conceito yin-yang chinês, equilibrando aspectos que parecem opostos, mas são complementares.",
+        "go_titulo": "GO (Força / Rigidez)",
+        "go_desc": "Refere-se ao endurecimento físico, golpes diretos, posições estáveis de combate e resistência ao impacto. É a força e firmeza necessárias para absorver o impacto e desferir contra-ataques decisivos com coragem implacável.",
+        "go_itens": [
+          "Katas de fortalecimento como Sanchin",
+          "Calejamento de membros (Kote Kitae)",
+          "Posturas baixas e firmes"
+        ],
+        "ju_titulo": "JU (Suavidade / Flexibilidade)",
+        "ju_desc": "Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.",
+        "ju_itens": [
+          "Katas de flexibilidade como Tensho",
+          "Esquivas circulares e fluidas (Tai Sabaki)",
+          "Técnicas de agarre e projeção (Kakie)"
+        ]
+      }
+    },
+    {
+      "chave": "katas",
+      "valor": [
+        {
+          "desc": "Foca na mente, corpo e espírito em perfeita união. Usa uma postura enraizada e contração isométrica para criar uma defesa impenetrável.",
+          "foco": "Fortalecimento e Respiração Ibuki",
+          "nome": "Sanchin",
+          "significado": "Três Batalhas"
+        },
+        {
+          "desc": "Criado pelo Mestre Miyagi como a contraparte suave do Sanchin. Foca no trabalho suave de mãos e transições respiratórias tranquilas.",
+          "foco": "Suavidade e Movimento Circular",
+          "nome": "Tensho",
+          "significado": "Mãos Rotativas"
+        },
+        {
+          "desc": "O primeiro Kata de combate avançado do estilo. Ensina técnicas de escape de agarres e socos rápidos nas articulações.",
+          "foco": "Golpes circulares e esquivas rápidas",
+          "nome": "Saifa",
+          "significado": "Destruir e Esmagar"
+        },
+        {
+          "desc": "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás.",
+          "foco": "Posturas baixas de pernas",
+          "nome": "Seiyunchin",
+          "significado": "Controlar e Puxar"
+        }
+      ]
     }
   ]
 }

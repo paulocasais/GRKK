@@ -225,3 +225,122 @@ def create_cms_routes(app: Flask):
             )
 
             return jsonify({"sucesso": True}), 200
+
+    @app.route("/api/cms/config", methods=["GET", "POST"])
+    def manage_cms_config():
+        from backend.app import get_current_user
+        from services.supabase_service import is_mock_mode, mock_db, supabase
+
+        if request.method == "GET":
+            if is_mock_mode:
+                configs = mock_db.data.get("cms_config", [])
+                config_dict = {c["chave"]: c["valor"] for c in configs}
+                return jsonify({"config": config_dict}), 200
+            else:
+                try:
+                    res = supabase.table("cms_config").select("*").execute()
+                    config_dict = {c["chave"]: c["valor"] for c in res.data}
+                    return jsonify({"config": config_dict}), 200
+                except Exception as e:
+                    return jsonify({"error": str(e)}), 500
+
+        elif request.method == "POST":
+            user = get_current_user()
+            if not user or user.get("tipo") != "admin":
+                return jsonify({"error": "Não autorizado"}), 403
+
+            data = request.json or {}
+            chave = data.get("chave")
+            valor = data.get("valor")
+
+            if not chave or valor is None:
+                return jsonify({"error": "Chave e valor são obrigatórios"}), 400
+
+            if is_mock_mode:
+                configs = mock_db.data.setdefault("cms_config", [])
+                found = False
+                for c in configs:
+                    if c["chave"] == c.get("chave"):
+                        if c["chave"] == chave:
+                            c["valor"] = valor
+                            found = True
+                            break
+                if not found:
+                    configs.append({"chave": chave, "valor": valor})
+                mock_db.save()
+                res_data = {"chave": chave, "valor": valor}
+            else:
+                try:
+                    res = supabase.table("cms_config").upsert({"chave": chave, "valor": valor}).execute()
+                    res_data = res.data[0] if res.data else {"chave": chave, "valor": valor}
+                except Exception as e:
+                    return jsonify({"error": str(e)}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Atualização de Configuração do Site",
+                f"Seção '{chave}' da página inicial atualizada."
+            )
+
+            return jsonify(res_data), 200
+
+    @app.route("/api/cms/glossario", methods=["GET", "POST"])
+    def manage_glossario():
+        from backend.app import get_current_user
+        from backend.services.ai_service import get_all_terms, add_or_update_term
+
+        if request.method == "GET":
+            terms = get_all_terms()
+            sorted_terms = sorted([{"termo": k, "definicao": v} for k, v in terms.items()], key=lambda x: x["termo"])
+            return jsonify({"glossario": sorted_terms}), 200
+
+        elif request.method == "POST":
+            user = get_current_user()
+            if not user or user.get("tipo") != "admin":
+                return jsonify({"error": "Não autorizado"}), 403
+
+            data = request.json or {}
+            termo = data.get("termo")
+            definicao = data.get("definicao")
+
+            if not termo or not definicao:
+                return jsonify({"error": "Termo e definição são obrigatórios"}), 400
+
+            res = add_or_update_term(termo, definicao)
+            
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Edição de Glossário do Sensei IA",
+                f"Termo '{termo.lower()}' adicionado ou atualizado no glossário da IA."
+            )
+
+            return jsonify({"success": True, "data": res}), 200
+
+    @app.route("/api/cms/glossario/<termo>", methods=["DELETE"])
+    def delete_glossario_term(termo):
+        from backend.app import get_current_user
+        from backend.services.ai_service import remove_term
+
+        user = get_current_user()
+        if not user or user.get("tipo") != "admin":
+            return jsonify({"error": "Não autorizado"}), 403
+
+        if not termo:
+            return jsonify({"error": "Termo é obrigatório"}), 400
+
+        sucesso = remove_term(termo)
+        if not sucesso:
+            return jsonify({"error": "Termo não encontrado no glossário"}), 404
+
+        # Registrar log de auditoria
+        registrar_log_auditoria(
+            user,
+            "Exclusão de Glossário do Sensei IA",
+            f"Termo '{termo.lower()}' removido do glossário da IA."
+        )
+
+        return jsonify({"success": True}), 200
+
+

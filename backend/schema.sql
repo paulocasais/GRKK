@@ -260,4 +260,11 @@ CREATE TABLE IF NOT EXISTS documentos (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
+-- 20. Tabela CMS_CONFIG
+CREATE TABLE IF NOT EXISTS cms_config (
+    chave VARCHAR(100) PRIMARY KEY,
+    valor JSONB NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
 

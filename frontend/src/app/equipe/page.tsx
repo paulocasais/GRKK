@@ -94,7 +94,7 @@ export default function EquipePage() {
                         <div className="flex flex-col items-center gap-3 opacity-20">
                           <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center">
                             <span className="font-cinzel text-white text-xl">
-                              {member.name.split(' ')[0]?.[0] || 'G'}{member.name.split(' ')[1]?.[0] || 'R'}
+                              {member.name ? member.name.split(' ')[0]?.[0] || 'G' : 'G'}{member.name ? member.name.split(' ')[1]?.[0] || 'R' : 'R'}
                             </span>
                           </div>
                         </div>

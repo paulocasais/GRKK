@@ -4,6 +4,7 @@
 import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend'))
 
 from backend.app import app
 
@@ -93,6 +94,14 @@ def test_app_structure():
         response = client.get('/api/galeria')
         assert response.status_code == 200
         print("PASS: Rotas de galeria funcionam corretamente")
+
+        # Testar rotas do glossário do Sensei IA
+        response = client.get('/api/cms/glossario')
+        assert response.status_code == 200
+        data = response.get_json()
+        assert 'glossario' in data
+        assert len(data['glossario']) > 0
+        print("PASS: Rota GET de glossário do Sensei IA funciona corretamente")
     
     print("\nSUCCESS: Todos os testes passaram! O backend refatorado está funcionando corretamente.")
     return True
@@ -100,7 +109,7 @@ def test_app_structure():
 if __name__ == '__main__':
     try:
         test_app_structure()
-        print("\n🎉 A refatoração do backend foi concluída com sucesso!")
+        print("\n[SUCCESS] A refatoração do backend foi concluída com sucesso!")
         print("\nResumo das melhorias:")
         print("1. app.py foi dividido em 13 módulos de rotas focados")
         print("2. Rotas duplicadas foram removidas")
@@ -109,7 +118,7 @@ if __name__ == '__main__':
         print("5. O frontend foi revisado e está em boas condições")
         print("6. Testes básicos foram criados para verificar a funcionalidade")
     except Exception as e:
-        print(f"\n❌ Erro durante os testes: {e}")
+        print(f"\n[ERROR] Erro durante os testes: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -31,6 +31,103 @@ export default function Home() {
   const [contactLoading, setContactLoading] = useState(false);
   const [contactStatus, setContactStatus] = useState<{ type: "success" | "error" | null; msg: string }>({ type: null, msg: "" });
 
+  // CMS site configuration state
+  const [siteConfig, setSiteConfig] = useState<any>(null);
+
+  useEffect(() => {
+    async function carregarConfig() {
+      try {
+        const res = await fetch(`${API_URL}/api/cms/config`);
+        if (res.ok) {
+          const data = await res.json();
+          setSiteConfig(data.config || null);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configurações do site:", err);
+      }
+    }
+    carregarConfig();
+  }, []);
+
+  const heroBadge = siteConfig?.hero?.badge || "Tradição de Okinawa & IA Moderna";
+  const heroDesc = siteConfig?.hero?.descricao || "O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes.";
+
+  const renderHeroTitle = () => {
+    if (!siteConfig?.hero?.titulo) {
+      return (
+        <>
+          Onde a <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Força (Go)</span> encontra a <span className="text-zinc-400 font-light italic">Suavidade (Ju)</span>
+        </>
+      );
+    }
+    const txt = siteConfig.hero.titulo;
+    if (txt.includes("Força (Go)") && txt.includes("Suavidade (Ju)")) {
+      const parts1 = txt.split("Força (Go)");
+      const before = parts1[0];
+      const after = parts1[1];
+      if (after.includes("Suavidade (Ju)")) {
+        const parts2 = after.split("Suavidade (Ju)");
+        const middle = parts2[0];
+        const end = parts2[1];
+        return (
+          <>
+            {before}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Força (Go)</span>
+            {middle}
+            <span className="text-zinc-400 font-light italic">Suavidade (Ju)</span>
+            {end}
+          </>
+        );
+      }
+    }
+    return txt;
+  };
+
+  const principiosSub = siteConfig?.principios?.subtitulo || "O Goju-Ryu é construído sobre o conceito yin-yang chinês, equilibrando aspectos que parecem opostos, mas são complementares.";
+  const goTitulo = siteConfig?.principios?.go_titulo || "GO (Força / Rigidez)";
+  const goDesc = siteConfig?.principios?.go_desc || "Refere-se ao endurecimento físico, golpes diretos, posições estáveis de combate e resistência ao impacto. É a força e firmeza necessárias para absorver o impacto e desferir contra-ataques decisivos com coragem implacável.";
+  const goItens = siteConfig?.principios?.go_itens || [
+    "Katas de fortalecimento como Sanchin",
+    "Calejamento de membros (Kote Kitae)",
+    "Posturas baixas e firmes"
+  ];
+  
+  const juTitulo = siteConfig?.principios?.ju_titulo || "JU (Suavidade / Flexibilidade)";
+  const juDesc = siteConfig?.principios?.ju_desc || "Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.";
+  const juItens = siteConfig?.principios?.ju_itens || [
+    "Katas de flexibilidade como Tensho",
+    "Esquivas circulares e fluidas (Tai Sabaki)",
+    "Técnicas de agarre e projeção (Kakie)"
+  ];
+
+  const defaultKatas = [
+    {
+      nome: "Sanchin",
+      significado: "Três Batalhas",
+      foco: "Fortalecimento e Respiração Ibuki",
+      desc: "Foca na mente, corpo e espírito em perfeita união. Usa uma postura enraizada e contração isométrica para criar uma defesa impenetrável."
+    },
+    {
+      nome: "Tensho",
+      significado: "Mãos Rotativas",
+      foco: "Suavidade e Movimento Circular",
+      desc: "Criado pelo Mestre Miyagi como a contraparte suave do Sanchin. Foca no trabalho suave de mãos e transições respiratórias tranquilas."
+    },
+    {
+      nome: "Saifa",
+      significado: "Destruir e Esmagar",
+      foco: "Golpes circulares e esquivas rápidas",
+      desc: "O primeiro Kata de combate avançado do estilo. Ensina técnicas de escape de agarres e socos rápidos nas articulações."
+    },
+    {
+      nome: "Seiyunchin",
+      significado: "Controlar e Puxar",
+      foco: "Posturas baixas de pernas",
+      desc: "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás."
+    }
+  ];
+  const listKatas = siteConfig?.katas || defaultKatas;
+
   // State para o Chatbot de IA
   const [chatOpen, setChatOpen] = useState(false);
   const [messages, setMessages] = useState<Array<{ sender: "user" | "ai"; text: string }>>([
@@ -151,13 +248,13 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 bg-red-950/30 border border-red-800/30 text-red-400 px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider mb-8">
             <Award className="w-4 h-4 text-red-500 animate-pulse" />
-            Tradição de Okinawa & IA Moderna
+            {heroBadge}
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-            Onde a <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">Força (Go)</span> encontra a <span className="text-zinc-400 font-light italic">Suavidade (Ju)</span>
+            {renderHeroTitle()}
           </h1>
           <p className="text-lg md:text-xl text-zinc-400 max-w-3xl mx-auto mb-12 leading-relaxed">
-            O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes.
+            {heroDesc}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
             <a 
@@ -185,7 +282,7 @@ export default function Home() {
               Os Princípios Fundamentais
             </h2>
             <p className="text-zinc-400">
-              O Goju-Ryu é construído sobre o conceito yin-yang chinês, equilibrando aspectos que parecem opostos, mas são complementares.
+              {principiosSub}
             </p>
           </div>
 
@@ -196,23 +293,17 @@ export default function Home() {
               <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500 font-extrabold text-xl mb-6 border border-red-500/10">
                 剛
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">GO (Força / Rigidez)</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">{goTitulo}</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Refere-se ao endurecimento físico, golpes diretos, posições estáveis de combate e resistência ao impacto. É a força e firmeza necessárias para absorver o impacto e desferir contra-ataques decisivos com coragem implacável.
+                {goDesc}
               </p>
               <ul className="mt-6 space-y-2.5 text-zinc-500 text-sm">
-                <li className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-red-500" />
-                  Katas de fortalecimento como Sanchin
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-red-500" />
-                  Calejamento de membros (Kote Kitae)
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-red-500" />
-                  Posturas baixas e firmes
-                </li>
+                {goItens.map((item: string, idx: number) => (
+                  <li key={idx} className="flex items-center gap-2.5">
+                    <Shield className="w-4 h-4 text-red-500" />
+                    {item}
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -222,23 +313,17 @@ export default function Home() {
               <div className="w-12 h-12 rounded-2xl bg-zinc-800/50 flex items-center justify-center text-zinc-300 font-extrabold text-xl mb-6 border border-zinc-700/30">
                 柔
               </div>
-              <h3 className="text-2xl font-bold text-white mb-4">JU (Suavidade / Flexibilidade)</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">{juTitulo}</h3>
               <p className="text-zinc-400 leading-relaxed">
-                Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.
+                {juDesc}
               </p>
               <ul className="mt-6 space-y-2.5 text-zinc-500 text-sm">
-                <li className="flex items-center gap-2.5">
-                  <Activity className="w-4 h-4 text-zinc-400" />
-                  Katas de flexibilidade como Tensho
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Activity className="w-4 h-4 text-zinc-400" />
-                  Esquivas circulares e fluidas (Tai Sabaki)
-                </li>
-                <li className="flex items-center gap-2.5">
-                  <Activity className="w-4 h-4 text-zinc-400" />
-                  Técnicas de agarre e projeção (Kakie)
-                </li>
+                {juItens.map((item: string, idx: number) => (
+                  <li key={idx} className="flex items-center gap-2.5">
+                    <Activity className="w-4 h-4 text-zinc-400" />
+                    {item}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -271,32 +356,7 @@ export default function Home() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                nome: "Sanchin",
-                significado: "Três Batalhas",
-                foco: "Fortalecimento e Respiração Ibuki",
-                desc: "Foca na mente, corpo e espírito em perfeita união. Usa uma postura enraizada e contração isométrica para criar uma defesa impenetrável."
-              },
-              {
-                nome: "Tensho",
-                significado: "Mãos Rotativas",
-                foco: "Suavidade e Movimento Circular",
-                desc: "Criado pelo Mestre Miyagi como a contraparte suave do Sanchin. Foca no trabalho suave de mãos e transições respiratórias tranquilas."
-              },
-              {
-                nome: "Saifa",
-                significado: "Destruir e Esmagar",
-                foco: "Golpes circulares e esquivas rápidas",
-                desc: "O primeiro Kata de combate avançado do estilo. Ensina técnicas de escape de agarres e socos rápidos nas articulações."
-              },
-              {
-                nome: "Seiyunchin",
-                significado: "Controlar e Puxar",
-                foco: "Posturas baixas de pernas",
-                desc: "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás."
-              }
-            ].map((kata, idx) => (
+            {listKatas.map((kata: any, idx: number) => (
               <div key={idx} className="bg-zinc-950/60 border border-zinc-900 hover:border-red-950 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 group">
                 <span className="text-xs text-red-500 font-semibold tracking-widest uppercase block mb-1">Kata</span>
                 <h4 className="text-xl font-bold text-white group-hover:text-red-500 transition-colors mb-2">{kata.nome}</h4>

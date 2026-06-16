@@ -44,7 +44,7 @@ export default function AdminCMSPage() {
   }
 
   const { usuario, tipo } = useAuth();
-  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens'>('banners');
+  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens' | 'paginainicial' | 'sensei-ia'>('banners');
   
   const [banners, setBanners] = useState<Banner[]>([]);
   const [equipe, setEquipe] = useState<TeamMember[]>([]);
@@ -55,6 +55,19 @@ export default function AdminCMSPage() {
   const [sendingReply, setSendingReply] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Glossário do Sensei IA
+  interface GlossaryTerm {
+    termo: string;
+    definicao: string;
+  }
+  const [glossario, setGlossario] = useState<GlossaryTerm[]>([]);
+  const [loadingGlossario, setLoadingGlossario] = useState(false);
+  const [termoSearch, setTermoSearch] = useState('');
+  const [showGlossarioModal, setShowGlossarioModal] = useState(false);
+  const [glossarioForm, setGlossarioForm] = useState<GlossaryTerm>({ termo: '', definicao: '' });
+  const [salvandoGlossario, setSalvandoGlossario] = useState(false);
+  const [isEditingTerm, setIsEditingTerm] = useState(false);
+
   // Modais
   const [showModal, setShowModal] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -63,6 +76,91 @@ export default function AdminCMSPage() {
   const [bannerForm, setBannerForm] = useState({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
   const [teamForm, setTeamForm] = useState({ nome: '', cargo: '', biografia: '', foto_url: '', order: 0 });
   const [galleryForm, setGalleryForm] = useState({ title: '', category: 'Dojo', image_url: '', order: 0 });
+
+  // Site configuration states
+  interface ConfigInicial {
+    hero: { badge: string; titulo: string; descricao: string };
+    principios: {
+      subtitulo: string;
+      go_titulo: string;
+      go_desc: string;
+      go_itens: string[];
+      ju_titulo: string;
+      ju_desc: string;
+      ju_itens: string[];
+    };
+    katas: Array<{ nome: string; significado: string; foco: string; desc: string }>;
+  }
+
+  const [siteConfig, setSiteConfig] = useState<ConfigInicial | null>(null);
+  const [salvandoConfig, setSalvandoConfig] = useState(false);
+
+  const [heroForm, setHeroForm] = useState({ badge: '', titulo: '', descricao: '' });
+  const [principiosForm, setPrincipiosForm] = useState({
+    subtitulo: '',
+    go_titulo: '',
+    go_desc: '',
+    go_itens: '',
+    ju_titulo: '',
+    ju_desc: '',
+    ju_itens: ''
+  });
+  const [katasForm, setKatasForm] = useState<Array<{ nome: string; significado: string; foco: string; desc: string }>>([]);
+
+  const carregarSiteConfig = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/cms/config`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setSiteConfig(data.config || null);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar configurações do site:", err);
+    }
+  };
+
+  const handleSaveConfig = async (chave: string, valor: any) => {
+    setSalvandoConfig(true);
+    try {
+      const res = await fetch(`${API_URL}/api/cms/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ chave, valor })
+      });
+      if (res.ok) {
+        alert(`Configuração de '${chave}' salva com sucesso!`);
+        await carregarSiteConfig();
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Erro ao salvar configuração.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSalvandoConfig(false);
+    }
+  };
+
+  useEffect(() => {
+    if (siteConfig) {
+      setHeroForm({
+        badge: siteConfig.hero?.badge || '',
+        titulo: siteConfig.hero?.titulo || '',
+        descricao: siteConfig.hero?.descricao || ''
+      });
+      setPrincipiosForm({
+        subtitulo: siteConfig.principios?.subtitulo || '',
+        go_titulo: siteConfig.principios?.go_titulo || '',
+        go_desc: siteConfig.principios?.go_desc || '',
+        go_itens: siteConfig.principios?.go_itens?.join(', ') || '',
+        ju_titulo: siteConfig.principios?.ju_titulo || '',
+        ju_desc: siteConfig.principios?.ju_desc || '',
+        ju_itens: siteConfig.principios?.ju_itens?.join(', ') || ''
+      });
+      setKatasForm(siteConfig.katas || []);
+    }
+  }, [siteConfig]);
 
   const carregarCMS = async () => {
     try {
@@ -106,10 +204,79 @@ export default function AdminCMSPage() {
     }
   };
 
+  const carregarGlossario = async () => {
+    setLoadingGlossario(true);
+    try {
+      const res = await fetch(`${API_URL}/api/cms/glossario`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setGlossario(data.glossario || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar glossário do Sensei IA:", err);
+    } finally {
+      setLoadingGlossario(false);
+    }
+  };
+
+  const handleSalvarGlossario = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!glossarioForm.termo.trim() || !glossarioForm.definicao.trim()) return;
+    setSalvandoGlossario(true);
+
+    try {
+      const res = await fetch(`${API_URL}/api/cms/glossario`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          termo: glossarioForm.termo,
+          definicao: glossarioForm.definicao
+        })
+      });
+
+      if (res.ok) {
+        alert(isEditingTerm ? 'Termo atualizado com sucesso!' : 'Novo termo adicionado com sucesso!');
+        setShowGlossarioModal(false);
+        setGlossarioForm({ termo: '', definicao: '' });
+        await carregarGlossario();
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Erro ao salvar termo no glossário.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSalvandoGlossario(false);
+    }
+  };
+
+  const handleExcluirGlossario = async (termo: string) => {
+    if (!confirm(`Excluir o termo "${termo.toUpperCase()}" do glossário do Sensei IA permanentemente?`)) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/cms/glossario/${encodeURIComponent(termo)}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        setGlossario(glossario.filter(g => g.termo !== termo));
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || 'Erro ao excluir o termo.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   useEffect(() => {
     if (tipo === 'admin') {
       carregarCMS();
       carregarContatos();
+      carregarSiteConfig();
+      carregarGlossario();
     } else {
       setLoading(false);
     }
@@ -251,10 +418,16 @@ export default function AdminCMSPage() {
         {activeTab !== 'mensagens' && (
           <button
             onClick={() => {
-              setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
-              setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
-              setGalleryForm({ title: '', category: 'Dojo', image_url: '', order: galeria.length + 1 });
-              setShowModal(true);
+              if (activeTab === 'sensei-ia') {
+                setGlossarioForm({ termo: '', definicao: '' });
+                setIsEditingTerm(false);
+                setShowGlossarioModal(true);
+              } else {
+                setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
+                setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
+                setGalleryForm({ title: '', category: 'Dojo', image_url: '', order: galeria.length + 1 });
+                setShowModal(true);
+              }
             }}
             className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer flex items-center gap-1.5"
           >
@@ -264,10 +437,10 @@ export default function AdminCMSPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full sm:max-w-lg">
+      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full sm:max-w-xl md:max-w-2xl flex-wrap">
         <button
           onClick={() => setActiveTab('banners')}
-          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === 'banners' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
           }`}
         >
@@ -275,7 +448,7 @@ export default function AdminCMSPage() {
         </button>
         <button
           onClick={() => setActiveTab('equipe')}
-          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === 'equipe' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
           }`}
         >
@@ -283,7 +456,7 @@ export default function AdminCMSPage() {
         </button>
         <button
           onClick={() => setActiveTab('galeria')}
-          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === 'galeria' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
           }`}
         >
@@ -291,11 +464,27 @@ export default function AdminCMSPage() {
         </button>
         <button
           onClick={() => setActiveTab('mensagens')}
-          className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+          className={`flex-1 min-w-[85px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
             activeTab === 'mensagens' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
           }`}
         >
           <MessageSquare size={12} /> Mensagens
+        </button>
+        <button
+          onClick={() => setActiveTab('paginainicial')}
+          className={`flex-1 min-w-[100px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === 'paginainicial' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <Settings size={12} /> Página Inicial
+        </button>
+        <button
+          onClick={() => setActiveTab('sensei-ia')}
+          className={`flex-1 min-w-[80px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === 'sensei-ia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <MessageSquare size={12} /> Sensei IA
         </button>
       </div>
 
@@ -392,6 +581,324 @@ export default function AdminCMSPage() {
             ) : (
               <div className="bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center h-64 text-zinc-500 text-xs font-cinzel">
                 Selecione uma mensagem para visualizar
+              </div>
+            )}
+          </div>
+        </div>
+      ) : activeTab === 'paginainicial' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {/* 1. HERO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Layout className="text-primary" size={16} /> 1. Banner Principal (Hero Section)
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Badge Superior</label>
+                <input
+                  type="text"
+                  id="hero-badge-input"
+                  value={heroForm.badge}
+                  onChange={e => setHeroForm({ ...heroForm, badge: e.target.value })}
+                  placeholder="Ex: Tradição de Okinawa & IA Moderna"
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título Principal</label>
+                <input
+                  type="text"
+                  id="hero-title-input"
+                  value={heroForm.titulo}
+                  onChange={e => setHeroForm({ ...heroForm, titulo: e.target.value })}
+                  placeholder="Ex: Onde a Força (Go) encontra a Suavidade (Ju)"
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                <textarea
+                  id="hero-desc-input"
+                  value={heroForm.descricao}
+                  onChange={e => setHeroForm({ ...heroForm, descricao: e.target.value })}
+                  placeholder="Descrição da associação ou estilo..."
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  id="save-hero-btn"
+                  onClick={() => handleSaveConfig('hero', heroForm)}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Hero
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. PRINCIPIOS CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Settings className="text-gold" size={16} /> 2. Os Princípios Fundamentais (Go & Ju)
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtítulo da Seção</label>
+                <input
+                  type="text"
+                  id="principles-subtitle-input"
+                  value={principiosForm.subtitulo}
+                  onChange={e => setPrincipiosForm({ ...principiosForm, subtitulo: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                {/* GO CARD */}
+                <div className="space-y-4 p-4 bg-zinc-950/40 border border-zinc-850 rounded-2xl">
+                  <h4 className="text-xs font-bold text-primary font-cinzel uppercase tracking-wider">Card GO (Força)</h4>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Título</label>
+                    <input
+                      type="text"
+                      id="go-title-input"
+                      value={principiosForm.go_titulo}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, go_titulo: e.target.value })}
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Descrição</label>
+                    <textarea
+                      id="go-desc-input"
+                      value={principiosForm.go_desc}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, go_desc: e.target.value })}
+                      rows={4}
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none resize-none font-sans"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Itens (separados por vírgula)</label>
+                    <input
+                      type="text"
+                      id="go-items-input"
+                      value={principiosForm.go_itens}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, go_itens: e.target.value })}
+                      placeholder="Ex: Item 1, Item 2"
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                    />
+                  </div>
+                </div>
+
+                {/* JU CARD */}
+                <div className="space-y-4 p-4 bg-zinc-950/40 border border-zinc-850 rounded-2xl">
+                  <h4 className="text-xs font-bold text-zinc-350 font-cinzel uppercase tracking-wider">Card JU (Suavidade)</h4>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Título</label>
+                    <input
+                      type="text"
+                      id="ju-title-input"
+                      value={principiosForm.ju_titulo}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, ju_titulo: e.target.value })}
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Descrição</label>
+                    <textarea
+                      id="ju-desc-input"
+                      value={principiosForm.ju_desc}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, ju_desc: e.target.value })}
+                      rows={4}
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none resize-none font-sans"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Itens (separados por vírgula)</label>
+                    <input
+                      type="text"
+                      id="ju-items-input"
+                      value={principiosForm.ju_itens}
+                      onChange={e => setPrincipiosForm({ ...principiosForm, ju_itens: e.target.value })}
+                      placeholder="Ex: Item 1, Item 2"
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  id="save-principles-btn"
+                  onClick={() => handleSaveConfig('principios', {
+                    subtitulo: principiosForm.subtitulo,
+                    go_titulo: principiosForm.go_titulo,
+                    go_desc: principiosForm.go_desc,
+                    go_itens: principiosForm.go_itens.split(',').map(i => i.trim()).filter(Boolean),
+                    ju_titulo: principiosForm.ju_titulo,
+                    ju_desc: principiosForm.ju_desc,
+                    ju_itens: principiosForm.ju_itens.split(',').map(i => i.trim()).filter(Boolean)
+                  })}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Princípios
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. KATAS CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Users className="text-emerald-500" size={16} /> 3. Os Katas Tradicionais (Lista de 4)
+            </h3>
+            <div className="space-y-6">
+              {katasForm.map((kata, idx) => (
+                <div key={idx} className="p-4 bg-zinc-950/40 border border-zinc-850 rounded-2xl space-y-3">
+                  <h4 className="text-xs font-bold text-gold font-cinzel">Kata {idx + 1}: {kata.nome || 'Novo Kata'}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Nome do Kata</label>
+                      <input
+                        type="text"
+                        id={`kata-name-${idx}`}
+                        value={kata.nome}
+                        onChange={e => {
+                          const newKatas = [...katasForm];
+                          newKatas[idx].nome = e.target.value;
+                          setKatasForm(newKatas);
+                        }}
+                        className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Significado</label>
+                      <input
+                        type="text"
+                        id={`kata-meaning-${idx}`}
+                        value={kata.significado}
+                        onChange={e => {
+                          const newKatas = [...katasForm];
+                          newKatas[idx].significado = e.target.value;
+                          setKatasForm(newKatas);
+                        }}
+                        className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Foco Principal</label>
+                      <input
+                        type="text"
+                        id={`kata-focus-${idx}`}
+                        value={kata.foco}
+                        onChange={e => {
+                          const newKatas = [...katasForm];
+                          newKatas[idx].foco = e.target.value;
+                          setKatasForm(newKatas);
+                        }}
+                        className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none font-sans"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Descrição</label>
+                    <textarea
+                      id={`kata-desc-${idx}`}
+                      value={kata.desc}
+                      onChange={e => {
+                        const newKatas = [...katasForm];
+                        newKatas[idx].desc = e.target.value;
+                        setKatasForm(newKatas);
+                      }}
+                      rows={2}
+                      className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-lg text-white outline-none resize-none font-sans"
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  id="save-katas-btn"
+                  onClick={() => handleSaveConfig('katas', katasForm)}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Katas
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'sensei-ia' ? (
+        <div className="space-y-6 max-w-5xl mx-auto w-full">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div>
+                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2">
+                  <MessageSquare className="text-primary" size={16} /> Base de Conhecimento do Sensei IA
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">Gerencie os termos e definições que guiam as respostas da inteligência artificial.</p>
+              </div>
+              <div className="w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Pesquisar termo..."
+                  value={termoSearch}
+                  onChange={e => setTermoSearch(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-primary transition"
+                />
+              </div>
+            </div>
+
+            {loadingGlossario ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-1">
+                {glossario
+                  .filter(g => g.termo.toLowerCase().includes(termoSearch.toLowerCase()) || g.definicao.toLowerCase().includes(termoSearch.toLowerCase()))
+                  .map((item) => (
+                    <div key={item.termo} className="bg-zinc-950/40 border border-zinc-855 hover:border-zinc-800 rounded-2xl p-5 flex flex-col justify-between space-y-3 transition group">
+                      <div>
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2.5 py-0.5 rounded border border-gold/20 inline-block mb-2">
+                          {item.termo}
+                        </span>
+                        <p className="text-zinc-450 text-xs leading-relaxed line-clamp-4 font-sans">{item.definicao}</p>
+                      </div>
+                      <div className="flex gap-2 pt-3 border-t border-zinc-850 justify-end">
+                        <button
+                          onClick={() => {
+                            setGlossarioForm({ termo: item.termo, definicao: item.definicao });
+                            setIsEditingTerm(true);
+                            setShowGlossarioModal(true);
+                          }}
+                          className="px-3 py-1.5 border border-zinc-800 text-zinc-400 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition hover:bg-zinc-900 cursor-pointer"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleExcluirGlossario(item.termo)}
+                          className="px-3 py-1.5 bg-red-650/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
+                        >
+                          <Trash2 size={10} /> Excluir
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                {glossario.length === 0 && (
+                  <div className="col-span-2 text-center py-12 text-zinc-500 text-xs">
+                    Nenhum termo cadastrado no glossário.
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -635,6 +1142,64 @@ export default function AdminCMSPage() {
                   className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition hover:scale-[1.02] cursor-pointer flex items-center justify-center"
                 >
                   {salvando ? <Loader2 size={14} className="animate-spin" /> : 'Confirmar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL SENSEI IA GLOSSARIO */}
+      {showGlossarioModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-855 rounded-2xl w-full max-w-lg p-6 relative">
+            <button onClick={() => setShowGlossarioModal(false)} className="absolute right-4 top-4 text-zinc-500 hover:text-white cursor-pointer">
+              <X size={16} />
+            </button>
+            <h3 className="text-base font-bold text-white font-cinzel mb-5 uppercase tracking-wide">
+              {isEditingTerm ? 'Editar Termo do Glossário' : 'Adicionar Termo ao Glossário'}
+            </h3>
+
+            <form onSubmit={handleSalvarGlossario} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Termo (Palavra-chave ou conceito) *</label>
+                <input
+                  type="text" required
+                  disabled={isEditingTerm}
+                  placeholder="Ex: sanchin"
+                  value={glossarioForm.termo}
+                  onChange={(e) => setGlossarioForm({ ...glossarioForm, termo: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed font-sans"
+                />
+                {!isEditingTerm && (
+                  <span className="text-[9px] text-zinc-500 mt-1 block">Escreva o termo em letras minúsculas (ex: "sanchin", "makiwara").</span>
+                )}
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Definição Oficial / Conteúdo *</label>
+                <textarea
+                  required rows={6}
+                  placeholder="Descreva o significado, a história ou a aplicação técnica para alimentar o prompt da IA..."
+                  value={glossarioForm.definicao}
+                  onChange={(e) => setGlossarioForm({ ...glossarioForm, definicao: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-primary font-sans"
+                />
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGlossarioModal(false)}
+                  className="flex-1 py-3 bg-zinc-950 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={salvandoGlossario}
+                  className="flex-1 py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition hover:scale-[1.02] cursor-pointer flex items-center justify-center"
+                >
+                  {salvandoGlossario ? <Loader2 size={14} className="animate-spin" /> : 'Salvar'}
                 </button>
               </div>
             </form>

@@ -29,6 +29,36 @@ if os.path.exists(GLOSSARY_PATH):
     except Exception as e:
         print(f"Erro ao carregar glossário em português: {e}")
 
+def save_glossary():
+    """Salva o estado atual do glossário em memória de volta para o arquivo JSON"""
+    try:
+        with open(GLOSSARY_PATH, "w", encoding="utf-8") as f:
+            json.dump(GLOSSARY, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        print(f"Erro ao salvar o glossário: {e}")
+        return False
+
+def get_all_terms():
+    """Retorna o glossário completo"""
+    return GLOSSARY
+
+def add_or_update_term(term, definition):
+    """Adiciona ou atualiza um termo no glossário (em memória e no arquivo)"""
+    term_key = term.strip().lower()
+    GLOSSARY[term_key] = definition.strip()
+    save_glossary()
+    return {term_key: GLOSSARY[term_key]}
+
+def remove_term(term):
+    """Remove um termo do glossário (em memória e no arquivo)"""
+    term_key = term.strip().lower()
+    if term_key in GLOSSARY:
+        del GLOSSARY[term_key]
+        save_glossary()
+        return True
+    return False
+
 # Base de conhecimento baseada em regras para fallback offline / sem chave
 FALLBACK_RESPONSES = {
     "sanchin": "Sanchin (Três Batalhas) é o Kata fundamental do Goju-Ryu. Ele foca na respiração ibuki, postura estável (Sanchin-dachi) e fortalecimento corporal através de contração isométrica rígida (Go).",

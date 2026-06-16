@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
    generateStaticParams() declarations. Remove or enable the line
    below only when you intentionally want a static export.
   */
-  output: "export",
+  // output: "export",
 };
 
 export default nextConfig;
