@@ -391,6 +391,24 @@
       "status": "pendente",
       "id": "c4bc2b9f-1a47-4796-a36d-5fb8a1f8fc6e",
       "created_at": "2026-06-16T01:35:48.689349"
+    },
+    {
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "id": "3df98353-1bb5-4182-ac33-02c0f44ae628",
+      "created_at": "2026-06-16T15:14:47.421767"
+    },
+    {
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "id": "eb4a94d5-c3d3-4d51-bc0f-5e3667b45b05",
+      "created_at": "2026-06-16T15:14:47.682276"
     }
   ],
   "documentos": [
@@ -987,6 +1005,14 @@
       "status": "pendente",
       "faixa": "Branca",
       "created_at": "2026-06-16T01:35:48.662070"
+    },
+    {
+      "id": "3df98353-1bb5-4182-ac33-02c0f44ae628",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "created_at": "2026-06-16T15:14:47.522219"
     }
   ],
   "filiais": [
@@ -1108,6 +1134,15 @@
       "status": "pendente",
       "codigo_interno": "MOCK-FILIAL-C4BC2",
       "created_at": "2026-06-16T01:35:48.713456"
+    },
+    {
+      "id": "eb4a94d5-c3d3-4d51-bc0f-5e3667b45b05",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-EB4A9",
+      "created_at": "2026-06-16T15:14:47.798026"
     }
   ],
   "eventos": [
@@ -1539,6 +1574,15 @@
       "read": false,
       "id": "529e27d6-24e1-4b86-a5d3-53856635d0ab",
       "created_at": "2026-06-16T01:35:48.745884"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "9a303bb6-0a8b-4cab-9e5e-aa76d75af6a4",
+      "created_at": "2026-06-16T15:14:48.044956"
     }
   ],
   "noticias": [
@@ -7690,6 +7734,105 @@
       "detalhes": "Termo 'tsuki' adicionado ou atualizado no glossário da IA.",
       "ip": "127.0.0.1",
       "created_at": "2026-06-16T01:50:09.534851"
+    },
+    {
+      "id": "4f066980-367e-4780-8949-8ce6f5c0adb9",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:48.296473"
+    },
+    {
+      "id": "349dcb43-f221-4dae-8edf-131d95ecdeb7",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:48.428717"
+    },
+    {
+      "id": "efe20177-369f-4f46-9775-47f2aa0283e2",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:48.644817"
+    },
+    {
+      "id": "0c98d16d-5e92-4590-b4a4-20567ec0a044",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Fatura",
+      "detalhes": "Fatura MENSALIDADE de R$ 120.50 criada para Atleta de Teste (Vencimento: 2026-08-15, ID Fatura: aaee9360-c66b-48fb-bc9b-9efd0e38b711)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:48.904785"
+    },
+    {
+      "id": "69bcad7c-0ba2-4bdd-9ced-3dcb089d390a",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:48.991691"
+    },
+    {
+      "id": "ef945bc7-7a79-4630-b2f2-cd3b670521e1",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@outlook.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:49.060438"
+    },
+    {
+      "id": "bfed5014-bb67-44f5-92e7-2987075f5b03",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:49.186948"
+    },
+    {
+      "id": "8558f317-dcfe-4334-8e5c-c8a378f4aa95",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@outlook.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:14:49.244477"
+    },
+    {
+      "id": "033dd901-befa-4c27-a93e-ea1f71bac3e8",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:52:33.606593"
+    },
+    {
+      "id": "ee648309-f538-47cd-a302-0a78da0310a4",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Edição de Exame",
+      "detalhes": "Exame de faixa (ID: eac41a07-223e-495a-bce0-ea2000b9b897) atualizado. Status: cancelado",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:57:59.319186"
+    },
+    {
+      "id": "2bff573d-40e6-4291-98f1-1fe560943d5c",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T15:58:48.392696"
     }
   ],
   "cms_config": [
@@ -7752,5 +7895,67 @@
     }
   ],
   "produtos_estoque": [],
-  "movimentacoes_estoque": []
+  "movimentacoes_estoque": [],
+  "financeiro": [
+    {
+      "id": "fat-1",
+      "atleta_id": "atleta-s9rxjaztv1q",
+      "atleta_nome": "Paulo Roberto",
+      "filial_id": "atleta-6hs7wr0vy9o",
+      "filial_nome": "GRKK CABULA",
+      "tipo": "anuidade",
+      "valor": 150.0,
+      "data_vencimento": "2026-06-30",
+      "status": "pago",
+      "created_at": "2026-06-01T10:00:00.000Z"
+    },
+    {
+      "id": "fat-2",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": "atleta-6hs7wr0vy9o",
+      "filial_nome": "GRKK CABULA",
+      "tipo": "mensalidade",
+      "valor": 120.0,
+      "data_vencimento": "2026-05-10",
+      "status": "pendente",
+      "created_at": "2026-05-01T10:00:00.000Z"
+    },
+    {
+      "id": "fat-3",
+      "atleta_id": null,
+      "atleta_nome": null,
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Filial Salvador Centro",
+      "tipo": "mensalidade",
+      "valor": 300.0,
+      "data_vencimento": "2026-06-15",
+      "status": "pago",
+      "created_at": "2026-06-01T10:00:00.000Z"
+    },
+    {
+      "id": "fat-4",
+      "atleta_id": "st-1",
+      "atleta_nome": "Aluno Pedro Oliveira",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Filial Salvador Centro",
+      "tipo": "exame",
+      "valor": 80.0,
+      "data_vencimento": "2026-07-15",
+      "status": "pendente",
+      "created_at": "2026-06-10T10:00:00.000Z"
+    },
+    {
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": null,
+      "filial_nome": null,
+      "tipo": "mensalidade",
+      "valor": 120.5,
+      "data_vencimento": "2026-08-15",
+      "status": "pendente",
+      "id": "aaee9360-c66b-48fb-bc9b-9efd0e38b711",
+      "created_at": "2026-06-16T15:14:48.753795"
+    }
+  ]
 }

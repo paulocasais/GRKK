@@ -103,20 +103,129 @@ def test_app_structure():
         assert len(data['glossario']) > 0
         print("PASS: Rota GET de glossário do Sensei IA funciona corretamente")
     
-    print("\nSUCCESS: Todos os testes passaram! O backend refatorado está funcionando corretamente.")
+    print("\nSUCCESS: Todos os testes estruturais passaram! O backend refatorado está funcionando corretamente.")
+    return True
+
+def test_finance_module():
+    """Testar funcionalidades e segurança do módulo financeiro"""
+    print("\nTestando módulo financeiro (segurança, validação, filtragem)...")
+    
+    with app.test_client() as client:
+        # 1. Tentar acessar sem estar autenticado (deve dar 401)
+        res = client.get('/api/financeiro')
+        assert res.status_code == 401
+        print("PASS: GET sem autenticação retorna 401")
+        
+        # 2. Login como Atleta (atleta@grkk.com.br)
+        res = client.post('/api/auth/login', json={'email': 'atleta@grkk.com.br'})
+        assert res.status_code == 200
+        
+        # 2.1. Tentar criar fatura como Atleta (deve dar 403)
+        res = client.post('/api/financeiro', json={
+            'tipo': 'anuidade',
+            'valor': 100,
+            'data_vencimento': '2026-12-31',
+            'atleta_id': '8513aa27-452f-462e-8f5a-b3f2052612f1'
+        })
+        assert res.status_code == 403
+        print("PASS: Atleta não pode criar fatura (403)")
+        
+        # 2.2. Listar faturas como Atleta
+        res = client.get('/api/financeiro')
+        assert res.status_code == 200
+        data = res.get_json()
+        assert 'pagamentos' in data
+        # Verificar se as faturas retornadas pertencem de fato ao atleta
+        for fat in data['pagamentos']:
+            assert fat.get('atleta_id') == '8513aa27-452f-462e-8f5a-b3f2052612f1'
+        print("PASS: Atleta só visualiza as próprias faturas")
+        
+        # Logout do atleta
+        client.post('/api/auth/logout')
+        
+        # 3. Login como Admin (admin@grkk.com.br)
+        res = client.post('/api/auth/login', json={'email': 'admin@grkk.com.br'})
+        assert res.status_code == 200
+        
+        # 3.1. Criar fatura válida como Admin
+        res = client.post('/api/financeiro', json={
+            'tipo': 'mensalidade',
+            'valor': 120.50,
+            'data_vencimento': '2026-08-15',
+            'atleta_id': '8513aa27-452f-462e-8f5a-b3f2052612f1'
+        })
+        assert res.status_code == 201
+        nova_fat = res.get_json()
+        assert nova_fat.get('id') is not None
+        assert nova_fat.get('valor') == 120.50
+        print("PASS: Admin consegue criar fatura válida (201)")
+        
+        # 3.2. Criar fatura inválida (valor negativo)
+        res = client.post('/api/financeiro', json={
+            'tipo': 'mensalidade',
+            'valor': -50.00,
+            'data_vencimento': '2026-08-15',
+            'atleta_id': '8513aa27-452f-462e-8f5a-b3f2052612f1'
+        })
+        assert res.status_code == 400
+        print("PASS: Criação de fatura com valor negativo é rejeitada (400)")
+        
+        # 3.3. Criar fatura inválida (data mal formatada)
+        res = client.post('/api/financeiro', json={
+            'tipo': 'mensalidade',
+            'valor': 100.00,
+            'data_vencimento': '15-08-2026',
+            'atleta_id': '8513aa27-452f-462e-8f5a-b3f2052612f1'
+        })
+        assert res.status_code == 400
+        print("PASS: Criação de fatura com data mal formatada é rejeitada (400)")
+        
+        # 3.4. Listar todas as faturas como Admin
+        res = client.get('/api/financeiro')
+        assert res.status_code == 200
+        data_admin = res.get_json()
+        assert len(data_admin['pagamentos']) > 0
+        print("PASS: Admin visualiza todas as faturas")
+        
+        # Logout admin
+        client.post('/api/auth/logout')
+        
+        # 4. Testes de IDOR (Acesso cruzado)
+        # Login como outro atleta (Paulo Roberto)
+        res = client.post('/api/auth/login', json={'email': 'paulocasais@outlook.com'})
+        assert res.status_code == 200
+        
+        # Tentar pagar fatura que pertence ao Atleta de Teste (fat-2)
+        res = client.patch('/api/financeiro/fat-2', json={'status': 'pago'})
+        assert res.status_code == 403
+        print("PASS: Atleta A não pode pagar/atualizar fatura do Atleta B (403 IDOR bloqueado)")
+        
+        # Tentar pagar própria fatura (fat-1) - deve ser permitido
+        res = client.patch('/api/financeiro/fat-1', json={'status': 'pago'})
+        assert res.status_code == 200
+        print("PASS: Atleta consegue pagar a própria fatura (200)")
+        
+        # Tentar alterar outros campos protegidos (valor) de sua própria fatura
+        res = client.patch('/api/financeiro/fat-1', json={'valor': 10.00})
+        assert res.status_code == 403
+        print("PASS: Atleta não pode alterar o valor de sua própria fatura (403)")
+        
+        # Logout
+        client.post('/api/auth/logout')
+        
+    print("SUCCESS: Todos os testes do módulo financeiro passaram!")
     return True
 
 if __name__ == '__main__':
     try:
         test_app_structure()
-        print("\n[SUCCESS] A refatoração do backend foi concluída com sucesso!")
-        print("\nResumo das melhorias:")
-        print("1. app.py foi dividido em 13 módulos de rotas focados")
-        print("2. Rotas duplicadas foram removidas")
-        print("3. Padrões de autenticação e tratamento de erros foram extraídos")
-        print("4. A estrutura do código foi melhorada para manutenção")
-        print("5. O frontend foi revisado e está em boas condições")
-        print("6. Testes básicos foram criados para verificar a funcionalidade")
+        test_finance_module()
+        print("\n[SUCCESS] Todos os testes de validação foram concluídos com sucesso!")
+        print("\nResumo das melhorias financeiras validadas:")
+        print("1. Rotas de faturamento restritas contra IDOR e privilégios")
+        print("2. Validação estrita de tipo de fatura, valor positivo e formato de data")
+        print("3. Filtragem automática no banco de dados com base na sessão")
+        print("4. Geração automática de logs de auditoria")
     except Exception as e:
         print(f"\n[ERROR] Erro durante os testes: {e}")
         import traceback

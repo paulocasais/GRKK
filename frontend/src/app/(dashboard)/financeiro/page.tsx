@@ -99,9 +99,31 @@ export default function FinanceiroPage() {
     }
   };
 
+  const carregarDestinatarios = async () => {
+    try {
+      const [resAtletas, resFiliais] = await Promise.all([
+        fetch(`${API_URL}/api/atletas`, { credentials: 'include' }),
+        fetch(`${API_URL}/api/filiais`, { credentials: 'include' })
+      ]);
+      if (resAtletas.ok) {
+        const data = await resAtletas.json();
+        setAtletas(data.atletas || []);
+      }
+      if (resFiliais.ok) {
+        const data = await resFiliais.json();
+        setFiliais(data.filiais || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar destinatários:", err);
+    }
+  };
+
   useEffect(() => {
     carregarDados();
-  }, []);
+    if (isAdmin) {
+      carregarDestinatarios();
+    }
+  }, [isAdmin]);
 
   const handleCriarCobranca = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,14 +147,26 @@ export default function FinanceiroPage() {
       });
       if (res.ok) {
         setShowNovaCobrancaModal(false);
+        setNovaCobrancaForm({
+          destinatario_tipo: 'atleta',
+          atleta_id: '',
+          filial_id: '',
+          tipo: 'anuidade',
+          valor: '',
+          data_vencimento: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0],
+        });
         carregarDados();
       }
     } catch (err) {
       // Simulação local
       const mockNova: Pagamento = {
         id: Date.now(),
-        atleta_nome: novaCobrancaForm.destinatario_tipo === 'atleta' ? 'Atleta Selecionado' : undefined,
-        filial_nome: novaCobrancaForm.destinatario_tipo === 'filial' ? 'Filial Selecionada' : undefined,
+        atleta_nome: novaCobrancaForm.destinatario_tipo === 'atleta' 
+          ? (atletas.find(a => a.id === novaCobrancaForm.atleta_id)?.nome || 'Atleta Selecionado') 
+          : undefined,
+        filial_nome: novaCobrancaForm.destinatario_tipo === 'filial' 
+          ? (filiais.find(f => f.id === novaCobrancaForm.filial_id)?.nome || 'Filial Selecionada') 
+          : undefined,
         tipo: novaCobrancaForm.tipo,
         valor: parseFloat(novaCobrancaForm.valor || '0'),
         data_vencimento: novaCobrancaForm.data_vencimento,
@@ -419,8 +453,16 @@ export default function FinanceiroPage() {
                 </div>
                 <button
                   onClick={() => {
-                    setCopiouChave(true);
-                    setTimeout(() => setCopiouChave(false), 2000);
+                    const valorFormatado = selectedPagamento.valor.toFixed(2);
+                    const chavePix = `00020101021226830014br.gov.bcb.pix2561pix.grkk.com.br/pagamento/cobranca5204000053039865406${valorFormatado}5802BR5915Goju Ryu Karate6008Salvador62070503***63041A2B`;
+                    navigator.clipboard.writeText(chavePix)
+                      .then(() => {
+                        setCopiouChave(true);
+                        setTimeout(() => setCopiouChave(false), 2000);
+                      })
+                      .catch(err => {
+                        console.error("Falha ao copiar a chave Pix: ", err);
+                      });
                   }}
                   className="px-4 py-2 border border-zinc-800 hover:border-gold text-zinc-350 hover:text-gold text-xs rounded-xl transition cursor-pointer"
                 >
@@ -468,15 +510,64 @@ export default function FinanceiroPage() {
             
             <form onSubmit={handleCriarCobranca} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Destinatário *</label>
-                <input
-                  type="text" required
-                  placeholder="Nome do atleta ou filial"
-                  value={novaCobrancaForm.atleta_id}
-                  onChange={(e) => setNovaCobrancaForm({ ...novaCobrancaForm, atleta_id: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
-                />
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Tipo de Destinatário *</label>
+                <div className="grid grid-cols-2 gap-2 p-1 bg-zinc-950 rounded-xl mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setNovaCobrancaForm({ ...novaCobrancaForm, destinatario_tipo: 'atleta', atleta_id: '', filial_id: '' })}
+                    className={`py-2 rounded-lg text-xs font-bold uppercase transition cursor-pointer ${
+                      novaCobrancaForm.destinatario_tipo === 'atleta' ? 'bg-gold text-white shadow-md' : 'text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    Atleta
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNovaCobrancaForm({ ...novaCobrancaForm, destinatario_tipo: 'filial', atleta_id: '', filial_id: '' })}
+                    className={`py-2 rounded-lg text-xs font-bold uppercase transition cursor-pointer ${
+                      novaCobrancaForm.destinatario_tipo === 'filial' ? 'bg-gold text-white shadow-md' : 'text-zinc-500 hover:text-white'
+                    }`}
+                  >
+                    Filial
+                  </button>
+                </div>
               </div>
+
+              {novaCobrancaForm.destinatario_tipo === 'atleta' ? (
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Selecionar Atleta *</label>
+                  <select
+                    required
+                    value={novaCobrancaForm.atleta_id}
+                    onChange={(e) => setNovaCobrancaForm({ ...novaCobrancaForm, atleta_id: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  >
+                    <option value="">Selecione um atleta...</option>
+                    {atletas.map((atl) => (
+                      <option key={atl.id} value={atl.id}>
+                        {atl.nome} {atl.faixa ? `(${atl.faixa})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Selecionar Filial *</label>
+                  <select
+                    required
+                    value={novaCobrancaForm.filial_id}
+                    onChange={(e) => setNovaCobrancaForm({ ...novaCobrancaForm, filial_id: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  >
+                    <option value="">Selecione uma filial...</option>
+                    {filiais.map((fil) => (
+                      <option key={fil.id} value={fil.id}>
+                        {fil.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Tipo de Cobrança *</label>

@@ -24,8 +24,8 @@ if frontend_origins_env:
     else:
         origins = frontend_origins_env
 else:
-    # Ambiente de desenvolvimento padrão: permitir explicitamente localhost:3000
-    origins = ["http://localhost:3000"]
+    # Ambiente de desenvolvimento padrão: permitir explicitamente localhost:3000 e 127.0.0.1:3000
+    origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
 
 # Registrar CORS com suporte a credenciais (cookies).
 CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
