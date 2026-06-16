@@ -7842,6 +7842,15 @@
       "detalhes": "Usuário paulocasais@hotmail.com realizou login com sucesso",
       "ip": "127.0.0.1",
       "created_at": "2026-06-16T16:44:59.884135"
+    },
+    {
+      "id": "b64bdfbd-6c63-4e09-a23a-b5242dcd7bb9",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@hotmail.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T16:51:34.994265"
     }
   ],
   "cms_config": [
