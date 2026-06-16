@@ -13,6 +13,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# Configuração de chave secreta para segurança das sessões/cookies em produção
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY") or "chave-secreta-grkk-dev-12345"
+
 # Permite CORS apenas para as origens front-end explícitas quando credenciais são necessárias.
 # Usamos a variável de ambiente FRONTEND_ORIGINS (lista separada por vírgula) ou FRONTEND_URL.
 # Se nenhuma variável for fornecida, habilitamos um conjunto razoável de origens de desenvolvimento
