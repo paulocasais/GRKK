@@ -7833,6 +7833,15 @@
       "detalhes": "Usuário admin@grkk.com.br realizou logout",
       "ip": "127.0.0.1",
       "created_at": "2026-06-16T15:58:48.392696"
+    },
+    {
+      "id": "b0f43772-9c95-4e64-b127-b6ce42ab44ae",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@hotmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-16T16:44:59.884135"
     }
   ],
   "cms_config": [
