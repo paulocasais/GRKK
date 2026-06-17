@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_event_routes(app: Flask):
     """Cria e registra as rotas de eventos"""
 
     @app.route("/api/eventos", methods=["GET", "POST"])
     def handle_eventos():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         if request.method == "GET":
             eventos, error = SupabaseService.get_all("eventos", order_by="data_inicio", ascending=False)
@@ -41,7 +41,7 @@ def create_event_routes(app: Flask):
 
     @app.route("/api/eventos/<id>", methods=["PATCH", "DELETE"])
     def gerenciar_evento(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
@@ -83,7 +83,7 @@ def create_event_routes(app: Flask):
 
     @app.route("/api/eventos/inscricoes", methods=["GET", "POST"])
     def gerenciar_inscricoes():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:
@@ -141,7 +141,7 @@ def create_event_routes(app: Flask):
 
     @app.route("/api/eventos/inscricoes/<id>", methods=["PATCH"])
     def atualizar_inscricao(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:
@@ -161,7 +161,7 @@ def create_event_routes(app: Flask):
 
     @app.route("/api/eventos/chaves", methods=["GET", "POST"])
     def gerenciar_chaves():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:

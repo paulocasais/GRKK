@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_atleta_routes(app: Flask):
     """Cria e registra as rotas de atletas"""
@@ -42,7 +42,7 @@ def create_atleta_routes(app: Flask):
 
     @app.route("/api/atletas", methods=["GET"])
     def get_atletas_lista():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") not in ["admin", "filial"]:
@@ -67,7 +67,7 @@ def create_atleta_routes(app: Flask):
 
     @app.route("/api/atletas/<id>", methods=["PATCH"])
     def patch_atleta(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         print(f"DEBUG: patch_atleta called with id={id}, type={type(id)}")

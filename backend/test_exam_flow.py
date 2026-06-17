@@ -1,8 +1,8 @@
 """Teste de fluxo completo de exame: criação, inscrição, início, aprovação e emissão de certificado"""
 import pytest
 import uuid
-from backend.app import app
-from backend.services.supabase_service import SupabaseService
+from app import app
+from services.supabase_service import SupabaseService
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ def create_estoque_routes(app: Flask):
 
     @app.route("/api/estoque/produtos", methods=["GET", "POST"])
     def handle_produtos():
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") not in ["admin", "filial"]:
             return jsonify({"error": "Acesso não autorizado"}), 403
@@ -64,7 +64,7 @@ def create_estoque_routes(app: Flask):
 
     @app.route("/api/estoque/produtos/<id>", methods=["PATCH", "DELETE"])
     def handle_produto_id(id):
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Acesso não autorizado"}), 403
@@ -100,7 +100,7 @@ def create_estoque_routes(app: Flask):
 
     @app.route("/api/estoque/movimentar", methods=["POST"])
     def handle_movimentar():
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") not in ["admin", "filial"]:
             return jsonify({"error": "Acesso não autorizado"}), 403
@@ -182,7 +182,7 @@ def create_estoque_routes(app: Flask):
 
     @app.route("/api/estoque/movimentacoes", methods=["GET"])
     def handle_movimentacoes():
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") not in ["admin", "filial"]:
             return jsonify({"error": "Acesso não autorizado"}), 403

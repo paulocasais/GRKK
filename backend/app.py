@@ -1,7 +1,10 @@
 import os
 import sys
-# Adiciona o diretório pai ao sys.path para permitir importações absolutas do pacote 'backend'
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Adiciona o diretório atual e o diretório pai ao sys.path para permitir importações flexíveis
+app_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, app_dir)
+sys.path.insert(1, os.path.dirname(app_dir))
+
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS

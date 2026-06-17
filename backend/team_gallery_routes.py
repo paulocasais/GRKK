@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_team_gallery_routes(app: Flask):
     """Cria e registra as rotas de equipe e galeria"""
@@ -38,7 +38,7 @@ def create_team_gallery_routes(app: Flask):
             }), 200
 
         elif request.method == "POST":
-            from backend.app import get_current_user
+            from app import get_current_user
             user = get_current_user()
             if not user or user.get("tipo") != "admin":
                 return jsonify({"error": "Não autorizado"}), 403
@@ -76,7 +76,7 @@ def create_team_gallery_routes(app: Flask):
 
     @app.route("/api/cms/<tipo>/<id>", methods=["DELETE"])
     def delete_cms_item(tipo, id):
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403

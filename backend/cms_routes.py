@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_cms_routes(app: Flask):
     """Cria e registra as rotas do CMS (conteúdos do site)"""
 
     @app.route("/api/noticias", methods=["GET", "POST"])
     def manage_noticias():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         if request.method == "GET":
             publicado = request.args.get("publicado")
@@ -44,7 +44,7 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/noticias/<id>", methods=["PATCH", "DELETE"])
     def gerenciar_noticias_id(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
@@ -152,7 +152,7 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/documentos", methods=["GET", "POST"])
     def manage_documentos():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         if request.method == "GET":
             docs, error = SupabaseService.get_all("documentos", order_by="created_at", ascending=False)
@@ -186,7 +186,7 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/documentos/<id>", methods=["PATCH", "DELETE"])
     def gerenciar_documentos_id(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
@@ -228,7 +228,7 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/cms/config", methods=["GET", "POST"])
     def manage_cms_config():
-        from backend.app import get_current_user
+        from app import get_current_user
         from services.supabase_service import is_mock_mode, mock_db, supabase
 
         if request.method == "GET":
@@ -287,8 +287,8 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/cms/glossario", methods=["GET", "POST"])
     def manage_glossario():
-        from backend.app import get_current_user
-        from backend.services.ai_service import get_all_terms, add_or_update_term
+        from app import get_current_user
+        from services.ai_service import get_all_terms, add_or_update_term
 
         if request.method == "GET":
             terms = get_all_terms()
@@ -320,8 +320,8 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/cms/glossario/<termo>", methods=["DELETE"])
     def delete_glossario_term(termo):
-        from backend.app import get_current_user
-        from backend.services.ai_service import remove_term
+        from app import get_current_user
+        from services.ai_service import remove_term
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":

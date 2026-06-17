@@ -6,7 +6,7 @@ def create_ranking_routes(app: Flask):
 
     @app.route("/api/ranking", methods=["GET", "POST"])
     def handle_ranking():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
 

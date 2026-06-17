@@ -1,14 +1,14 @@
 from flask import Flask, request, jsonify
-from backend.services.supabase_service import SupabaseService
+from services.supabase_service import SupabaseService
 from datetime import datetime
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_exam_routes(app: Flask):
     """Cria e registra as rotas de exames"""
 
     @app.route("/api/exames", methods=["GET", "POST"])
     def handle_exames():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         if request.method == "GET":
             exames, error = SupabaseService.get_all("exames", order_by="data_exame", ascending=False)
@@ -38,7 +38,7 @@ def create_exam_routes(app: Flask):
     # Rotas fixas DEVEM vir antes das rotas com <id> para evitar shadowing
     @app.route("/api/exames/candidatos", methods=["GET", "POST"])
     def handle_candidatos():
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user:
             return jsonify({"error": "Não autenticado"}), 401
@@ -91,7 +91,7 @@ def create_exam_routes(app: Flask):
 
     @app.route("/api/exames/candidatos/<id>", methods=["GET", "PATCH", "DELETE"])
     def handle_candidato_actions(id):
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user:
             return jsonify({"error": "Não autenticado"}), 401
@@ -175,7 +175,7 @@ def create_exam_routes(app: Flask):
 
     @app.route("/api/exames/<id>", methods=["GET", "PATCH"])
     def handle_exame_detail(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:
@@ -226,7 +226,7 @@ def create_exam_routes(app: Flask):
 
     @app.route("/api/exames/<id>/examinadores", methods=["POST"])
     def vincular_examinadores(id):
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403
@@ -248,7 +248,7 @@ def create_exam_routes(app: Flask):
 
     @app.route("/api/exames/<id>/certificados", methods=["POST"])
     def emitir_certificados_exame(id):
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
             return jsonify({"error": "Não autorizado"}), 403

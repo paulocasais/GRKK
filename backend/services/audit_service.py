@@ -10,7 +10,7 @@ def registrar_log_auditoria(usuario, acao, detalhes):
     """
     try:
         if not usuario:
-            from backend.app import get_current_user
+            from app import get_current_user
             usuario = get_current_user()
             
         usuario_id = usuario.get("id") if usuario else None

@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_finance_routes(app: Flask):
     """Cria e registra as rotas financeiras"""
 
     @app.route("/api/financeiro", methods=["GET", "POST"])
     def handle_financeiro():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:
@@ -109,7 +109,7 @@ def create_finance_routes(app: Flask):
 
     @app.route("/api/financeiro/<id>", methods=["PATCH"])
     def handle_financeiro_update(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:

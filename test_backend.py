@@ -185,6 +185,10 @@ def test_finance_module():
         assert res.status_code == 200
         data_admin = res.get_json()
         assert len(data_admin['pagamentos']) > 0
+        # Garantir que a fatura fat-1 esteja como pendente para que o teste de pagamento passe repetidamente
+        res = client.patch('/api/financeiro/fat-1', json={'status': 'pendente'})
+        assert res.status_code == 200
+        
         print("PASS: Admin visualiza todas as faturas")
         
         # Logout admin

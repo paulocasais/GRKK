@@ -6,7 +6,7 @@ def create_notif_routes(app: Flask):
 
     @app.route("/api/notificacoes", methods=["GET", "PATCH"])
     def handle_notificacoes_list():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:
@@ -38,7 +38,7 @@ def create_notif_routes(app: Flask):
 
     @app.route("/api/notificacoes/<id>", methods=["PATCH"])
     def handle_notificacao_update(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:

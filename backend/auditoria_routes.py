@@ -6,7 +6,7 @@ def create_auditoria_routes(app: Flask):
 
     @app.route("/api/auditoria", methods=["GET"])
     def get_auditoria_logs():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":

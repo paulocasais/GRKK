@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_auth_routes(app: Flask):
     """Cria e registra as rotas de autenticação"""
@@ -36,7 +36,7 @@ def create_auth_routes(app: Flask):
 
     @app.route("/api/auth/logout", methods=["POST"])
     def auth_logout():
-        from backend.app import get_current_user
+        from app import get_current_user
         user = get_current_user()
         if user:
             registrar_log_auditoria(user, "Logout", f"Usuário {user.get('email')} realizou logout")
@@ -48,7 +48,7 @@ def create_auth_routes(app: Flask):
 
     @app.route("/api/auth/me", methods=["GET"])
     def auth_me():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user:

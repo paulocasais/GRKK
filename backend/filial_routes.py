@@ -1,13 +1,13 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from backend.services.audit_service import registrar_log_auditoria
+from services.audit_service import registrar_log_auditoria
 
 def create_filial_routes(app: Flask):
     """Cria e registra as rotas de filiais"""
 
     @app.route("/api/filiais", methods=["GET", "POST"])
     def register_filial():
-        from backend.app import get_current_user
+        from app import get_current_user
 
         if request.method == "GET":
             user = get_current_user()
@@ -63,7 +63,7 @@ def create_filial_routes(app: Flask):
 
     @app.route("/api/filiais/<id>", methods=["PATCH"])
     def patch_filial(id):
-        from backend.app import get_current_user
+        from app import get_current_user
 
         user = get_current_user()
         if not user or user.get("tipo") != "admin":
