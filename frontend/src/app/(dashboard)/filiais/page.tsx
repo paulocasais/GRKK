@@ -28,10 +28,9 @@ export default function FiliaisPage() {
   const carregarFiliais = async () => {
     try {
       const res = await fetch(`${API_URL}/api/filiais`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setFiliais(data.filiais || []);
-      }
+      if (!res.ok) throw new Error('Falha ao obter filiais da API');
+      const data = await res.json();
+      setFiliais(data.filiais || []);
     } catch (err) {
       console.error("Erro ao carregar filiais, usando dados mock:", err);
       setFiliais([
@@ -55,11 +54,24 @@ export default function FiliaisPage() {
         credentials: 'include',
         body: JSON.stringify({ status: novoStatus })
       });
-      if (res.ok) {
-        setFiliais(filiais.map(f => f.id === filialId ? { ...f, status: novoStatus } : f));
-      }
+      if (!res.ok) throw new Error('Erro ao alterar status');
+      setFiliais(filiais.map(f => f.id === filialId ? { ...f, status: novoStatus } : f));
     } catch (err) {
       setFiliais(filiais.map(f => f.id === filialId ? { ...f, status: novoStatus } : f));
+    }
+  };
+
+  const handleExcluir = async (filialId: string) => {
+    if (!confirm("Tem certeza que deseja excluir permanentemente esta filial?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/filiais/${filialId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Erro ao excluir filial');
+      setFiliais(filiais.filter(f => f.id !== filialId));
+    } catch (err) {
+      setFiliais(filiais.filter(f => f.id !== filialId));
     }
   };
 
@@ -138,39 +150,55 @@ export default function FiliaisPage() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4 border-t border-zinc-800/40">
-              {filial.status === 'pendente' && (
-                <>
+            <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/40">
+              <div className="flex gap-2">
+                {filial.status === 'pendente' && (
+                  <>
+                    <button
+                      onClick={() => handleStatusChange(filial.id, 'ativo')}
+                      className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <Check size={12} /> Aprovar
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(filial.id, 'reprovado')}
+                      className="flex-1 py-2 bg-zinc-950 hover:bg-red-950/40 border border-zinc-800 hover:border-red-900/30 text-zinc-400 hover:text-red-400 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <X size={12} /> Negar
+                    </button>
+                  </>
+                )}
+                {filial.status === 'ativo' && (
+                  <button
+                    onClick={() => handleStatusChange(filial.id, 'inativo')}
+                    className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
+                  >
+                    Suspender Filial
+                  </button>
+                )}
+                {filial.status === 'inativo' && (
                   <button
                     onClick={() => handleStatusChange(filial.id, 'ativo')}
-                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center flex items-center justify-center gap-1"
                   >
-                    <Check size={12} /> Aprovar
+                    <ShieldCheck size={12} /> Re-homologar
                   </button>
+                )}
+                {filial.status === 'reprovado' && (
                   <button
-                    onClick={() => handleStatusChange(filial.id, 'reprovado')}
-                    className="flex-1 py-2 bg-red-650 hover:bg-red-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                    onClick={() => handleStatusChange(filial.id, 'ativo')}
+                    className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-gold hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center flex items-center justify-center gap-1"
                   >
-                    <X size={12} /> Negar
+                    <ShieldCheck size={12} /> Re-homologar
                   </button>
-                </>
-              )}
-              {filial.status === 'ativo' && (
-                <button
-                  onClick={() => handleStatusChange(filial.id, 'inativo')}
-                  className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
-                >
-                  Desativar Filial
-                </button>
-              )}
-              {filial.status === 'reprovado' && (
-                <button
-                  onClick={() => handleStatusChange(filial.id, 'ativo')}
-                  className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-gold hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center flex items-center justify-center gap-1"
-                >
-                  <ShieldCheck size={12} /> Re-homologar
-                </button>
-              )}
+                )}
+              </div>
+              <button
+                onClick={() => handleExcluir(filial.id)}
+                className="w-full py-1.5 bg-red-950/20 hover:bg-red-600 border border-red-900/20 hover:border-red-500 text-red-400 hover:text-white rounded-xl text-[9px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
+              >
+                Excluir Filial
+              </button>
             </div>
           </div>
         ))}

@@ -29,8 +29,8 @@ def create_auth_routes(app: Flask):
         }))
 
         session_val = user_data["id"] if not SupabaseService.is_mock() else user_data["email"]
-        response.set_cookie("session_user", session_val, max_age=86400, httponly=False, samesite="Lax")
-        response.set_cookie("sb-mock-session", session_val, max_age=86400, httponly=False, samesite="Lax")
+        response.set_cookie("session_user", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain="localhost")
+        response.set_cookie("sb-mock-session", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain="localhost")
 
         return response, 200
 
@@ -42,8 +42,8 @@ def create_auth_routes(app: Flask):
             registrar_log_auditoria(user, "Logout", f"Usuário {user.get('email')} realizou logout")
 
         response = make_response(jsonify({"sucesso": True, "message": "Logout realizado com sucesso"}))
-        response.delete_cookie("session_user")
-        response.delete_cookie("sb-mock-session")
+        response.delete_cookie("session_user", domain="localhost")
+        response.delete_cookie("sb-mock-session", domain="localhost")
         return response, 200
 
     @app.route("/api/auth/me", methods=["GET"])

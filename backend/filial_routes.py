@@ -84,6 +84,8 @@ def create_filial_routes(app: Flask):
         if error:
             return jsonify({"error": error}), 500
 
+        updated_filial, _ = SupabaseService.get_profile_by_id(id)
+
         # Registrar log de auditoria
         registrar_log_auditoria(
             user,
@@ -91,5 +93,34 @@ def create_filial_routes(app: Flask):
             f"Filial {updated_filial.get('nome') if updated_filial else id} (ID: {id}) atualizada. Status: {status or 'Sem alteração de status'}"
         )
 
-        updated_filial, _ = SupabaseService.get_profile_by_id(id)
         return jsonify(updated_filial), 200
+
+    @app.route("/api/filiais/<id>", methods=["DELETE"])
+    def delete_filial(id):
+        from app import get_current_user
+        user = get_current_user()
+        if not user or user.get("tipo") != "admin":
+            return jsonify({"error": "Acesso não autorizado"}), 403
+
+        # Busca filial antes de deletar para obter o nome para auditoria
+        filial, _ = SupabaseService.get_profile_by_id(id)
+        filial_nome = filial.get("nome") if filial else id
+
+        # Remove de filiais
+        _, error = SupabaseService.delete("filiais", id)
+        if error:
+            return jsonify({"error": error}), 500
+
+        # Remove do profiles
+        _, error2 = SupabaseService.delete("profiles", id)
+        if error2:
+            return jsonify({"error": error2}), 500
+
+        # Registrar log de auditoria
+        registrar_log_auditoria(
+            user,
+            "Exclusão de Filial",
+            f"Filial '{filial_nome}' (ID: {id}) excluída com sucesso."
+        )
+
+        return jsonify({"sucesso": True}), 200

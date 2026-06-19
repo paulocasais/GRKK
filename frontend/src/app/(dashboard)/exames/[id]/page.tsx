@@ -12,5 +12,6 @@ export async function generateStaticParams() {
 }
 
 export default async function ExameDetalhePage({ params }: { params: Params }) {
-  return <ExameDetalheClient params={params} />;
+  const { id } = await params;
+  return <ExameDetalheClient id={id} />;
 }

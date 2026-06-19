@@ -136,10 +136,26 @@ function AdminDashboard({ usuario }: { usuario: any }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        const res = await fetch(`${API_URL}/api/financeiro`); // Para demonstrar, consumimos dados
-        setStats({ activeAthletes: 42, openEvents: 3, pendingExams: 2, filiationsThisMonth: 5 });
+        const [resAtletas, resEventos, resExames, resFiliais] = await Promise.all([
+          fetch(`${API_URL}/api/atletas`, { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+          fetch(`${API_URL}/api/eventos`, { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+          fetch(`${API_URL}/api/exames`, { credentials: 'include' }).then(r => r.ok ? r.json() : null),
+          fetch(`${API_URL}/api/filiais`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
+        ]);
+
+        const totalAtletas = resAtletas?.atletas?.filter((a: any) => a.status === 'ativo').length || 0;
+        const totalEventos = resEventos?.eventos?.length || 0;
+        const totalExames = resExames?.exames?.filter((e: any) => e.status === 'publicado' || e.status === 'em_andamento').length || 0;
+        const totalFiliais = resFiliais?.filiais?.length || 0;
+
+        setStats({
+          activeAthletes: totalAtletas,
+          openEvents: totalEventos,
+          pendingExams: totalExames,
+          filiationsThisMonth: totalFiliais
+        });
       } catch (err) {
-        console.error(err);
+        console.error("Erro ao carregar estatísticas do admin:", err);
       } finally {
         setLoading(false);
       }
@@ -196,6 +212,34 @@ function AdminDashboard({ usuario }: { usuario: any }) {
 
 /* --- FILIAL DASHBOARD --- */
 function FilialDashboard({ usuario }: { usuario: any }) {
+  const [stats, setStats] = useState({ totalAlunos: 0, alunosAtivos: 0, preAvaliacoes: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFilialStats() {
+      try {
+        const res = await fetch(`${API_URL}/api/atletas`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.atletas || [];
+          const total = list.length;
+          const ativos = list.filter((a: any) => a.status === 'ativo').length;
+          const pendentes = list.filter((a: any) => a.status === 'pendente').length;
+          setStats({
+            totalAlunos: total,
+            alunosAtivos: ativos,
+            preAvaliacoes: pendentes
+          });
+        }
+      } catch (err) {
+        console.error("Erro ao carregar estatísticas da filial:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadFilialStats();
+  }, []);
+
   return (
     <main className="p-6 lg:p-10 space-y-8 w-full">
       <div className="relative overflow-hidden bg-gradient-to-br from-gold/10 via-zinc-900 to-zinc-900 border border-gold/20 rounded-3xl p-8">
@@ -212,9 +256,9 @@ function FilialDashboard({ usuario }: { usuario: any }) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <StatCard label="Total de Alunos" value="18" icon={Users} color="brand" loading={false} />
-        <StatCard label="Alunos Ativos" value="15" icon={CheckCircle2} color="green" loading={false} />
-        <StatCard label="Pré-Avaliações" value="2" icon={FileWarning} color="gold" loading={false} />
+        <StatCard label="Total de Alunos" value={stats.totalAlunos} icon={Users} color="brand" loading={loading} />
+        <StatCard label="Alunos Ativos" value={stats.alunosAtivos} icon={CheckCircle2} color="green" loading={loading} />
+        <StatCard label="Pré-Avaliações" value={stats.preAvaliacoes} icon={FileWarning} color="gold" loading={loading} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

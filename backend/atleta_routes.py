@@ -141,3 +141,37 @@ def create_atleta_routes(app: Flask):
 
         updated_atleta, _ = SupabaseService.get_profile_by_id(id)
         return jsonify(updated_atleta), 200
+
+    @app.route("/api/atletas/<id>", methods=["DELETE"])
+    def delete_atleta(id):
+        from app import get_current_user
+        user = get_current_user()
+        if not user or user.get("tipo") not in ["admin", "filial"]:
+            return jsonify({"error": "Acesso não autorizado"}), 403
+
+        # Busca atleta antes de deletar para obter o nome para auditoria
+        atleta, _ = SupabaseService.get_profile_by_id(id)
+        atleta_nome = atleta.get("nome") if atleta else id
+
+        # Se o usuário for dojo/filial, só pode excluir atletas da sua filial
+        if user.get("tipo") == "filial" and atleta and atleta.get("filial_id") != user["id"]:
+            return jsonify({"error": "Não autorizado a excluir atleta de outra filial"}), 403
+
+        # Remove de atletas
+        _, error = SupabaseService.delete("atletas", id)
+        if error:
+            return jsonify({"error": error}), 500
+
+        # Remove do profiles
+        _, error2 = SupabaseService.delete("profiles", id)
+        if error2:
+            return jsonify({"error": error2}), 500
+
+        # Registrar log de auditoria
+        registrar_log_auditoria(
+            user,
+            "Exclusão de Atleta",
+            f"Atleta '{atleta_nome}' (ID: {id}) excluído com sucesso."
+        )
+
+        return jsonify({"sucesso": True}), 200

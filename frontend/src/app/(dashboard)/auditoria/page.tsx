@@ -23,10 +23,9 @@ export default function AuditoriaPage() {
   const carregarLogs = async () => {
     try {
       const res = await fetch(`${API_URL}/api/auditoria`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs || []);
-      }
+      if (!res.ok) throw new Error('Falha ao obter logs de auditoria');
+      const data = await res.json();
+      setLogs(data.logs || []);
     } catch (err) {
       console.error("Erro ao carregar auditoria, usando logs fictícios:", err);
       setLogs([

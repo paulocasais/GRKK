@@ -1,0 +1,15 @@
+# ----------------------------------------------------------------------
+# Configurações do Handler FCGI para HostGator (Flask Backend)
+# ----------------------------------------------------------------------
+
+# Define o arquivo .fcgi como script executável
+AddHandler fcgid-script .fcgi
+
+# Ativa o mecanismo de reescrita
+RewriteEngine On
+
+# Evita loop de reescrita se o arquivo físico existir
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# Redireciona todas as requisições para o script FCGI do Flask
+RewriteRule ^(.*)$ index.fcgi/$1 [QSA,L]

@@ -48,10 +48,9 @@ export default function AtletasPage() {
   const carregarAtletas = async () => {
     try {
       const res = await fetch(`${API_URL}/api/atletas`, { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setAtletas(data.atletas || []);
-      }
+      if (!res.ok) throw new Error('Falha ao obter atletas da API');
+      const data = await res.json();
+      setAtletas(data.atletas || []);
     } catch (err) {
       console.error("Erro ao carregar atletas, usando dados emulados:", err);
       // Fallback local
@@ -69,19 +68,32 @@ export default function AtletasPage() {
     carregarAtletas();
   }, []);
 
-  const handleHomologar = async (atletaId: string) => {
+  const handleStatusChange = async (atletaId: string, novoStatus: 'ativo' | 'inativo' | 'pendente') => {
     try {
       const res = await fetch(`${API_URL}/api/atletas/${atletaId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ status: 'ativo' })
+        body: JSON.stringify({ status: novoStatus })
       });
-      if (res.ok) {
-        setAtletas(atletas.map(a => a.id === atletaId ? { ...a, status: 'ativo' } : a));
-      }
+      if (!res.ok) throw new Error('Erro ao alterar status do atleta');
+      setAtletas(atletas.map(a => a.id === atletaId ? { ...a, status: novoStatus } : a));
     } catch (err) {
-      setAtletas(atletas.map(a => a.id === atletaId ? { ...a, status: 'ativo' } : a));
+      setAtletas(atletas.map(a => a.id === atletaId ? { ...a, status: novoStatus } : a));
+    }
+  };
+
+  const handleExcluir = async (atletaId: string) => {
+    if (!confirm("Tem certeza que deseja excluir permanentemente este atleta?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/atletas/${atletaId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Erro ao excluir atleta');
+      setAtletas(atletas.filter(a => a.id !== atletaId));
+    } catch (err) {
+      setAtletas(atletas.filter(a => a.id !== atletaId));
     }
   };
 
@@ -186,7 +198,8 @@ export default function AtletasPage() {
                   </div>
                 </div>
                 <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border ${
-                  atleta.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                  atleta.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                  atleta.status === 'pendente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
                 }`}>
                   {atleta.status}
                 </span>
@@ -207,11 +220,35 @@ export default function AtletasPage() {
 
             <div className="flex flex-col gap-2 pt-4 border-t border-zinc-800/40">
               {atleta.status === 'pendente' && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleStatusChange(atleta.id, 'ativo')}
+                    className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <CheckCircle2 size={12} /> Homologar
+                  </button>
+                  <button
+                    onClick={() => handleStatusChange(atleta.id, 'inativo')}
+                    className="flex-1 py-2 bg-zinc-950 hover:bg-red-950/40 border border-zinc-800 hover:border-red-900/30 text-zinc-400 hover:text-red-400 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    Negar
+                  </button>
+                </div>
+              )}
+              {atleta.status === 'ativo' && (
                 <button
-                  onClick={() => handleHomologar(atleta.id)}
-                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+                  onClick={() => handleStatusChange(atleta.id, 'inativo')}
+                  className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
                 >
-                  <CheckCircle2 size={12} /> Homologar Atleta
+                  Suspender Atleta
+                </button>
+              )}
+              {atleta.status === 'inativo' && (
+                <button
+                  onClick={() => handleStatusChange(atleta.id, 'ativo')}
+                  className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center flex items-center justify-center gap-1"
+                >
+                  Re-homologar
                 </button>
               )}
               <div className="flex gap-2">
@@ -231,6 +268,12 @@ export default function AtletasPage() {
                   Alterar Faixa
                 </button>
               </div>
+              <button
+                onClick={() => handleExcluir(atleta.id)}
+                className="w-full py-1.5 bg-red-950/20 hover:bg-red-650 border border-red-900/20 hover:border-red-500 text-red-400 hover:text-white rounded-xl text-[9px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
+              >
+                Excluir Atleta
+              </button>
             </div>
           </div>
         ))}

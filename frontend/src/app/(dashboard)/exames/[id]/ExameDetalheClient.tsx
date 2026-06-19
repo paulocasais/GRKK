@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -66,8 +66,7 @@ const PROXIMOS_STATUS: Record<string, string[]> = {
   cancelado:    [],
 };
 
-export default function ExameDetalheClient({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ExameDetalheClient({ id }: { id: string }) {
   const router = useRouter();
   const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial'; // Na GRKK, representantes de filial atuam como examinadores no tatame
