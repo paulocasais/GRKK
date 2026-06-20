@@ -45,7 +45,24 @@ export default function EquipePage() {
         if (!res.ok) throw new Error('Erro ao carregar equipe');
         const data = await res.json();
         if (data.members && data.members.length > 0) {
-          setMembers(data.members);
+          const mapped = data.members.map((m: any) => {
+            let belt = "Faixa Preta";
+            let role = m.cargo || m.role || "";
+            if (role.includes(" - ")) {
+              const parts = role.split(" - ");
+              role = parts[0];
+              belt = parts[1];
+            }
+            return {
+              id: m.id,
+              name: m.nome || m.name || "",
+              role: role,
+              belt: m.belt || m.graduacao || belt,
+              bio: m.biografia || m.bio || "",
+              photo_url: m.foto_url || m.photo_url || null
+            };
+          });
+          setMembers(mapped);
         }
       } catch (err) {
         console.error('Erro ao buscar equipe do backend:', err);

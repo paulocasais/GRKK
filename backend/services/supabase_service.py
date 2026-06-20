@@ -112,7 +112,7 @@ class SupabaseService:
                     for k, v in filter_dict.items():
                         query = query.eq(k, v)
                 if order_by:
-                    query = query.order(order_by, ascending=ascending)
+                    query = query.order(order_by, desc=not ascending)
                 res = query.execute()
                 return res.data, None
             except Exception as e:
