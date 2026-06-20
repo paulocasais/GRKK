@@ -29,8 +29,17 @@ def create_auth_routes(app: Flask):
         }))
 
         session_val = user_data["id"] if not SupabaseService.is_mock() else user_data["email"]
-        response.set_cookie("session_user", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain="localhost")
-        response.set_cookie("sb-mock-session", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain="localhost")
+        
+        # Determina o domínio do cookie de forma dinâmica (ex: .gojuryukaratekai.com.br em produção)
+        host = request.headers.get("Host", "")
+        cookie_domain = None
+        if "localhost" not in host and "127.0.0.1" not in host:
+            parts = host.split(":")[0].split(".")
+            if len(parts) >= 2:
+                cookie_domain = "." + ".".join(parts[-2:])
+
+        response.set_cookie("session_user", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain=cookie_domain)
+        response.set_cookie("sb-mock-session", session_val, max_age=86400, httponly=False, samesite="Lax", secure=False, domain=cookie_domain)
 
         return response, 200
 
@@ -41,9 +50,17 @@ def create_auth_routes(app: Flask):
         if user:
             registrar_log_auditoria(user, "Logout", f"Usuário {user.get('email')} realizou logout")
 
+        # Determina o domínio do cookie de forma dinâmica para remoção
+        host = request.headers.get("Host", "")
+        cookie_domain = None
+        if "localhost" not in host and "127.0.0.1" not in host:
+            parts = host.split(":")[0].split(".")
+            if len(parts) >= 2:
+                cookie_domain = "." + ".".join(parts[-2:])
+
         response = make_response(jsonify({"sucesso": True, "message": "Logout realizado com sucesso"}))
-        response.delete_cookie("session_user", domain="localhost")
-        response.delete_cookie("sb-mock-session", domain="localhost")
+        response.delete_cookie("session_user", domain=cookie_domain)
+        response.delete_cookie("sb-mock-session", domain=cookie_domain)
         return response, 200
 
     @app.route("/api/auth/me", methods=["GET"])
