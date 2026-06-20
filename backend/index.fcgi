@@ -1,4 +1,4 @@
-#!/usr/bin/scl enable rh-python35 -- /home/CONTA/.virtualenv/bin/python
+#!/home1/b403bf81/backend-grkk/.venv/bin/python
 import os
 import sys
 
@@ -7,11 +7,11 @@ import sys
 # Substitua "CONTA" pelo seu usuário cPanel
 # Substitua "PASTA_DO_SITE" pelo caminho da sua pasta (ex: public_html/api)
 # ----------------------------------------------------------------------
-CONTA = "CONTA"
-PASTA_DO_SITE = "PASTA_DO_SITE"
+CONTA = "b403bf81"
+PASTA_DO_SITE = "backend-grkk"
 
 # Adiciona o diretório do backend ao PATH do Python
-sys.path.insert(0, f"/home/{CONTA}/{PASTA_DO_SITE}")
+sys.path.insert(0, f"/home1/{CONTA}/{PASTA_DO_SITE}")
 
 from flup.server.fcgi import WSGIServer
 from app import app
