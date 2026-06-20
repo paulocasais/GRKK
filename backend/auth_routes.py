@@ -31,16 +31,22 @@ def create_auth_routes(app: Flask):
         session_val = user_data["id"] if not SupabaseService.is_mock() else user_data["email"]
         
         # Determina o domínio, secure e samesite do cookie de forma dinâmica
-        host = request.headers.get("Host", "")
+        host = request.headers.get("Host", "").split(":")[0]
         cookie_domain = None
         secure_cookie = False
         samesite_val = "Lax"
         if "localhost" not in host and "127.0.0.1" not in host:
-            parts = host.split(":")[0].split(".")
-            if len(parts) >= 2:
-                cookie_domain = "." + ".".join(parts[-2:])
             secure_cookie = True
             samesite_val = "None"
+            if "gojuryukaratekai.com.br" in host:
+                cookie_domain = ".gojuryukaratekai.com.br"
+            else:
+                parts = host.split(".")
+                if len(parts) >= 2:
+                    if len(parts) >= 3 and parts[-2] in ["com", "org", "net", "edu", "gov", "mil"]:
+                        cookie_domain = "." + ".".join(parts[-3:])
+                    else:
+                        cookie_domain = "." + ".".join(parts[-2:])
 
         response.set_cookie("session_user", session_val, max_age=86400, httponly=False, samesite=samesite_val, secure=secure_cookie, domain=cookie_domain)
         response.set_cookie("sb-mock-session", session_val, max_age=86400, httponly=False, samesite=samesite_val, secure=secure_cookie, domain=cookie_domain)
@@ -55,16 +61,22 @@ def create_auth_routes(app: Flask):
             registrar_log_auditoria(user, "Logout", f"Usuário {user.get('email')} realizou logout")
 
         # Determina o domínio do cookie de forma dinâmica para remoção
-        host = request.headers.get("Host", "")
+        host = request.headers.get("Host", "").split(":")[0]
         cookie_domain = None
         secure_cookie = False
         samesite_val = "Lax"
         if "localhost" not in host and "127.0.0.1" not in host:
-            parts = host.split(":")[0].split(".")
-            if len(parts) >= 2:
-                cookie_domain = "." + ".".join(parts[-2:])
             secure_cookie = True
             samesite_val = "None"
+            if "gojuryukaratekai.com.br" in host:
+                cookie_domain = ".gojuryukaratekai.com.br"
+            else:
+                parts = host.split(".")
+                if len(parts) >= 2:
+                    if len(parts) >= 3 and parts[-2] in ["com", "org", "net", "edu", "gov", "mil"]:
+                        cookie_domain = "." + ".".join(parts[-3:])
+                    else:
+                        cookie_domain = "." + ".".join(parts[-2:])
 
         response = make_response(jsonify({"sucesso": True, "message": "Logout realizado com sucesso"}))
         response.delete_cookie("session_user", domain=cookie_domain, secure=secure_cookie, samesite=samesite_val)
@@ -81,16 +93,22 @@ def create_auth_routes(app: Flask):
 
         if user.get("status") != "ativo":
             # Determina o domínio do cookie de forma dinâmica para remoção
-            host = request.headers.get("Host", "")
+            host = request.headers.get("Host", "").split(":")[0]
             cookie_domain = None
             secure_cookie = False
             samesite_val = "Lax"
             if "localhost" not in host and "127.0.0.1" not in host:
-                parts = host.split(":")[0].split(".")
-                if len(parts) >= 2:
-                    cookie_domain = "." + ".".join(parts[-2:])
                 secure_cookie = True
                 samesite_val = "None"
+                if "gojuryukaratekai.com.br" in host:
+                    cookie_domain = ".gojuryukaratekai.com.br"
+                else:
+                    parts = host.split(".")
+                    if len(parts) >= 2:
+                        if len(parts) >= 3 and parts[-2] in ["com", "org", "net", "edu", "gov", "mil"]:
+                            cookie_domain = "." + ".".join(parts[-3:])
+                        else:
+                            cookie_domain = "." + ".".join(parts[-2:])
 
             response = make_response(jsonify({"autenticado": False, "erro": "Conta inativa."}), 200)
             response.delete_cookie("session_user", domain=cookie_domain, secure=secure_cookie, samesite=samesite_val)
