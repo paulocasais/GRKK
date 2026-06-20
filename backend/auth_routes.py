@@ -102,3 +102,20 @@ def create_auth_routes(app: Flask):
             "usuario": user,
             "tipo": user.get("tipo")
         }), 200
+
+    @app.route("/api/auth/debug", methods=["GET"])
+    def auth_debug():
+        from app import get_current_user
+        cookies = dict(request.cookies)
+        headers = dict(request.headers)
+        if "Authorization" in headers:
+            headers["Authorization"] = "Bearer [REDACTED]"
+            
+        user = get_current_user()
+        
+        return jsonify({
+            "cookies_recebidos": cookies,
+            "headers_recebidos": {k: v for k, v in headers.items() if k.lower() in ["host", "origin", "cookie", "referer", "user-agent"]},
+            "usuario_resolvido": user,
+            "is_mock_mode": SupabaseService.is_mock()
+        }), 200
