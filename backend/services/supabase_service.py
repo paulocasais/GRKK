@@ -5,7 +5,10 @@ from datetime import datetime
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-load_dotenv()
+# Resolve o caminho do .env de forma robusta e absoluta
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(base_dir, ".env")
+load_dotenv(dotenv_path=env_path)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
@@ -18,13 +21,20 @@ is_mock_mode = (
     or "seu-anon-key-do-supabase" in SUPABASE_KEY
 )
 
+# Força a desativação do modo mock em produção ou se configurado no .env
+if os.environ.get("DISABLE_MOCK") == "true" or os.environ.get("FLASK_ENV") == "production":
+    is_mock_mode = False
+
 supabase: Client = None
 if not is_mock_mode:
     try:
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         print("Conectado ao Supabase oficial.")
     except Exception as e:
-        print(f"Erro ao conectar ao Supabase oficial (mudando para modo Mock): {e}")
+        print(f"Erro ao conectar ao Supabase oficial: {e}")
+        # Em produção, falha explicitamente em vez de cair em modo mock silenciosamente
+        if os.environ.get("FLASK_ENV") == "production":
+            raise RuntimeError(f"Falha crítica de conexão com o Supabase em produção: {e}")
         is_mock_mode = True
 else:
     print("Modo de emulação offline (Mock) ativado.")

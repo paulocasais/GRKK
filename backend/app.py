@@ -9,10 +9,12 @@ sys.path.insert(1, os.path.dirname(app_dir))
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
-
 from services.supabase_service import SupabaseService
 
-load_dotenv()
+# Resolve o caminho do .env de forma robusta e absoluta
+app_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(app_dir, ".env")
+load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 

@@ -5,8 +5,10 @@ from dotenv import load_dotenv
 # Adiciona o diretório atual ao PATH para poder importar os módulos do projeto
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Carrega as variáveis de ambiente do arquivo .env
-load_dotenv()
+# Carrega as variáveis de ambiente do arquivo .env usando o caminho absoluto
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(backend_dir, ".env")
+load_dotenv(dotenv_path=env_path)
 
 print("--- TESTE DE CONEXÃO COM O SUPABASE ---")
 
@@ -45,11 +47,19 @@ else:
     print("\nTentando estabelecer conexão com o Supabase na nuvem...")
     try:
         # Tenta realizar uma consulta de contagem simples na tabela profiles
-        profiles, error = SupabaseService.get_all("profiles", limit=1)
+        profiles, error = SupabaseService.get_all("profiles")
         if error:
-            print(f"❌ Conectou, mas o banco retornou um erro: {error}")
+            print(f"❌ Conectou, mas o banco retornou um erro na tabela profiles: {error}")
         else:
             print("✅ CONEXÃO COM O SUPABASE REAL ESTABELECIDA COM SUCESSO!")
             print(f"✅ Consulta de teste executada com sucesso. Perfis cadastrados encontrados: {len(profiles) if profiles else 0}")
+            
+        print("\nTestando acesso à tabela 'logs_auditoria'...")
+        logs, log_error = SupabaseService.get_all("logs_auditoria")
+        if log_error:
+            print(f"❌ Erro ao acessar a tabela 'logs_auditoria': {log_error}")
+            print("Conselho: Verifique se a tabela 'logs_auditoria' existe no Supabase e se a RLS (Row Level Security) permite leitura.")
+        else:
+            print(f"✅ Tabela 'logs_auditoria' acessada com sucesso! Logs cadastrados: {len(logs) if logs else 0}")
     except Exception as err:
-        print(f"❌ Erro de conexão de rede ou autenticação com o Supabase: {err}")
+        print(f"❌ Erro inesperado ao interagir com o Supabase: {err}")

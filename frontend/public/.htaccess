@@ -1,4 +1,15 @@
 RewriteEngine On
+
+# Mapeamento de payloads Next.js RSC (correção do bug de exportação estática com App Router)
+# Exemplo: /exames/__next.!KGRhc2hib2FyZCk.exames.__PAGE__.txt -> /exames/__next.!KGRhc2hib2FyZCk/exames/__PAGE__.txt
+RewriteCond %{REQUEST_URI} ^/(.+)/__next\.!([^.]+)\.([^.]+)\.__PAGE__\.txt$
+RewriteRule ^.*$ /%1/__next.!%2/%3/__PAGE__.txt [L]
+
+# Exemplo: /exames/__next.!KGRhc2hib2FyZCk.exames.txt -> /exames/__next.!KGRhc2hib2FyZCk/exames.txt
+RewriteCond %{REQUEST_URI} ^/(.+)/__next\.!([^.]+)\.([^.]+)\.txt$
+RewriteRule ^.*$ /%1/__next.!%2/%3.txt [L]
+
+# Roteamento padrão de arquivos estáticos HTML (.html opcional na URL)
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
