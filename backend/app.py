@@ -18,6 +18,16 @@ load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 
+@app.after_request
+def disable_api_caching(response):
+    # Desativa cache para todas as rotas da API (tanto no navegador quanto no proxy Nginx da HostGator)
+    if request.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        response.headers["X-Accel-Expires"] = "0"  # Especifico para desativar cache no Nginx
+    return response
+
 # Configuração de chave secreta para segurança das sessões/cookies em produção
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY") or "chave-secreta-grkk-dev-12345"
 
