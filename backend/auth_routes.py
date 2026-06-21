@@ -131,6 +131,7 @@ def create_auth_routes(app: Flask):
             
         user = get_current_user()
         
+        import os
         import services.supabase_service
         return jsonify({
             "cookies_recebidos": cookies,
