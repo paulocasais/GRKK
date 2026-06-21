@@ -131,9 +131,12 @@ def create_auth_routes(app: Flask):
             
         user = get_current_user()
         
+        import services.supabase_service
         return jsonify({
             "cookies_recebidos": cookies,
             "headers_recebidos": {k: v for k, v in headers.items() if k.lower() in ["host", "origin", "cookie", "referer", "user-agent"]},
             "usuario_resolvido": user,
-            "is_mock_mode": SupabaseService.is_mock()
+            "is_mock_mode": SupabaseService.is_mock(),
+            "cwd": os.getcwd(),
+            "supabase_service_file": services.supabase_service.__file__
         }), 200
