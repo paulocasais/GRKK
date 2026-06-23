@@ -4,6 +4,7 @@ from services.audit_service import registrar_log_auditoria
 
 def create_cms_routes(app: Flask):
     """Cria e registra as rotas do CMS (conteúdos do site)"""
+    from app import get_current_user
 
     @app.route("/api/noticias", methods=["GET", "POST"])
     def manage_noticias():
