@@ -416,8 +416,20 @@ export default function AdminCMSPage() {
         else if (activeTab === 'galeria') setGaleria([...galeria, data]);
         setShowModal(false);
       } else {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Erro do servidor ao salvar o item.');
+        let errorMsg = 'Erro do servidor ao salvar o item.';
+        try {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errData = await res.json();
+            errorMsg = errData.error || errData.message || errorMsg;
+          } else {
+            const textData = await res.text();
+            errorMsg = textData.slice(0, 300) || errorMsg;
+          }
+        } catch (e) {
+          console.error("Erro ao ler resposta de erro:", e);
+        }
+        throw new Error(errorMsg);
       }
     } catch (err: any) {
       console.error(err);
@@ -454,8 +466,20 @@ export default function AdminCMSPage() {
         else if (activeTab === 'equipe') setEquipe(equipe.filter(e => e.id !== id));
         else if (activeTab === 'galeria') setGaleria(galeria.filter(g => g.id !== id));
       } else {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || 'Erro do servidor ao excluir o item.');
+        let errorMsg = 'Erro do servidor ao excluir o item.';
+        try {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errData = await res.json();
+            errorMsg = errData.error || errData.message || errorMsg;
+          } else {
+            const textData = await res.text();
+            errorMsg = textData.slice(0, 300) || errorMsg;
+          }
+        } catch (e) {
+          console.error("Erro ao ler resposta de erro:", e);
+        }
+        throw new Error(errorMsg);
       }
     } catch (err: any) {
       console.error(err);
