@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { User } from 'lucide-react';
 
 interface TeamMember {
   id: string | number;
@@ -36,7 +35,7 @@ const defaultTeam: TeamMember[] = [
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
 export default function EquipePage() {
-  const [members, setMembers] = useState<TeamMember[]>(defaultTeam);
+  const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,26 +44,25 @@ export default function EquipePage() {
         const res = await fetch(`${API_URL}/api/equipe`);
         if (!res.ok) throw new Error('Erro ao carregar equipe');
         const data = await res.json();
-        if (data.members && data.members.length > 0) {
-          const mapped = data.members.map((m: any) => {
-            let belt = "Faixa Preta";
-            let role = m.cargo || m.role || "";
-            if (role.includes(" - ")) {
-              const parts = role.split(" - ");
-              role = parts[0];
-              belt = parts[1];
-            }
-            return {
-              id: m.id,
-              name: m.nome || m.name || "",
-              role: role,
-              belt: m.belt || m.graduacao || belt,
-              bio: m.biografia || m.bio || "",
-              photo_url: m.foto_url || m.photo_url || null
-            };
-          });
-          setMembers(mapped);
-        }
+        const apiMembers = data.members || [];
+        const mapped = apiMembers.map((m: any) => {
+          let belt = "Faixa Preta";
+          let role = m.cargo || m.role || "";
+          if (role.includes(" - ")) {
+            const parts = role.split(" - ");
+            role = parts[0];
+            belt = parts[1];
+          }
+          return {
+            id: m.id,
+            name: m.nome || m.name || "",
+            role: role,
+            belt: m.belt || m.graduacao || belt,
+            bio: m.biografia || m.bio || "",
+            photo_url: m.foto_url || m.photo_url || null
+          };
+        });
+        setMembers(mapped);
       } catch (err) {
         console.error('Erro ao buscar equipe do backend:', err);
       } finally {
@@ -109,9 +107,11 @@ export default function EquipePage() {
                         <img src={member.photo_url} alt={member.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="flex flex-col items-center gap-3 opacity-20 text-white">
+                        <div className="flex flex-col items-center gap-3 opacity-20">
                           <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center">
-                            <User size={28} />
+                            <span className="font-cinzel text-white text-xl">
+                              {member.name ? member.name.split(' ')[0]?.[0] || 'G' : 'G'}{member.name ? member.name.split(' ')[1]?.[0] || 'R' : 'R'}
+                            </span>
                           </div>
                         </div>
                       )}
