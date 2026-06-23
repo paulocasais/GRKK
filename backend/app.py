@@ -32,11 +32,18 @@ if frontend_origins_env:
     else:
         origins = [frontend_origins_env.strip()]
 else:
-    # Ambiente de desenvolvimento padrão: permitir explicitamente localhost:3000 e 127.0.0.1:3000
     origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
-
-# Registrar CORS com suporte a credenciais (cookies).
-CORS(app, resources={r"/api/*": {"origins": origins}}, supports_credentials=True)
+# Ensure production front‑end domain is allowed
+prod_origin = "https://gojuryukaratekai.com.br"
+if prod_origin not in origins:
+    origins.append(prod_origin)
+CORS(
+    app,
+    resources={r"/api/*": {"origins": origins, "allow_headers": "*"}},
+    supports_credentials=True,
+    expose_headers="*",
+    max_age=86400,
+)
 
 
 
@@ -118,3 +125,5 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     is_dev = os.environ.get("FLASK_ENV", "development") != "production"
     app.run(host="0.0.0.0", port=port, debug=is_dev)
+
+ALLOWED_HOSTS = ['gojuryukaratekai.com.br']

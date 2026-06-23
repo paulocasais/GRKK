@@ -86,8 +86,14 @@ def create_auth_routes(app: Flask):
     @app.route("/api/auth/me", methods=["GET"])
     def auth_me():
         from app import get_current_user
+        import traceback
+        try:
+            user = get_current_user()
+        except Exception as e:
+            # Log the error for debugging purposes
+            print(f"Erro ao obter usuário atual: {e}\n{traceback.format_exc()}")
+            return jsonify({"autenticado": False, "erro": "Erro interno ao obter usuário."}), 500
 
-        user = get_current_user()
         if not user:
             return jsonify({"autenticado": False}), 200
 

@@ -8179,13 +8179,49 @@
       "detalhes": "Exame de faixa (ID: 0c7e512e-5b1e-4fae-8525-627da6669a5d) atualizado. Status: concluido",
       "ip": "127.0.0.1",
       "created_at": "2026-06-19T22:31:20.651261"
+    },
+    {
+      "id": "5865cdc2-5b24-4e64-bd6e-33428597ca93",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-22T00:22:19.520064"
+    },
+    {
+      "id": "6b9496c3-2b18-44ef-ac05-8de18d796747",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-22T00:22:31.478948"
+    },
+    {
+      "id": "47c1070a-4ed6-412a-9f31-ada8861f88b6",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-22T19:58:00.008698"
+    },
+    {
+      "id": "c745eb51-8b81-423a-bc9a-fd31884774a7",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Configuração do Site",
+      "detalhes": "Seção 'hero' da página inicial atualizada.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-06-22T20:02:27.107577"
     }
   ],
   "cms_config": [
     {
       "chave": "hero",
       "valor": {
-        "badge": "Tradição de Okinawa & IA Moderna",
+        "badge": "Tradição de Okinawa & IA ModernaTeste Badge",
         "titulo": "Onde a Força (Go) encontra a Suavidade (Ju)",
         "descricao": "O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes."
       }

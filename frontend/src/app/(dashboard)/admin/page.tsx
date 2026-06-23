@@ -95,17 +95,46 @@ export default function AdminCMSPage() {
   const [siteConfig, setSiteConfig] = useState<ConfigInicial | null>(null);
   const [salvandoConfig, setSalvandoConfig] = useState(false);
 
-  const [heroForm, setHeroForm] = useState({ badge: '', titulo: '', descricao: '' });
-  const [principiosForm, setPrincipiosForm] = useState({
-    subtitulo: '',
-    go_titulo: '',
-    go_desc: '',
-    go_itens: '',
-    ju_titulo: '',
-    ju_desc: '',
-    ju_itens: ''
+  const [heroForm, setHeroForm] = useState({
+    badge: 'Tradição de Okinawa & IA Moderna',
+    titulo: 'Onde a Força (Go) encontra a Suavidade (Ju)',
+    descricao: 'O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes.'
   });
-  const [katasForm, setKatasForm] = useState<Array<{ nome: string; significado: string; foco: string; desc: string }>>([]);
+  const [principiosForm, setPrincipiosForm] = useState({
+    subtitulo: 'O Goju-Ryu é construído sobre o conceito yin-yang chinês, equilibrando aspectos que parecem opostos, mas são complementares.',
+    go_titulo: 'GO (Força / Rigidez)',
+    go_desc: 'Refere-se ao endurecimento físico, golpes diretos, posições estáveis de combate e resistência ao impacto. É a força e firmeza necessárias para absorver o impacto e desferir contra-ataques decisivos com coragem implacável.',
+    go_itens: 'Katas de fortalecimento como Sanchin, Calejamento de membros (Kote Kitae), Posturas baixas e firmes',
+    ju_titulo: 'JU (Suavidade / Flexibilidade)',
+    ju_desc: 'Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.',
+    ju_itens: 'Katas de flexibilidade como Tensho, Esquivas circulares e fluidas (Tai Sabaki), Técnicas de agarre e projeção (Kakie)'
+  });
+  const [katasForm, setKatasForm] = useState<Array<{ nome: string; significado: string; foco: string; desc: string }>>([
+    {
+      nome: "Sanchin",
+      significado: "Três Batalhas",
+      foco: "Fortalecimento e Respiração Ibuki",
+      desc: "Foca na mente, corpo e espírito em perfeita união. Usa uma postura enraizada e contração isométrica para criar uma defesa impenetrável."
+    },
+    {
+      nome: "Tensho",
+      significado: "Mãos Rotativas",
+      foco: "Suavidade e Movimento Circular",
+      desc: "Criado pelo Mestre Miyagi como a contraparte suave do Sanchin. Foca no trabalho suave de mãos e transições respiratórias tranquilas."
+    },
+    {
+      nome: "Saifa",
+      significado: "Destruir e Esmagar",
+      foco: "Golpes circulares e esquivas rápidas",
+      desc: "O primeiro Kata de combate avançado do estilo. Ensina técnicas de escape de agarres e socos rápidos nas articulações."
+    },
+    {
+      nome: "Seiyunchin",
+      significado: "Controlar e Puxar",
+      foco: "Posturas baixas de pernas",
+      desc: "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás."
+    }
+  ]);
 
   const carregarSiteConfig = async () => {
     try {
@@ -143,22 +172,47 @@ export default function AdminCMSPage() {
   };
 
   useEffect(() => {
-    if (siteConfig) {
+    if (siteConfig && Object.keys(siteConfig).length > 0) {
       setHeroForm({
-        badge: siteConfig.hero?.badge || '',
-        titulo: siteConfig.hero?.titulo || '',
-        descricao: siteConfig.hero?.descricao || ''
+        badge: siteConfig.hero?.badge || 'Tradição de Okinawa & IA Moderna',
+        titulo: siteConfig.hero?.titulo || 'Onde a Força (Go) encontra a Suavidade (Ju)',
+        descricao: siteConfig.hero?.descricao || 'O Karate Goju-Ryu harmoniza ataques diretos e bloqueios rígidos com movimentos circulares fluidos, respiração profunda e controle mental. Aprenda a arte marcial tradicional e consulte o nosso Sensei IA para expandir seus horizontes.'
       });
       setPrincipiosForm({
-        subtitulo: siteConfig.principios?.subtitulo || '',
-        go_titulo: siteConfig.principios?.go_titulo || '',
-        go_desc: siteConfig.principios?.go_desc || '',
-        go_itens: siteConfig.principios?.go_itens?.join(', ') || '',
-        ju_titulo: siteConfig.principios?.ju_titulo || '',
-        ju_desc: siteConfig.principios?.ju_desc || '',
-        ju_itens: siteConfig.principios?.ju_itens?.join(', ') || ''
+        subtitulo: siteConfig.principios?.subtitulo || 'O Goju-Ryu é construído sobre o conceito yin-yang chinês, equilibrando aspectos que parecem opostos, mas são complementares.',
+        go_titulo: siteConfig.principios?.go_titulo || 'GO (Força / Rigidez)',
+        go_desc: siteConfig.principios?.go_desc || 'Refere-se ao endurecimento físico, golpes diretos, posições estáveis de combate e resistência ao impacto. É a força e firmeza necessárias para absorver o impacto e desferir contra-ataques decisivos com coragem implacável.',
+        go_itens: siteConfig.principios?.go_itens?.join(', ') || 'Katas de fortalecimento como Sanchin, Calejamento de membros (Kote Kitae), Posturas baixas e firmes',
+        ju_titulo: siteConfig.principios?.ju_titulo || 'JU (Suavidade / Flexibilidade)',
+        ju_desc: siteConfig.principios?.ju_desc || 'Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.',
+        ju_itens: siteConfig.principios?.ju_itens?.join(', ') || 'Katas de flexibilidade como Tensho, Esquivas circulares e fluidas (Tai Sabaki), Técnicas de agarre e projeção (Kakie)'
       });
-      setKatasForm(siteConfig.katas || []);
+      setKatasForm(siteConfig.katas && siteConfig.katas.length > 0 ? siteConfig.katas : [
+        {
+          nome: "Sanchin",
+          significado: "Três Batalhas",
+          foco: "Fortalecimento e Respiração Ibuki",
+          desc: "Foca na mente, corpo e espírito em perfeita união. Usa uma postura enraizada e contração isométrica para criar uma defesa impenetrável."
+        },
+        {
+          nome: "Tensho",
+          significado: "Mãos Rotativas",
+          foco: "Suavidade e Movimento Circular",
+          desc: "Criado pelo Mestre Miyagi como a contraparte suave do Sanchin. Foca no trabalho suave de mãos e transições respiratórias tranquilas."
+        },
+        {
+          nome: "Saifa",
+          significado: "Destruir e Esmagar",
+          foco: "Golpes circulares e esquivas rápidas",
+          desc: "O primeiro Kata de combate avançado do estilo. Ensina técnicas de escape de agarres e socos rápidos nas articulações."
+        },
+        {
+          nome: "Seiyunchin",
+          significado: "Controlar e Puxar",
+          foco: "Posturas baixas de pernas",
+          desc: "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás."
+        }
+      ]);
     }
   }, [siteConfig]);
 
@@ -340,12 +394,20 @@ export default function AdminCMSPage() {
     else if (activeTab === 'equipe') payload = teamForm;
     else if (activeTab === 'galeria') payload = galleryForm;
 
+    const getTipoItem = (tab: string) => {
+      if (tab === 'banners') return 'banner';
+      if (tab === 'equipe') return 'equipe';
+      if (tab === 'galeria') return 'galeria';
+      return tab;
+    };
+    const tipoItem = getTipoItem(activeTab);
+
     try {
       const res = await fetch(`${API_URL}/api/cms`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ tipo: activeTab.slice(0, -1) === 'equip' ? 'equipe' : activeTab.slice(0, -1), payload })
+        body: JSON.stringify({ tipo: tipoItem, payload })
       });
       if (res.ok) {
         const data = await res.json();
@@ -353,8 +415,13 @@ export default function AdminCMSPage() {
         else if (activeTab === 'equipe') setEquipe([...equipe, data]);
         else if (activeTab === 'galeria') setGaleria([...galeria, data]);
         setShowModal(false);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Erro do servidor ao salvar o item.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Erro de conexão ou permissão. Salvando localmente para fins de teste...');
       // Fallback local
       const mockItem = { id: Date.now(), ...payload };
       if (activeTab === 'banners') setBanners([...banners, mockItem as any]);
@@ -369,8 +436,15 @@ export default function AdminCMSPage() {
   const handleExcluir = async (id: string | number) => {
     if (!confirm("Excluir item permanentemente?")) return;
 
+    const getTipoItem = (tab: string) => {
+      if (tab === 'banners') return 'banner';
+      if (tab === 'equipe') return 'equipe';
+      if (tab === 'galeria') return 'galeria';
+      return tab;
+    };
+    const tipoItem = getTipoItem(activeTab);
+
     try {
-      const tipoItem = activeTab.slice(0, -1) === 'equip' ? 'equipe' : activeTab.slice(0, -1);
       const res = await fetch(`${API_URL}/api/cms/${tipoItem}/${id}`, {
         method: 'DELETE',
         credentials: 'include'
@@ -379,8 +453,13 @@ export default function AdminCMSPage() {
         if (activeTab === 'banners') setBanners(banners.filter(b => b.id !== id));
         else if (activeTab === 'equipe') setEquipe(equipe.filter(e => e.id !== id));
         else if (activeTab === 'galeria') setGaleria(galeria.filter(g => g.id !== id));
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Erro do servidor ao excluir o item.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Erro de conexão ou permissão. Excluindo localmente da visualização atual...');
       if (activeTab === 'banners') setBanners(banners.filter(b => b.id !== id));
       else if (activeTab === 'equipe') setEquipe(equipe.filter(e => e.id !== id));
       else if (activeTab === 'galeria') setGaleria(galeria.filter(g => g.id !== id));
@@ -985,7 +1064,9 @@ export default function AdminCMSPage() {
             <button onClick={() => setShowModal(false)} className="absolute right-4 top-4 text-zinc-500 hover:text-white cursor-pointer">
               <X size={16} />
             </button>
-            <h3 className="text-base font-bold text-white font-cinzel mb-5 uppercase tracking-wide">Adicionar Novo {activeTab.slice(0, -1)}</h3>
+            <h3 className="text-base font-bold text-white font-cinzel mb-5 uppercase tracking-wide">
+              Adicionar Novo {activeTab === 'banners' ? 'Banner' : activeTab === 'equipe' ? 'Membro da Equipe' : activeTab === 'galeria' ? 'Item da Galeria' : activeTab}
+            </h3>
 
             <form onSubmit={handleSalvar} className="space-y-4">
               

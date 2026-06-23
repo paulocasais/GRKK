@@ -42,7 +42,9 @@ TABELAS_ORDEM = [
     "notifications",
     "contacts",
     "historico_pontos",
-    "certificados"
+    "certificados",
+    "cms_banners",
+    "cms_config"
 ]
 
 # Schema de colunas reais para filtrar campos mock indesejados
@@ -63,7 +65,9 @@ COLUNAS_VALIDAS = {
     "notifications": ["id", "destinatario_id", "titulo", "mensagem", "tipo", "lida", "created_at"],
     "contacts": ["id", "name", "email", "message", "phone", "read", "created_at"],
     "historico_pontos": ["id", "atleta_id", "tipo_evento", "descricao", "pontos", "data_pontuacao", "created_at"],
-    "certificados": ["id", "atleta_id", "codigo_validacao", "data_emissao", "created_at"]
+    "certificados": ["id", "atleta_id", "codigo_validacao", "data_emissao", "created_at"],
+    "cms_banners": ["id", "titulo", "subtitulo", "link", "imagem_url", "created_at"],
+    "cms_config": ["chave", "valor", "updated_at"]
 }
 
 headers = {
@@ -95,7 +99,7 @@ def migrar_tabela(tabela_name):
             else:
                 r_filtrado[col] = None
         
-        # Garante a presença do ID
+        # Garante a presença do ID para tabelas que utilizam ID
         if "id" in r_filtrado and r_filtrado["id"] is None:
             r_filtrado["id"] = str(uuid.uuid4())
             

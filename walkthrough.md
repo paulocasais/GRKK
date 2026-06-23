@@ -86,3 +86,27 @@ Transformamos a página de documentos estáticos em uma biblioteca de apostilas 
 4. **Validação**: Testado com sucesso via subagente, listando todas as apostilas e testando o download do Glossário.
    - Veja a tela do acervo de documentos:
 ![Documents List Page](file:///C:/Users/CASAIS/.gemini/antigravity-ide/brain/fee10f35-3472-4974-a664-e558fa79a98c/documents_list_page_1780866937666.png)
+
+---
+
+## 8. Correção de Erro CORS / 500 em Produção (HostGator)
+
+### Problema Reportado
+O site em produção apresentava erros de CORS e `500 Internal Server Error` ao carregar rotas cruciais como `/api/cms/config` e `/api/auth/me`.
+
+### Diagnóstico e Resolução
+1. **Tratamento de Exceções**: Adicionamos um tratamento robusto no endpoint `auth_me` para evitar falhas gerais não capturadas no backend.
+2. **Identificação da Incompatibilidade do Ambiente Virtual**:
+   - O arquivo de entrada executado pelo servidor Apache da HostGator (`index.fcgi`) estava configurado para apontar para o executável Python contido em `.venv` (com ponto).
+   - No entanto, as dependências do projeto (`requirements.txt`) haviam sido instaladas manualmente no ambiente virtual `venv` (sem ponto).
+   - Isso causava um erro `ModuleNotFoundError: No module named 'dotenv'` durante a importação do servidor web, fazendo a HostGator retornar uma página genérica de erro 500 que omitia os cabeçalhos de CORS.
+3. **Correção**:
+   - Ativamos o ambiente virtual correto (`.venv`) no servidor via SSH.
+   - Instalamos todas as dependências (`pip install -r requirements.txt`).
+   - Forçamos a limpeza do cache de processos executando `touch index.fcgi` e `touch app.py`.
+
+### Validação
+Realizamos requisições de teste diretamente no endpoint público:
+- **Status da API**: `/api/health` passou a retornar `200 OK` e `"status": "healthy"`.
+- **CORS**: O endpoint `/api/auth/me` agora retorna os cabeçalhos corretos (`Access-Control-Allow-Origin: https://gojuryukaratekai.com.br`), normalizando a integração com o frontend.
+
