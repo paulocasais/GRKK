@@ -131,6 +131,13 @@ def health_check():
         "message": "API do Goju-Ryu Karate Kai está rodando com sucesso!"
     }), 200
 
+@app.route("/api/debug-version", methods=["GET"])
+def debug_version():
+    return jsonify({
+        "version": "v1.0.3-debug",
+        "message": "Nova versão do backend com suporte a debug de exclusão está rodando!"
+    }), 200
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     is_dev = os.environ.get("FLASK_ENV", "development") != "production"
