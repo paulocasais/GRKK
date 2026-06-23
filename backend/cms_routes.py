@@ -132,24 +132,31 @@ def create_cms_routes(app: Flask):
 
     @app.route("/api/cms/<tipo>/<id>", methods=["DELETE"])
     def delete_cms_item(tipo, id):
-        user = get_current_user()
-        if not user or user.get("tipo") != "admin":
-            return jsonify({"error": "Não autorizado"}), 403
+        import traceback
+        try:
+            user = get_current_user()
+            if not user or user.get("tipo") != "admin":
+                return jsonify({"error": "Não autorizado"}), 403
 
-        tabela = ""
-        if tipo == "banner":
-            tabela = "cms_banners"
-        elif tipo == "equipe":
-            tabela = "team_members"
-        elif tipo == "galeria":
-            tabela = "gallery_items"
-        else:
-            return jsonify({"error": "Tipo inválido"}), 400
+            tabela = ""
+            if tipo == "banner":
+                tabela = "cms_banners"
+            elif tipo == "equipe":
+                tabela = "team_members"
+            elif tipo == "galeria":
+                tabela = "gallery_items"
+            else:
+                return jsonify({"error": "Tipo inválido"}), 400
 
-        res, error = SupabaseService.delete(tabela, id)
-        if error:
-            return jsonify({"error": error}), 500
-        return jsonify({"sucesso": True}), 200
+            res, error = SupabaseService.delete(tabela, id)
+            if error:
+                return jsonify({"error": error}), 500
+            return jsonify({"sucesso": True}), 200
+        except Exception as e:
+            return jsonify({
+                "error": f"Crash no backend: {str(e)}",
+                "traceback": traceback.format_exc()
+            }), 500
 
     @app.route("/api/documentos", methods=["GET", "POST"])
     def manage_documentos():
