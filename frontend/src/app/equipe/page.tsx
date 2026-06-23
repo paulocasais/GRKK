@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { User } from 'lucide-react';
 
 interface TeamMember {
   id: string | number;
@@ -108,11 +109,9 @@ export default function EquipePage() {
                         <img src={member.photo_url} alt={member.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       ) : (
-                        <div className="flex flex-col items-center gap-3 opacity-20">
+                        <div className="flex flex-col items-center gap-3 opacity-20 text-white">
                           <div className="w-16 h-16 rounded-full border-2 border-white flex items-center justify-center">
-                            <span className="font-cinzel text-white text-xl">
-                              {member.name ? member.name.split(' ')[0]?.[0] || 'G' : 'G'}{member.name ? member.name.split(' ')[1]?.[0] || 'R' : 'R'}
-                            </span>
+                            <User size={28} />
                           </div>
                         </div>
                       )}
