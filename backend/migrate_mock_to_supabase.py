@@ -51,7 +51,7 @@ TABELAS_ORDEM = [
 COLUNAS_VALIDAS = {
     "profiles": ["id", "nome", "email", "telefone", "tipo", "status", "avatar_url", "cidade", "nome_fantasia", "created_at", "updated_at"],
     "filiais": ["id", "nome", "email", "telefone", "status", "codigo_interno", "nome_fantasia", "tipo", "cpf_responsavel", "graduacao_responsavel", "registro_federativo", "cep", "rua", "numero", "bairro", "municipio", "estado", "motivo_reprovacao", "created_at", "updated_at"],
-    "atletas": ["id", "email", "telefone", "status", "faixa", "filial_id", "filial_nome", "cpf", "sexo", "data_nascimento", "nome_professor", "endereco", "cidade", "uf", "responsavel_nome", "responsavel_cpf", "responsavel_email", "responsavel_telefone", "pontos", "registro_federacao", "created_at", "updated_at"],
+    "atletas": ["id", "email", "telefone", "status", "faixa", "filial_id", "filial_nome", "cpf", "sexo", "data_nascimento", "nome_professor", "endereco", "cidade", "uf", "responsavel_nome", "responsavel_cpf", "responsavel_email", "responsavel_telefone", "medico_alergias", "medico_plano", "medico_restricoes", "medico_diagnosticos", "pontos", "registro_federacao", "created_at", "updated_at"],
     "eventos": ["id", "titulo", "descricao", "data_inicio", "data_fim", "tipo", "imagem_url", "created_at", "updated_at"],
     "eventos_inscricoes": ["id", "evento_id", "atleta_id", "atleta_nome", "filial_id", "filial_nome", "categoria", "faixa", "idade", "pagamento_status", "status", "created_at"],
     "eventos_chaves": ["id", "evento_id", "modalidade", "brackets", "created_at", "updated_at"],
