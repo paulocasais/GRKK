@@ -187,13 +187,13 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                {/* Botão Área do Membro + Dropdown */}
+                {/* Botão Área Restrita + Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => { setShowLoginDropdown(!showLoginDropdown); setLoginDropdownMode('login'); }}
                     className="border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-2 hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer"
                   >
-                    Área do Membro
+                    Área Restrita
                   </button>
 
                   {showLoginDropdown && (
@@ -319,7 +319,7 @@ export default function Navbar() {
                           </p>
                           <div className="space-y-2.5">
                             <Link
-                              href="/auth/cadastro-atleta"
+                              href="/auth/cadastro-atleta/"
                               onClick={() => setShowLoginDropdown(false)}
                               className="flex items-center gap-3 w-full p-3 border border-gold/30 hover:border-gold bg-gold/5 hover:bg-gold/10 transition-all duration-200 group"
                             >
@@ -332,7 +332,7 @@ export default function Navbar() {
                               </div>
                             </Link>
                             <Link
-                              href="/auth/cadastro-filial"
+                              href="/auth/cadastro-filial/"
                               onClick={() => setShowLoginDropdown(false)}
                               className="flex items-center gap-3 w-full p-3 border border-primary/30 hover:border-primary bg-primary/5 hover:bg-primary/10 transition-all duration-200 group"
                             >
@@ -434,7 +434,7 @@ export default function Navbar() {
                 href="/auth"
                 className="mt-4 text-center border border-primary text-primary text-xs font-cinzel tracking-widest uppercase px-5 py-3 hover:bg-primary hover:text-white transition-all duration-300"
               >
-                Área do Membro
+                Área Restrita
               </Link>
             </>
           )}

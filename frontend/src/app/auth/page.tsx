@@ -72,7 +72,7 @@ export default function EntrarPage() {
             ← Voltar ao site
           </Link>
 
-          <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-3">Área do Membro</p>
+          <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-3">Área Restrita</p>
           <h2 className="font-cinzel text-4xl text-white font-bold mb-2">Entrar</h2>
           <div className="w-8 h-0.5 bg-primary mb-8" />
 
@@ -123,11 +123,11 @@ export default function EntrarPage() {
               Ainda não possui cadastro?
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center text-xs font-cinzel uppercase tracking-wider">
-              <Link href="/auth/cadastro-atleta" className="text-primary hover:underline font-semibold transition-all">
+              <Link href="/auth/cadastro-atleta/" className="text-primary hover:underline font-semibold transition-all">
                 Cadastro de Atleta
               </Link>
               <span className="hidden sm:inline text-zinc-700">|</span>
-              <Link href="/auth/cadastro-filial" className="text-gold hover:underline font-semibold transition-all">
+              <Link href="/auth/cadastro-filial/" className="text-gold hover:underline font-semibold transition-all">
                 Filiação de Dojo
               </Link>
             </div>

@@ -11,14 +11,16 @@ env_path = os.path.join(base_dir, ".env")
 load_dotenv(dotenv_path=env_path)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY")
+# Prefer service role key for backend operations to bypass RLS, fallback to anon key
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY") or os.environ.get("SUPABASE_ANON_KEY")
 
 # Verifica se o Supabase está configurado com chaves válidas ou se usará o emulador mock
 is_mock_mode = (
     not SUPABASE_URL 
     or not SUPABASE_KEY 
-    or "sua-url-do-supabase" in SUPABASE_URL 
-    or "seu-anon-key-do-supabase" in SUPABASE_KEY
+    or "sua-url" in SUPABASE_URL 
+    or "seu-anon-key" in SUPABASE_KEY
+    or "seu-token-anon-key" in SUPABASE_KEY
 )
 
 # Força a desativação do modo mock em produção ou se configurado no .env
@@ -177,10 +179,43 @@ class SupabaseService:
     @staticmethod
     def login(email, password=None):
         """Verifica a existência do perfil para fins de login na fase 1"""
+        resolved_email = email
+        
+        # Se o identificador não contém '@', assumimos que seja telefone e tentamos resolver para email
+        if email and "@" not in email:
+            input_digits = "".join(filter(str.isdigit, email))
+            if input_digits:
+                if is_mock_mode:
+                    profiles = mock_db.data.get("profiles", [])
+                    for p in profiles:
+                        p_tel = "".join(filter(str.isdigit, p.get("telefone", "")))
+                        if p_tel and p_tel == input_digits:
+                            resolved_email = p.get("email", email)
+                            break
+                else:
+                    try:
+                        # Busca correspondência exata de telefone no banco primeiro
+                        prof_res = supabase.table("profiles").select("email").eq("telefone", email).execute()
+                        if prof_res.data:
+                            resolved_email = prof_res.data[0]["email"]
+                        else:
+                            # Se não achar por correspondência exata, busca todos os profiles para filtrar por dígitos limpos
+                            all_profs = supabase.table("profiles").select("email", "telefone").execute()
+                            if all_profs.data:
+                                for row in all_profs.data:
+                                    row_tel = row.get("telefone")
+                                    if row_tel:
+                                        row_digits = "".join(filter(str.isdigit, row_tel))
+                                        if row_digits and row_digits == input_digits:
+                                            resolved_email = row["email"]
+                                            break
+                    except Exception as lookup_err:
+                        print(f"Erro ao buscar email por telefone no login: {lookup_err}")
+
         if is_mock_mode:
             profiles = mock_db.data.get("profiles", [])
             for p in profiles:
-                if p["email"].lower() == email.lower():
+                if p["email"].lower() == resolved_email.lower():
                     # Sucesso no login mockado (sem senha)
                     user_data = dict(p)
                     # Enriquece com dados adicionais se for atleta ou filial
@@ -200,10 +235,13 @@ class SupabaseService:
             return None, "Usuário não encontrado."
         else:
             try:
-                # Login real usando o auth do Supabase
-                res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+                # Login real usando um cliente temporário para não sobrescrever os cabeçalhos globais do service_role com o token do usuário.
+                # Se sobrescrevermos os cabeçalhos globais, as consultas subsequentes ao banco falharão por causa de políticas RLS.
+                anon_key = os.environ.get("SUPABASE_ANON_KEY") or SUPABASE_KEY
+                temp_supabase = create_client(SUPABASE_URL, anon_key)
+                res = temp_supabase.auth.sign_in_with_password({"email": resolved_email, "password": password})
                 if res.user:
-                    # Busca as informações estendidas do profile
+                    # Busca as informações estendidas do profile usando o cliente global (que usa service_role e pula RLS)
                     profile_res = supabase.table("profiles").select("*").eq("id", res.user.id).single().execute()
                     if profile_res.data:
                         user_data = dict(profile_res.data)

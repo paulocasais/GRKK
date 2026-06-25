@@ -110,7 +110,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Goju-Ryu Karate Kai — Todos os direitos reservados.
           </p>
           <p className="text-gray-700 text-xs">
-            <Link href="/auth" className="hover:text-gray-500 transition-colors">Área do Membro</Link>
+            <Link href="/auth" className="hover:text-gray-500 transition-colors">Área Restrita</Link>
           </p>
         </div>
       </div>

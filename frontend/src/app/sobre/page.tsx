@@ -1,14 +1,49 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Shield, Heart, Star, Award, Users, Globe } from 'lucide-react';
 
-export const metadata = {
-  title: 'A Academia - Goju-Ryu Karate Kai',
-  description: 'História, missão e valores da nossa federação de Karatê.',
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
 export default function SobrePage() {
+  const [siteConfig, setSiteConfig] = useState({
+    hero_subtitulo: 'Nossa História',
+    hero_titulo: 'A Academia',
+    hero_descricao: 'Conheça a história, missão e valores do Goju-Ryu Karate Kai, uma academia comprometida com a preservação do Karatê Goju-Ryu tradicional de Okinawa.',
+    desde_subtitulo: 'Desde o Início',
+    desde_titulo: 'Nossa História',
+    desde_paragrafo1: 'O Goju-Ryu Karate Kai nasceu com a missão de preservar e difundir o Karatê Goju-Ryu Okinawano em Salvador, Bahia, mantendo viva a tradição secular desta arte marcial.',
+    desde_paragrafo2: 'Filiados à IOGKF Brasil — a maior organização de Karatê Goju-Ryu do mundo —, seguimos o currículo técnico e filosófico estabelecido pelos grandes mestres de Okinawa, garantindo a autenticidade do ensinamento.',
+    desde_paragrafo3: 'Nossa academia acolhe praticantes de todas as idades e níveis, oferecendo um ambiente de aprendizado respeitoso, disciplinado e transformador.',
+    missao_desc: 'Preservar e transmitir o Karatê Goju-Ryu Okinawano em sua forma mais autêntica, promovendo o desenvolvimento humano integral através da arte marcial.',
+    visao_desc: 'Ser referência no Karatê Goju-Ryu tradicional em Salvador, formando praticantes técnicos, éticos e comprometidos com os valores do Budo.',
+    valores_desc: 'Respeito, disciplina, perseverança, lealdade e autocontrole — os pilares que sustentam cada treino e cada relação dentro do dojo.'
+  });
+
+  useEffect(() => {
+    document.title = 'A Academia - Goju-Ryu Karate Kai';
+    const carregarConfig = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/cms/config`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.config && data.config.academia) {
+            const ac = data.config.academia;
+            setSiteConfig(prev => ({
+              ...prev,
+              ...ac
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar configurações do CMS:", err);
+      }
+    };
+    carregarConfig();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -18,13 +53,15 @@ export default function SobrePage() {
           <div className="absolute inset-0 opacity-5"
             style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, #c41e2a 0%, transparent 60%)' }} />
           <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16">
-            <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">Nossa História</p>
+            <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">
+              {siteConfig.hero_subtitulo}
+            </p>
             <h1 className="font-cinzel text-5xl md:text-6xl font-bold text-white leading-tight mb-6">
-              A Academia
+              {siteConfig.hero_titulo}
             </h1>
             <div className="w-16 h-0.5 bg-primary mb-6" />
             <p className="text-gray-400 max-w-2xl text-lg leading-relaxed font-body">
-              Conheça a história, missão e valores do Goju-Ryu Karate Kai, uma academia comprometida com a preservação do Karatê Goju-Ryu tradicional de Okinawa.
+              {siteConfig.hero_descricao}
             </p>
           </div>
         </section>
@@ -34,23 +71,17 @@ export default function SobrePage() {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">Desde o Início</p>
-                <h2 className="font-cinzel text-4xl font-bold text-white mb-6">Nossa História</h2>
+                <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">
+                  {siteConfig.desde_subtitulo}
+                </p>
+                <h2 className="font-cinzel text-4xl font-bold text-white mb-6">
+                  {siteConfig.desde_titulo}
+                </h2>
                 <div className="w-12 h-0.5 bg-primary mb-8" />
                 <div className="flex flex-col gap-5 text-gray-300 leading-relaxed font-body">
-                  <p>
-                    O Goju-Ryu Karate Kai nasceu com a missão de preservar e difundir o Karatê Goju-Ryu Okinawano
-                    em Salvador, Bahia, mantendo viva a tradição secular desta arte marcial.
-                  </p>
-                  <p>
-                    Filiados à IOGKF Brasil — a maior organização de Karatê Goju-Ryu do mundo —, seguimos o currículo
-                    técnico e filosófico estabelecido pelos grandes mestres de Okinawa, garantindo a autenticidade
-                    do ensinamento.
-                  </p>
-                  <p>
-                    Nossa academia acolhe praticantes de todas as idades e níveis, oferecendo um ambiente de
-                    aprendizado respeitoso, disciplinado e transformador.
-                  </p>
+                  {siteConfig.desde_paragrafo1 && <p>{siteConfig.desde_paragrafo1}</p>}
+                  {siteConfig.desde_paragrafo2 && <p>{siteConfig.desde_paragrafo2}</p>}
+                  {siteConfig.desde_paragrafo3 && <p>{siteConfig.desde_paragrafo3}</p>}
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -87,17 +118,17 @@ export default function SobrePage() {
                 {
                   icon: Heart,
                   title: 'Missão',
-                  desc: 'Preservar e transmitir o Karatê Goju-Ryu Okinawano em sua forma mais autêntica, promovendo o desenvolvimento humano integral através da arte marcial.',
+                  desc: siteConfig.missao_desc,
                 },
                 {
                   icon: Star,
                   title: 'Visão',
-                  desc: 'Ser referência no Karatê Goju-Ryu tradicional em Salvador, formando praticantes técnicos, éticos e comprometidos com os valores do Budo.',
+                  desc: siteConfig.visao_desc,
                 },
                 {
                   icon: Shield,
                   title: 'Valores',
-                  desc: 'Respeito, disciplina, perseverança, lealdade e autocontrole — os pilares que sustentam cada treino e cada relação dentro do dojo.',
+                  desc: siteConfig.valores_desc,
                 },
               ].map((item, i) => {
                 const Icon = item.icon;

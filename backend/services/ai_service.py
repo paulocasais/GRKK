@@ -1,16 +1,23 @@
 import os
 import json
 import re
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Tenta importar a biblioteca do Gemini de forma segura para nao crashar o startup
+has_gemini_sdk = False
+try:
+    import google.generativeai as genai
+    has_gemini_sdk = True
+except ImportError:
+    genai = None
 
 # Recupera a chave da API do Gemini das variáveis de ambiente
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 has_gemini = False
-if GEMINI_API_KEY and "sua-chave-api" not in GEMINI_API_KEY and GEMINI_API_KEY.strip() != "":
+if has_gemini_sdk and GEMINI_API_KEY and "sua-chave-api" not in GEMINI_API_KEY and GEMINI_API_KEY.strip() != "":
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         has_gemini = True
@@ -25,9 +32,9 @@ if os.path.exists(GLOSSARY_PATH):
     try:
         with open(GLOSSARY_PATH, "r", encoding="utf-8") as f:
             GLOSSARY = json.load(f)
-        print(f"Glossário carregado com sucesso ({len(GLOSSARY)} termos).")
+        print(f"Glossario carregado com sucesso ({len(GLOSSARY)} termos).")
     except Exception as e:
-        print(f"Erro ao carregar glossário em português: {e}")
+        print(f"Erro ao carregar glossario em portugues: {e}")
 
 def save_glossary():
     """Salva o estado atual do glossário em memória de volta para o arquivo JSON"""
@@ -36,7 +43,7 @@ def save_glossary():
             json.dump(GLOSSARY, f, ensure_ascii=False, indent=2)
         return True
     except Exception as e:
-        print(f"Erro ao salvar o glossário: {e}")
+        print(f"Erro ao salvar o glossario: {e}")
         return False
 
 def get_all_terms():

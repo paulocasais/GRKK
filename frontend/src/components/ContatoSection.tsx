@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Send, CheckCircle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -10,6 +10,37 @@ export default function ContatoSection() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const [siteConfig, setSiteConfig] = useState({
+    secao_subtitulo: 'Fale Conosco',
+    secao_titulo: 'Entre em Contato',
+    secao_desc: 'Tire suas dúvidas, agende uma aula experimental ou venha nos conhecer.',
+    telefone: '(71) 9 0000-0000',
+    telefone_tel: '+5571900000000',
+    email: 'contato@gojoryukaratekai.com.br',
+    endereco: 'Salvador, Bahia, Brasil',
+    horarios: 'Segunda e Quarta: 19:00 — 21:00\nSábado: 09:00 — 11:00'
+  });
+
+  useEffect(() => {
+    const carregarConfig = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/cms/config`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.config && data.config.contato) {
+            setSiteConfig(prev => ({
+              ...prev,
+              ...data.config.contato
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar contato config:", err);
+      }
+    };
+    carregarConfig();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,11 +75,11 @@ export default function ContatoSection() {
 
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">Fale Conosco</p>
-          <h2 className="font-cinzel text-4xl md:text-5xl font-bold text-white">Entre em Contato</h2>
+          <p className="text-primary font-cinzel text-xs tracking-[0.3em] uppercase mb-4">{siteConfig.secao_subtitulo}</p>
+          <h2 className="font-cinzel text-4xl md:text-5xl font-bold text-white">{siteConfig.secao_titulo}</h2>
           <div className="w-16 h-0.5 bg-primary mx-auto mt-6 mb-5" />
           <p className="text-gray-400 max-w-lg mx-auto font-body">
-            Tire suas dúvidas, agende uma aula experimental ou venha nos conhecer.
+            {siteConfig.secao_desc}
           </p>
         </div>
 
@@ -61,7 +92,7 @@ export default function ContatoSection() {
                 <MapPin size={18} className="text-primary flex-shrink-0" />
                 <h4 className="font-cinzel text-white text-sm tracking-wider">Localização</h4>
               </div>
-              <p className="text-gray-400 text-sm pl-8 font-body">Salvador, Bahia, Brasil</p>
+              <p className="text-gray-400 text-sm pl-8 font-body">{siteConfig.endereco}</p>
             </div>
             
             <div className="p-6 border border-zinc-900 bg-zinc-900/40 rounded-3xl hover:border-primary/20 transition-all duration-300">
@@ -69,8 +100,8 @@ export default function ContatoSection() {
                 <Phone size={18} className="text-primary flex-shrink-0" />
                 <h4 className="font-cinzel text-white text-sm tracking-wider">Telefone</h4>
               </div>
-              <a href="tel:+5571900000000" className="text-gray-400 text-sm pl-8 hover:text-primary transition-colors font-body">
-                (71) 9 0000-0000
+              <a href={`tel:${siteConfig.telefone_tel}`} className="text-gray-400 text-sm pl-8 hover:text-primary transition-colors font-body">
+                {siteConfig.telefone}
               </a>
             </div>
 
@@ -79,9 +110,9 @@ export default function ContatoSection() {
                 <Mail size={18} className="text-primary flex-shrink-0" />
                 <h4 className="font-cinzel text-white text-sm tracking-wider">E-mail</h4>
               </div>
-              <a href="mailto:contato@gojoryukaratekai.com.br"
+              <a href={`mailto:${siteConfig.email}`}
                 className="text-gray-400 text-sm pl-8 hover:text-primary transition-colors break-all font-body">
-                contato@gojoryukaratekai.com.br
+                {siteConfig.email}
               </a>
             </div>
 
@@ -89,10 +120,12 @@ export default function ContatoSection() {
             <div className="p-6 border border-zinc-900 bg-zinc-900/40 rounded-3xl">
               <h4 className="font-cinzel text-white text-sm tracking-wider mb-4">Horários de Treino</h4>
               <div className="flex flex-col gap-2 font-body">
-                {[
-                  { dia: 'Segunda e Quarta', hora: '19:00 — 21:00' },
-                  { dia: 'Sábado', hora: '09:00 — 11:00' },
-                ].map((h, i) => (
+                {siteConfig.horarios.split('\n').map((line, idx) => {
+                  const parts = line.split(':');
+                  const dia = parts[0]?.trim() || '';
+                  const hora = parts.slice(1).join(':')?.trim() || '';
+                  return { dia, hora };
+                }).filter(h => h.dia && h.hora).map((h, i) => (
                   <div key={i} className="flex justify-between text-sm">
                     <span className="text-gray-500">{h.dia}</span>
                     <span className="text-white font-cinzel">{h.hora}</span>

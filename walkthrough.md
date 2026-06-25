@@ -110,3 +110,32 @@ Realizamos requisições de teste diretamente no endpoint público:
 - **Status da API**: `/api/health` passou a retornar `200 OK` e `"status": "healthy"`.
 - **CORS**: O endpoint `/api/auth/me` agora retorna os cabeçalhos corretos (`Access-Control-Allow-Origin: https://gojuryukaratekai.com.br`), normalizando a integração com o frontend.
 
+---
+
+## 9. Ajustes de CMS e Área Restrita (Fase Atual)
+
+Implementamos e validamos as alterações solicitadas para dinamizar as páginas institucionais e readequar a terminologia de acesso do site:
+
+1. **Alteração do rótulo "Área do Membro" para "Área Restrita"**:
+   - Modificado no menu de navegação ([Navbar.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/components/Navbar.tsx)).
+   - Modificado no rodapé ([Footer.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/components/Footer.tsx)).
+   - Modificado na tela de login ([auth/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/auth/page.tsx)).
+
+2. **Criação de novos menus de edição no painel administrativo (CMS)**:
+   - **A Academia**: Adicionada aba para gerenciar o Hero, a História e os Princípios (Missão, Visão e Valores).
+   - **Transparência**: Adicionada aba para gerenciar os textos do Hero e descrição de compromisso institucional.
+   - **Contato**: Adicionada aba para gerenciar os textos de cabeçalho, telefone, e-mail, endereço e os horários de treino (em formato de quebra de linha).
+   - Modificado: [admin/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/(dashboard)/admin/page.tsx).
+
+3. **Páginas Públicas Dinâmicas**:
+   - As páginas públicas correspondentes foram refatoradas para buscar as configurações atualizadas dinamicamente a partir do endpoint do CMS (`/api/cms/config`), contendo fallbacks completos em português em caso de indisponibilidade de rede:
+     - [sobre/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/sobre/page.tsx)
+     - [transparencia/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/transparencia/page.tsx)
+     - [contato/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/contato/page.tsx)
+     - [ContatoSection.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/components/ContatoSection.tsx)
+
+4. **Validação**:
+   - **Compilação**: Executamos o build completo do frontend com `npm run build`, que compilou TypeScript e Next.js com sucesso absoluto.
+   - **Deploy**: Executamos o script de empacotamento `create_zip_skip_venv.py` para gerar um novo pacote limpo de deploy do backend (`backend_clean.zip`), pronto para envio ao servidor HostGator.
+
+

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone } from 'lucide-react';
+import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone, Shield, FileText, BookOpen } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -44,7 +44,7 @@ export default function AdminCMSPage() {
   }
 
   const { usuario, tipo } = useAuth();
-  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens' | 'paginainicial' | 'sensei-ia'>('banners');
+  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens' | 'paginainicial' | 'sensei-ia' | 'academia' | 'transparencia' | 'contato'>('banners');
   
   const [banners, setBanners] = useState<Banner[]>([]);
   const [equipe, setEquipe] = useState<TeamMember[]>([]);
@@ -90,6 +90,39 @@ export default function AdminCMSPage() {
       ju_itens: string[];
     };
     katas: Array<{ nome: string; significado: string; foco: string; desc: string }>;
+    academia?: {
+      hero_subtitulo: string;
+      hero_titulo: string;
+      hero_descricao: string;
+      desde_subtitulo: string;
+      desde_titulo: string;
+      desde_paragrafo1: string;
+      desde_paragrafo2: string;
+      desde_paragrafo3: string;
+      missao_desc: string;
+      visao_desc: string;
+      valores_desc: string;
+    };
+    transparencia?: {
+      hero_title: string;
+      hero_subtitle: string;
+      hero_breadcrumb: string;
+      intro_text: string;
+      compromisso_title: string;
+      compromisso_text: string;
+    };
+    contato?: {
+      hero_title: string;
+      hero_subtitle: string;
+      secao_subtitulo: string;
+      secao_titulo: string;
+      secao_desc: string;
+      telefone: string;
+      telefone_tel: string;
+      email: string;
+      endereco: string;
+      horarios: string;
+    };
   }
 
   const [siteConfig, setSiteConfig] = useState<ConfigInicial | null>(null);
@@ -108,6 +141,42 @@ export default function AdminCMSPage() {
     ju_titulo: 'JU (Suavidade / Flexibilidade)',
     ju_desc: 'Representa movimentos circulares de esquiva, desvios suaves da força adversária, controle respiratório relaxado e agilidade. Ensina a ceder para vencer, redirecionando o fluxo de energia do oponente com precisão.',
     ju_itens: 'Katas de flexibilidade como Tensho, Esquivas circulares e fluidas (Tai Sabaki), Técnicas de agarre e projeção (Kakie)'
+  });
+
+  const [academiaForm, setAcademiaForm] = useState({
+    hero_subtitulo: 'Nossa História',
+    hero_titulo: 'A Academia',
+    hero_descricao: 'Conheça a história, missão e valores do Goju-Ryu Karate Kai, uma academia comprometida com a preservação do Karatê Goju-Ryu tradicional de Okinawa.',
+    desde_subtitulo: 'Desde o Início',
+    desde_titulo: 'Nossa História',
+    desde_paragrafo1: 'O Goju-Ryu Karate Kai nasceu com a missão de preservar e difundir o Karatê Goju-Ryu Okinawano em Salvador, Bahia, mantendo viva a tradição secular desta arte marcial.',
+    desde_paragrafo2: 'Filiados à IOGKF Brasil — a maior organização de Karatê Goju-Ryu do mundo —, seguimos o currículo técnico e filosófico estabelecido pelos grandes mestres de Okinawa, garantindo a autenticidade do ensinamento.',
+    desde_paragrafo3: 'Nossa academia acolhe praticantes de todas as idades e níveis, oferecendo um ambiente de aprendizado respeitoso, disciplinado e transformador.',
+    missao_desc: 'Preservar e transmitir o Karatê Goju-Ryu Okinawano em sua forma mais autêntica, promovendo o desenvolvimento humano integral através da arte marcial.',
+    visao_desc: 'Ser referência no Karatê Goju-Ryu tradicional em Salvador, formando praticantes técnicos, éticos e comprometidos com os valores do Budo.',
+    valores_desc: 'Respeito, disciplina, perseverança, lealdade e autocontrole — os pilares que sustentam cada treino e cada relação dentro do dojo.'
+  });
+
+  const [transparenciaForm, setTransparenciaForm] = useState({
+    hero_title: 'Transparência',
+    hero_subtitle: 'A GRKK atua com ética, responsabilidade e compromisso público.',
+    hero_breadcrumb: 'Transparência',
+    intro_text: 'A GRKK disponibiliza seu estatuto social, diretoria vigência, CNPJ, regulamentos e documentos institucionais para consulta pública, reafirmando seu compromisso com a transparência e a boa governança esportiva.',
+    compromisso_title: 'Nosso Compromisso',
+    compromisso_text: 'A GRKK atua como executora de projetos esportivos e sociais, operando de forma organizada, transparente e descentralizada, garantindo a lisura de suas atividades administrativas e esportivas.'
+  });
+
+  const [contatoForm, setContatoForm] = useState({
+    hero_title: 'Contato',
+    hero_subtitle: 'Tire suas dúvidas, agende uma aula experimental ou venha nos conhecer. Onegai shimasu!',
+    secao_subtitulo: 'Fale Conosco',
+    secao_titulo: 'Entre em Contato',
+    secao_desc: 'Tire suas dúvidas, agende uma aula experimental ou venha nos conhecer.',
+    telefone: '(71) 9 0000-0000',
+    telefone_tel: '+5571900000000',
+    email: 'contato@gojoryukaratekai.com.br',
+    endereco: 'Salvador, Bahia, Brasil',
+    horarios: 'Segunda e Quarta: 19:00 — 21:00\nSábado: 09:00 — 11:00'
   });
   const [katasForm, setKatasForm] = useState<Array<{ nome: string; significado: string; foco: string; desc: string }>>([
     {
@@ -213,6 +282,45 @@ export default function AdminCMSPage() {
           desc: "Não possui chutes. Desenvolve resistência extrema nas pernas utilizando a base Shiko-Dachi e defesas contra agarres por trás."
         }
       ]);
+      if (siteConfig.academia) {
+        setAcademiaForm({
+          hero_subtitulo: siteConfig.academia.hero_subtitulo || 'Nossa História',
+          hero_titulo: siteConfig.academia.hero_titulo || 'A Academia',
+          hero_descricao: siteConfig.academia.hero_descricao || '',
+          desde_subtitulo: siteConfig.academia.desde_subtitulo || 'Desde o Início',
+          desde_titulo: siteConfig.academia.desde_titulo || 'Nossa História',
+          desde_paragrafo1: siteConfig.academia.desde_paragrafo1 || '',
+          desde_paragrafo2: siteConfig.academia.desde_paragrafo2 || '',
+          desde_paragrafo3: siteConfig.academia.desde_paragrafo3 || '',
+          missao_desc: siteConfig.academia.missao_desc || '',
+          visao_desc: siteConfig.academia.visao_desc || '',
+          valores_desc: siteConfig.academia.valores_desc || ''
+        });
+      }
+      if (siteConfig.transparencia) {
+        setTransparenciaForm({
+          hero_title: siteConfig.transparencia.hero_title || 'Transparência',
+          hero_subtitle: siteConfig.transparencia.hero_subtitle || '',
+          hero_breadcrumb: siteConfig.transparencia.hero_breadcrumb || 'Transparência',
+          intro_text: siteConfig.transparencia.intro_text || '',
+          compromisso_title: siteConfig.transparencia.compromisso_title || 'Nosso Compromisso',
+          compromisso_text: siteConfig.transparencia.compromisso_text || ''
+        });
+      }
+      if (siteConfig.contato) {
+        setContatoForm({
+          hero_title: siteConfig.contato.hero_title || 'Contato',
+          hero_subtitle: siteConfig.contato.hero_subtitle || '',
+          secao_subtitulo: siteConfig.contato.secao_subtitulo || 'Fale Conosco',
+          secao_titulo: siteConfig.contato.secao_titulo || 'Entre em Contato',
+          secao_desc: siteConfig.contato.secao_desc || '',
+          telefone: siteConfig.contato.telefone || '(71) 9 0000-0000',
+          telefone_tel: siteConfig.contato.telefone_tel || '+5571900000000',
+          email: siteConfig.contato.email || '',
+          endereco: siteConfig.contato.endereco || '',
+          horarios: siteConfig.contato.horarios || 'Segunda e Quarta: 19:00 — 21:00\nSábado: 09:00 — 11:00'
+        });
+      }
     }
   }, [siteConfig]);
 
@@ -518,7 +626,7 @@ export default function AdminCMSPage() {
           <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold font-sans">Administração dinâmica do portal público</p>
         </div>
 
-        {activeTab !== 'mensagens' && (
+        {(activeTab === 'banners' || activeTab === 'equipe' || activeTab === 'galeria' || activeTab === 'sensei-ia') && (
           <button
             onClick={() => {
               if (activeTab === 'sensei-ia') {
@@ -540,7 +648,7 @@ export default function AdminCMSPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full sm:max-w-xl md:max-w-2xl flex-wrap">
+      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full max-w-5xl flex-wrap animate-in fade-in duration-300">
         <button
           onClick={() => setActiveTab('banners')}
           className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -588,6 +696,30 @@ export default function AdminCMSPage() {
           }`}
         >
           <MessageSquare size={12} /> Sensei IA
+        </button>
+        <button
+          onClick={() => setActiveTab('academia')}
+          className={`flex-1 min-w-[90px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === 'academia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <BookOpen size={12} /> A Academia
+        </button>
+        <button
+          onClick={() => setActiveTab('transparencia')}
+          className={`flex-1 min-w-[100px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
+            activeTab === 'transparencia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <FileText size={12} /> Transparência
+        </button>
+        <button
+          onClick={() => setActiveTab('contato')}
+          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex-items-center justify-center gap-1.5 ${
+            activeTab === 'contato' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+          }`}
+        >
+          <Mail size={12} /> Contato
         </button>
       </div>
 
@@ -1004,6 +1136,382 @@ export default function AdminCMSPage() {
                 )}
               </div>
             )}
+          </div>
+        </div>
+      ) : activeTab === 'academia' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {/* 1. HERO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Layout className="text-primary" size={16} /> 1. Banner Superior (Hero Section)
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtítulo Superior</label>
+                <input
+                  type="text"
+                  value={academiaForm.hero_subtitulo}
+                  onChange={e => setAcademiaForm({ ...academiaForm, hero_subtitulo: e.target.value })}
+                  placeholder="Ex: Nossa História"
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título Principal</label>
+                <input
+                  type="text"
+                  value={academiaForm.hero_titulo}
+                  onChange={e => setAcademiaForm({ ...academiaForm, hero_titulo: e.target.value })}
+                  placeholder="Ex: A Academia"
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                <textarea
+                  value={academiaForm.hero_descricao}
+                  onChange={e => setAcademiaForm({ ...academiaForm, hero_descricao: e.target.value })}
+                  placeholder="Descrição..."
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. HISTORIA CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <BookOpen className="text-gold" size={16} /> 2. História da Academia
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtítulo da Seção</label>
+                  <input
+                    type="text"
+                    value={academiaForm.desde_subtitulo}
+                    onChange={e => setAcademiaForm({ ...academiaForm, desde_subtitulo: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                  <input
+                    type="text"
+                    value={academiaForm.desde_titulo}
+                    onChange={e => setAcademiaForm({ ...academiaForm, desde_titulo: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Parágrafo 1</label>
+                <textarea
+                  value={academiaForm.desde_paragrafo1}
+                  onChange={e => setAcademiaForm({ ...academiaForm, desde_paragrafo1: e.target.value })}
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Parágrafo 2</label>
+                <textarea
+                  value={academiaForm.desde_paragrafo2}
+                  onChange={e => setAcademiaForm({ ...academiaForm, desde_paragrafo2: e.target.value })}
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Parágrafo 3</label>
+                <textarea
+                  value={academiaForm.desde_paragrafo3}
+                  onChange={e => setAcademiaForm({ ...academiaForm, desde_paragrafo3: e.target.value })}
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. PRINCIPIOS CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Shield className="text-emerald-500" size={16} /> 3. Pilares (Missão, Visão e Valores)
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição da Missão</label>
+                <textarea
+                  value={academiaForm.missao_desc}
+                  onChange={e => setAcademiaForm({ ...academiaForm, missao_desc: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição da Visão</label>
+                <textarea
+                  value={academiaForm.visao_desc}
+                  onChange={e => setAcademiaForm({ ...academiaForm, visao_desc: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição dos Valores</label>
+                <textarea
+                  value={academiaForm.valores_desc}
+                  onChange={e => setAcademiaForm({ ...academiaForm, valores_desc: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  onClick={() => handleSaveConfig('academia', academiaForm)}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Academia
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'transparencia' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {/* 1. HERO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Layout className="text-primary" size={16} /> 1. Hero da Página de Transparência
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título da Página</label>
+                <input
+                  type="text"
+                  value={transparenciaForm.hero_title}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, hero_title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtítulo</label>
+                <input
+                  type="text"
+                  value={transparenciaForm.hero_subtitle}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, hero_subtitle: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Caminho / Breadcrumb</label>
+                <input
+                  type="text"
+                  value={transparenciaForm.hero_breadcrumb}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, hero_breadcrumb: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. INTRODUCAO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <FileText className="text-gold" size={16} /> 2. Texto de Introdução
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Texto Principal</label>
+                <textarea
+                  value={transparenciaForm.intro_text}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, intro_text: e.target.value })}
+                  rows={4}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. COMPROMISSO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Shield className="text-emerald-500" size={16} /> 3. Compromisso da Federação
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                <input
+                  type="text"
+                  value={transparenciaForm.compromisso_title}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, compromisso_title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Texto de Compromisso</label>
+                <textarea
+                  value={transparenciaForm.compromisso_text}
+                  onChange={e => setTransparenciaForm({ ...transparenciaForm, compromisso_text: e.target.value })}
+                  rows={4}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  onClick={() => handleSaveConfig('transparencia', transparenciaForm)}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Transparência
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'contato' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          {/* 1. HERO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Layout className="text-primary" size={16} /> 1. Hero da Página de Contato
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título da Página</label>
+                <input
+                  type="text"
+                  value={contatoForm.hero_title}
+                  onChange={e => setContatoForm({ ...contatoForm, hero_title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição do Hero</label>
+                <textarea
+                  value={contatoForm.hero_subtitle}
+                  onChange={e => setContatoForm({ ...contatoForm, hero_subtitle: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 2. SECAO CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <FileText className="text-gold" size={16} /> 2. Títulos da Seção de Contato
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Subtítulo da Seção</label>
+                  <input
+                    type="text"
+                    value={contatoForm.secao_subtitulo}
+                    onChange={e => setContatoForm({ ...contatoForm, secao_subtitulo: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                  <input
+                    type="text"
+                    value={contatoForm.secao_titulo}
+                    onChange={e => setContatoForm({ ...contatoForm, secao_titulo: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição da Seção</label>
+                <textarea
+                  value={contatoForm.secao_desc}
+                  onChange={e => setContatoForm({ ...contatoForm, secao_desc: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 3. DADOS CONFIG */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Phone className="text-emerald-500" size={16} /> 3. Informações de Contato e Horários
+            </h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Telefone Exibido</label>
+                  <input
+                    type="text"
+                    value={contatoForm.telefone}
+                    onChange={e => setContatoForm({ ...contatoForm, telefone: e.target.value })}
+                    placeholder="Ex: (71) 9 0000-0000"
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Link de Telefone (tel:...)</label>
+                  <input
+                    type="text"
+                    value={contatoForm.telefone_tel}
+                    onChange={e => setContatoForm({ ...contatoForm, telefone_tel: e.target.value })}
+                    placeholder="Ex: +5571900000000"
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
+                  <input
+                    type="email"
+                    value={contatoForm.email}
+                    onChange={e => setContatoForm({ ...contatoForm, email: e.target.value })}
+                    placeholder="contato@exemplo.com"
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Endereço Exibido</label>
+                  <input
+                    type="text"
+                    value={contatoForm.endereco}
+                    onChange={e => setContatoForm({ ...contatoForm, endereco: e.target.value })}
+                    placeholder="Cidade, Estado, País"
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Horários de Funcionamento (um por linha, formato: Dia: Hora)</label>
+                <textarea
+                  value={contatoForm.horarios}
+                  onChange={e => setContatoForm({ ...contatoForm, horarios: e.target.value })}
+                  placeholder="Segunda e Quarta: 19:00 — 21:00&#10;Sábado: 09:00 — 11:00"
+                  rows={3}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans"
+                />
+              </div>
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button
+                  type="button"
+                  onClick={() => handleSaveConfig('contato', contatoForm)}
+                  disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Save size={13} /> Salvar Contato
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       ) : (

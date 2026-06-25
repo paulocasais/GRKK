@@ -27,6 +27,7 @@ def create_filial_routes(app: Flask):
 
             return jsonify({"filiais": res_filiais}), 200
 
+        import uuid
         data = request.json or {}
         nome = data.get("nome")
         email = data.get("email")
@@ -36,7 +37,24 @@ def create_filial_routes(app: Flask):
         if not nome or not email:
             return jsonify({"error": "Nome e e-mail da filial são obrigatórios"}), 400
 
+        user_id = str(uuid.uuid4())
+
+        # Cria a conta no Supabase Auth se não estiver em modo mock
+        if not SupabaseService.is_mock():
+            try:
+                from services.supabase_service import supabase
+                user_attrs = {
+                    "email": email,
+                    "password": senha if senha else "GojuRyu123!",
+                    "email_confirm": True,
+                    "id": user_id
+                }
+                supabase.auth.admin.create_user(user_attrs)
+            except Exception as auth_err:
+                return jsonify({"error": f"Erro ao criar conta no Supabase Auth: {str(auth_err)}"}), 400
+
         profile_item = {
+            "id": user_id,
             "nome": nome,
             "email": email,
             "telefone": telefone or "",
@@ -45,15 +63,22 @@ def create_filial_routes(app: Flask):
         }
         profile, error = SupabaseService.insert("profiles", profile_item)
         if error:
+            # Se der erro de banco na inserção de dados, tenta remover o usuário do Auth para consistência
+            if not SupabaseService.is_mock():
+                try:
+                    from services.supabase_service import supabase
+                    supabase.auth.admin.delete_user(user_id)
+                except Exception:
+                    pass
             return jsonify({"error": error}), 500
 
         filial_item = {
-            "id": profile["id"],
+            "id": user_id,
             "nome": nome,
             "email": email,
             "telefone": telefone or "",
             "status": "pendente",
-            "codigo_interno": "MOCK-FILIAL-" + profile["id"][:5].upper()
+            "codigo_interno": "MOCK-FILIAL-" + user_id[:5].upper()
         }
         filial, error2 = SupabaseService.insert("filiais", filial_item)
         if error2:
