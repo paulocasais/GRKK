@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Trophy, CalendarDays,
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
-  Medal, CreditCard, MessageSquare, BookOpen, Package
+  Medal, CreditCard, MessageSquare, BookOpen, Package, BarChart3
 } from 'lucide-react';
 
 const NAV_ADMIN = [
@@ -17,14 +17,14 @@ const NAV_ADMIN = [
   { href: '/atletas', label: 'Atletas', icon: UserCheck },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/noticias', label: 'Notícias', icon: Newspaper },
-  { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
+  { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/estoque', label: 'Estoque', icon: Package },
   { href: '/documentos', label: 'Documentos', icon: FileText },
+  { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
-  { href: '/dojo-kun-dash', label: 'Dojo Kun', icon: BookOpen },
   { href: '/admin', label: 'Gerenciar Site (CMS)', icon: Settings },
 ];
 
@@ -33,24 +33,22 @@ const NAV_FILIAL = [
   { href: '/filial', label: 'Minha Filial', icon: Building2 },
   { href: '/atletas', label: 'Atletas', icon: UserCheck },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
-  { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
+  { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/estoque', label: 'Estoque', icon: Package },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/auditoria', label: 'Auditoria', icon: ClipboardList },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
-  { href: '/dojo-kun-dash', label: 'Dojo Kun', icon: BookOpen },
 ];
 
 const NAV_ATLETA = [
   { href: '/home', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
-  { href: '/exames', label: 'Exames de Faixa', icon: Trophy },
+  { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
-  { href: '/dojo-kun-dash', label: 'Dojo Kun', icon: BookOpen },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
 

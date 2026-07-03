@@ -32,8 +32,8 @@ interface FilialSelect {
 
 const TIPO_COBRANCA: Record<string, { label: string; cor: string }> = {
   filiacao: { label: 'Taxa de Filiação', cor: 'text-blue-400 bg-blue-500/10' },
-  anuidade: { label: 'Anuidade Federativa', cor: 'text-purple-400 bg-purple-500/10' },
-  exame: { label: 'Taxa de Exame de Faixa', cor: 'text-red-400 bg-red-500/10' },
+  anuidade: { label: 'Anuidade da Associação', cor: 'text-purple-400 bg-purple-500/10' },
+  exame: { label: 'Taxa de Graduação de Faixa', cor: 'text-red-400 bg-red-500/10' },
   evento: { label: 'Taxa de Evento/Torneio', cor: 'text-teal-400 bg-teal-500/10' },
   mensalidade: { label: 'Mensalidade', cor: 'text-orange-400 bg-orange-500/10' },
 };
@@ -248,7 +248,7 @@ export default function FinanceiroPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white font-cinzel tracking-wider">Controle Financeiro</h1>
-          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Mensalidades, anuidades e taxas federativas</p>
+          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Mensalidades, anuidades e taxas da associação</p>
         </div>
         {isAdmin && (
           <button
@@ -261,16 +261,18 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Pódio Financeiro */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
-          <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-            <CheckCircle2 size={22} />
+      <div className={`grid grid-cols-1 ${isAtleta ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-5`}>
+        {!isAtleta && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+              <CheckCircle2 size={22} />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-white font-cinzel">R$ {totalPago.toFixed(2)}</p>
+              <p className="text-xs text-zinc-500">Total Pago</p>
+            </div>
           </div>
-          <div>
-            <p className="text-2xl font-black text-white font-cinzel">R$ {totalPago.toFixed(2)}</p>
-            <p className="text-xs text-zinc-500">Total Pago</p>
-          </div>
-        </div>
+        )}
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
@@ -448,8 +450,14 @@ export default function FinanceiroPage() {
 
             {metodoPagamento === 'pix' ? (
               <div className="flex flex-col items-center gap-4">
-                <div className="bg-white p-3 rounded-xl">
-                  <QrCode className="w-28 h-28 text-zinc-950" />
+                <div className="bg-white p-1.5 rounded-xl flex items-center justify-center">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=09090b&margin=0&data=${encodeURIComponent(
+                      `00020101021226830014br.gov.bcb.pix2561pix.grkk.com.br/pagamento/cobranca5204000053039865406${selectedPagamento.valor.toFixed(2)}5802BR5915Goju Ryu Karate6008Salvador62070503***63041A2B`
+                    )}`}
+                    alt="QR Code Pix"
+                    className="w-28 h-28 object-contain"
+                  />
                 </div>
                 <button
                   onClick={() => {
@@ -576,9 +584,9 @@ export default function FinanceiroPage() {
                   onChange={(e) => setNovaCobrancaForm({ ...novaCobrancaForm, tipo: e.target.value })}
                   className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
                 >
-                  <option value="anuidade">Anuidade Federativa</option>
+                  <option value="anuidade">Anuidade da Associação</option>
                   <option value="mensalidade">Mensalidade</option>
-                  <option value="exame">Taxa de Exame de Faixa</option>
+                  <option value="exame">Taxa de Graduação de Faixa</option>
                   <option value="evento">Taxa de Torneio / Evento</option>
                 </select>
               </div>

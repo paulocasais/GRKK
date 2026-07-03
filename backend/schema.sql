@@ -118,9 +118,19 @@ CREATE TABLE IF NOT EXISTS exames (
     titulo VARCHAR(255) NOT NULL,
     descricao TEXT,
     data_exame DATE NOT NULL,
-    status VARCHAR(50) DEFAULT 'agendado' CHECK (status IN ('agendado', 'realizado', 'cancelado')),
+    status VARCHAR(50) DEFAULT 'rascunho' CHECK (status IN ('rascunho', 'publicado', 'em_andamento', 'concluido', 'cancelado', 'realizado', 'agendado')),
+    local VARCHAR(255) DEFAULT 'Sede Central GRKK',
+    modalidade VARCHAR(100) DEFAULT 'Karate Goju-Ryu',
+    faixa_alvo VARCHAR(100) DEFAULT 'Todas',
+    taxa_valor NUMERIC DEFAULT 0.00,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- Migração: atualiza constraint de status caso a tabela já exista
+ALTER TABLE exames DROP CONSTRAINT IF EXISTS exames_status_check;
+ALTER TABLE exames ADD CONSTRAINT exames_status_check
+    CHECK (status IN ('rascunho', 'publicado', 'em_andamento', 'concluido', 'cancelado', 'realizado', 'agendado'));
+
 
 -- 8. Tabela CANDIDATOS_EXAME
 CREATE TABLE IF NOT EXISTS candidatos_exame (
@@ -132,12 +142,21 @@ CREATE TABLE IF NOT EXISTS candidatos_exame (
     filial_nome VARCHAR(255),
     faixa_atual VARCHAR(100),
     graduacao_pretendida VARCHAR(100) NOT NULL,
-    status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'inscrito', 'aprovado', 'reprovado')),
+    status VARCHAR(50) DEFAULT 'pendente' CHECK (status IN ('pendente', 'inscrito', 'em_andamento', 'aprovado', 'reprovado')),
     autorizacao_tecnica BOOLEAN DEFAULT FALSE,
     pagamento_status VARCHAR(50) DEFAULT 'pendente',
-    dados_banca JSONB DEFAULT '{}'::jsonb,
+    avaliado_por TEXT REFERENCES profiles(id) ON DELETE SET NULL,
+    dados_banca JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- Migração: adiciona coluna avaliado_por se não existir
+ALTER TABLE candidatos_exame ADD COLUMN IF NOT EXISTS avaliado_por TEXT REFERENCES profiles(id) ON DELETE SET NULL;
+-- Migração: atualiza constraint de status dos candidatos
+ALTER TABLE candidatos_exame DROP CONSTRAINT IF EXISTS candidatos_exame_status_check;
+ALTER TABLE candidatos_exame ADD CONSTRAINT candidatos_exame_status_check
+    CHECK (status IN ('pendente', 'inscrito', 'em_andamento', 'aprovado', 'reprovado'));
+
 
 -- 9. Tabela FINANCEIRO
 CREATE TABLE IF NOT EXISTS financeiro (
@@ -293,6 +312,32 @@ CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
     usuario_nome VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+-- 23. Tabela AVISOS_DIRETORIA
+CREATE TABLE IF NOT EXISTS avisos_diretoria (
+    id TEXT PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    conteudo TEXT NOT NULL,
+    categoria VARCHAR(100) DEFAULT 'Geral',
+    destinatario VARCHAR(50) DEFAULT 'todos' CHECK (destinatario IN ('todos', 'filial', 'atleta')),
+    criado_por TEXT REFERENCES profiles(id) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- 24. Tabela FORNECEDORES
+CREATE TABLE IF NOT EXISTS fornecedores (
+    id TEXT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    contato VARCHAR(255),
+    telefone VARCHAR(50),
+    email VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
+-- Modificações nas tabelas existentes para estoque
+ALTER TABLE produtos_estoque ADD COLUMN IF NOT EXISTS fornecedor_id TEXT REFERENCES fornecedores(id) ON DELETE SET NULL;
+ALTER TABLE produtos_estoque ADD COLUMN IF NOT EXISTS tamanho VARCHAR(50) DEFAULT 'Único';
+
 
 
 

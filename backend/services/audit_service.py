@@ -1,4 +1,5 @@
 import uuid
+import os
 from datetime import datetime
 from flask import request
 from services.supabase_service import SupabaseService
@@ -34,7 +35,19 @@ def registrar_log_auditoria(usuario, acao, detalhes):
             "ip": ip,
             "created_at": datetime.utcnow().isoformat()
         }
-        SupabaseService.insert("logs_auditoria", audit_log)
+        
+        res, error = SupabaseService.insert("logs_auditoria", audit_log)
+        if error:
+            raise RuntimeError(f"Erro do Supabase: {error}")
+            
         print(f"AUDIT LOG: {acao} - {detalhes} (User: {usuario_nome}, IP: {ip})")
     except Exception as e:
-        print(f"Erro ao registrar log de auditoria: {e}")
+        err_msg = f"[{datetime.now().isoformat()}] Erro ao registrar log de auditoria ({acao} - {detalhes}): {str(e)}\n"
+        print(err_msg, end="")
+        try:
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            log_path = os.path.join(base_dir, "audit_errors.log")
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(err_msg)
+        except Exception as file_err:
+            print(f"Erro ao salvar em audit_errors.log: {file_err}")

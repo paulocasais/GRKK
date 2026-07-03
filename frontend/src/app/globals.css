@@ -183,3 +183,88 @@ select:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px #141414 inset !important;
   transition: background-color 5000s ease-in-out 0s !important;
 }
+
+/* ==========================================================================
+   Estilos de Impressão Globais (Ctrl + P / Salvar como PDF)
+   Permite gerar relatórios em PDF limpos de qualquer tela administrativa do ERP
+   ========================================================================== */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Oculta menus de navegação, barras laterais e botões de ação interativos */
+  aside,
+  nav,
+  header,
+  button,
+  a[href^="/auth"],
+  .no-print,
+  .btn,
+  .action-buttons,
+  form,
+  .search-bar,
+  input,
+  select {
+    display: none !important;
+  }
+
+  /* Ajusta o contêiner de conteúdo principal para 100% de largura física */
+  main,
+  .main-content,
+  .content-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+  }
+
+  /* Remove sombras e altera fundos escuros do dark-mode para transparência */
+  .bg-zinc-950,
+  .bg-zinc-900,
+  .bg-zinc-900\/40,
+  .bg-zinc-900\/45,
+  .bg-black\/30,
+  .card,
+  div,
+  table,
+  tr,
+  td,
+  th {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+  }
+
+  /* Garante legibilidade em preto com contraste ideal para textos do dark-mode */
+  .text-zinc-300,
+  .text-zinc-400,
+  .text-zinc-500,
+  .text-zinc-650,
+  .text-white {
+    color: #000000 !important;
+  }
+
+  /* Cria bordas cinzas claras e finas para as tabelas e grids ficarem nítidos */
+  .border,
+  .border-zinc-900,
+  .border-zinc-800,
+  .border-zinc-850 {
+    border-color: #cccccc !important;
+    border-width: 1px !important;
+  }
+
+  /* Evita a quebra feia de tabelas ou blocos pela metade entre folhas A4 */
+  tr,
+  td,
+  .print-block,
+  .card {
+    page-break-inside: avoid !important;
+  }
+}

@@ -298,7 +298,7 @@ export default function EventosDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white font-cinzel tracking-wider">Módulo de Eventos</h1>
-          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Torneios federativos, seminários e chaves de lutas</p>
+          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Torneios da associação, seminários e chaves de lutas</p>
         </div>
 
         {isAdmin && (
@@ -451,7 +451,7 @@ export default function EventosDashboardPage() {
                 >
                   <option value="torneio">Torneio / Campeonato</option>
                   <option value="seminario">Seminário / Curso</option>
-                  <option value="exame">Exame de Faixa Geral</option>
+                  <option value="exame">Graduação de Faixa Geral</option>
                   <option value="outro">Outro</option>
                 </select>
               </div>

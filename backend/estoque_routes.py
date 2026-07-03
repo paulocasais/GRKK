@@ -36,7 +36,10 @@ def create_estoque_routes(app: Flask):
                 "preco_compra": float(data.get("preco_compra", 0) or 0),
                 "preco_venda": float(data.get("preco_venda", 0) or 0),
                 "quantidade_estoque": int(data.get("quantidade_estoque", 0) or 0),
-                "estoque_minimo": int(data.get("estoque_minimo", 5) or 5)
+                "estoque_minimo": int(data.get("estoque_minimo", 5) or 5),
+                "fornecedor_id": data.get("fornecedor_id"),
+                "fornecedor_nome": data.get("fornecedor_nome", ""),
+                "tamanho": data.get("tamanho", "Único")
             }
 
             res, error = SupabaseService.insert("produtos_estoque", novo_produto)
@@ -73,7 +76,7 @@ def create_estoque_routes(app: Flask):
             data = request.json or {}
             # Limpa chaves vazias ou não modificáveis
             update_data = {}
-            for field in ["nome", "descricao", "categoria", "preco_compra", "preco_venda", "quantidade_estoque", "estoque_minimo"]:
+            for field in ["nome", "descricao", "categoria", "preco_compra", "preco_venda", "quantidade_estoque", "estoque_minimo", "fornecedor_id", "fornecedor_nome", "tamanho"]:
                 if field in data:
                     val = data[field]
                     if field in ["preco_compra", "preco_venda"]:

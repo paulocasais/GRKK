@@ -53,7 +53,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
         {
           id: 2,
           titulo: "Cadastro Aprovado",
-          mensagem: "Seu perfil de atleta foi homologado pela Federação.",
+          mensagem: "Seu perfil de atleta foi homologado pela Associação.",
           tipo: "sucesso",
           lida: true,
           created_at: new Date(Date.now() - 3600000).toISOString()

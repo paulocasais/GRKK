@@ -66,7 +66,16 @@ const PROXIMOS_STATUS: Record<string, string[]> = {
   cancelado:    [],
 };
 
-export default function ExameDetalheClient({ id }: { id: string }) {
+export default function ExameDetalheClient({ id: idProp }: { id: string }) {
+  // Resolução de ID real para exportação estática (Apache/HostGator)
+  let id = idProp;
+  if (typeof window !== 'undefined' && (idProp === 'exame-1' || idProp === 'exame-2' || idProp === 'exame-3')) {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length >= 2 && parts[0] === 'exames') {
+      id = parts[1];
+    }
+  }
+
   const router = useRouter();
   const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial'; // Na GRKK, representantes de filial atuam como examinadores no tatame
@@ -179,6 +188,47 @@ export default function ExameDetalheClient({ id }: { id: string }) {
     }
   };
 
+  const handleExcluirExame = async () => {
+    if (!window.confirm("Tem certeza que deseja excluir este exame permanentemente? Todos os candidatos e examinadores vinculados serão removidos.")) {
+      return;
+    }
+    
+    setNotif({ type: null, msg: '' });
+    try {
+      const res = await fetch(`${API_URL}/api/exames/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Erro ao excluir o exame.');
+      
+      router.push('/exames');
+    } catch (err: any) {
+      setNotif({ type: 'error', msg: err.message || 'Erro ao excluir exame.' });
+    }
+  };
+
+  const handleConfirmarCandidato = async (candidatoId: string | number, novoStatus: 'inscrito' | 'pendente') => {
+    try {
+      const res = await fetch(`${API_URL}/api/exames/candidatos/${candidatoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ status: novoStatus })
+      });
+      if (res.ok) {
+        setCandidatos(candidatos.map(c => c.id === candidatoId ? { ...c, status: novoStatus } : c));
+        setNotif({ type: 'success', msg: novoStatus === 'inscrito' ? 'Candidato confirmado na fila de avaliação!' : 'Candidato movido de volta para pendente.' });
+      } else {
+        const data = await res.json();
+        setNotif({ type: 'error', msg: data.error || 'Erro ao atualizar status.' });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleAprovacaoTecnica = async (candidatoId: string | number, aprovado: boolean) => {
     try {
       const res = await fetch(`${API_URL}/api/exames/candidatos/${candidatoId}`, {
@@ -263,6 +313,15 @@ export default function ExameDetalheClient({ id }: { id: string }) {
               className="text-xs font-bold px-4 py-2.5 rounded-xl bg-gold/10 text-gold border border-gold/20 hover:bg-gold hover:text-white transition duration-300 font-cinzel cursor-pointer"
             >
               🏅 Emitir Certificados
+            </button>
+          )}
+
+          {isAdmin && (exame.status === 'cancelado' || exame.status === 'rascunho') && (
+            <button
+              onClick={handleExcluirExame}
+              className="text-xs font-bold px-4 py-2.5 rounded-xl bg-red-950/20 text-red-400 border border-red-900/30 hover:bg-red-500 hover:text-white transition duration-300 font-cinzel cursor-pointer"
+            >
+              🗑 Excluir Exame
             </button>
           )}
 
@@ -423,23 +482,28 @@ export default function ExameDetalheClient({ id }: { id: string }) {
       </div>
 
       {/* Homologações e Validações (Alunos e Filiais) */}
-      {isAdmin && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {(isAdmin || isExaminador) && (
+        <div className={`grid grid-cols-1 ${isAdmin ? 'md:grid-cols-2' : ''} gap-6`}>
           {/* Homologação Técnica (Recomendação) */}
           <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-white mb-2 flex items-center gap-2 font-cinzel text-xs uppercase tracking-wider">
               <Award size={15} className="text-primary" /> Homologação Técnica (Alunos)
             </h3>
-            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">Autorize os alunos inscritos a irem para a banca de avaliação baseado em critérios técnicos.</p>
+            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">
+              {isAdmin
+                ? 'Autorize os alunos inscritos a irem para a banca de avaliação baseado em critérios técnicos.'
+                : 'Autorize os alunos de sua filial a irem para a banca de avaliação baseado em critérios técnicos.'}
+            </p>
             
             <div className="space-y-2.5 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
-              {candidatos.length === 0 ? (
-                <p className="text-xs text-zinc-600 italic py-4">Nenhum aluno inscrito.</p>
+              {candidatos.filter(c => isAdmin || c.filial_id === usuario?.id).length === 0 ? (
+                <p className="text-xs text-zinc-600 italic py-4">Nenhum aluno para homologação técnica.</p>
               ) : (
-                candidatos.map((c) => (
+                candidatos.filter(c => isAdmin || c.filial_id === usuario?.id).map((c) => (
                   <div key={c.id} className="flex justify-between items-center bg-zinc-950/50 p-3 rounded-xl border border-zinc-900 text-xs">
                     <div>
                       <p className="font-semibold text-white">{c.atleta_nome}</p>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">{c.filial_nome}</p>
                       <span className={`inline-block text-[9px] font-bold px-2 py-0.5 mt-1 rounded-md border ${
                         c.autorizacao_tecnica 
                           ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400' 
@@ -472,53 +536,55 @@ export default function ExameDetalheClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* Homologação Administrativa (Pagamento) */}
-          <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-white mb-2 flex items-center gap-2 font-cinzel text-xs uppercase tracking-wider">
-              <Building2 size={15} className="text-primary" /> Homologação Administrativa (Taxas)
-            </h3>
-            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">Valide se as taxas de inscrição correspondentes foram quitadas para homologar a inscrição.</p>
-            
-            <div className="space-y-2.5 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
-              {candidatos.length === 0 ? (
-                <p className="text-xs text-zinc-600 italic py-4">Nenhum aluno inscrito.</p>
-              ) : (
-                candidatos.map((c) => (
-                  <div key={c.id} className="flex justify-between items-center bg-zinc-950/50 p-3 rounded-xl border border-zinc-900 text-xs">
-                    <div>
-                      <p className="font-semibold text-white">{c.atleta_nome}</p>
-                      <p className="text-[10px] text-zinc-500 mt-0.5">{c.filial_nome}</p>
-                      <span className={`inline-block text-[9px] font-bold px-2 py-0.5 mt-1 rounded-md border ${
-                        c.pagamento_status === 'pago'
-                          ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400' 
-                          : 'bg-yellow-950/20 border-yellow-900/30 text-yellow-300'
-                      }`}>
-                        {c.pagamento_status === 'pago' ? 'Pago' : 'Pendente'}
-                      </span>
+          {/* Homologação Administrativa (Pagamento) - Exclusivo do Admin */}
+          {isAdmin && (
+            <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6 shadow-sm">
+              <h3 className="font-bold text-white mb-2 flex items-center gap-2 font-cinzel text-xs uppercase tracking-wider">
+                <Building2 size={15} className="text-primary" /> Homologação Administrativa (Taxas)
+              </h3>
+              <p className="text-xs text-zinc-500 mb-4 leading-relaxed">Valide se as taxas de inscrição correspondentes foram quitadas para homologar a inscrição.</p>
+              
+              <div className="space-y-2.5 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
+                {candidatos.length === 0 ? (
+                  <p className="text-xs text-zinc-600 italic py-4">Nenhum aluno inscrito.</p>
+                ) : (
+                  candidatos.map((c) => (
+                    <div key={c.id} className="flex justify-between items-center bg-zinc-950/50 p-3 rounded-xl border border-zinc-900 text-xs">
+                      <div>
+                        <p className="font-semibold text-white">{c.atleta_nome}</p>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">{c.filial_nome}</p>
+                        <span className={`inline-block text-[9px] font-bold px-2 py-0.5 mt-1 rounded-md border ${
+                          c.pagamento_status === 'pago'
+                            ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400' 
+                            : 'bg-yellow-950/20 border-yellow-900/30 text-yellow-300'
+                        }`}>
+                          {c.pagamento_status === 'pago' ? 'Pago' : 'Pendente'}
+                        </span>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => handleAprovacaoAdministrativa(c.id, 'pago')}
+                          className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-bold uppercase transition cursor-pointer hover:bg-emerald-950/20 ${
+                            c.pagamento_status === 'pago' ? 'bg-emerald-950/20 border-emerald-800 text-emerald-400' : 'border-zinc-900 text-zinc-500'
+                          }`}
+                        >
+                          Quitar
+                        </button>
+                        <button
+                          onClick={() => handleAprovacaoAdministrativa(c.id, 'pendente')}
+                          className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-bold uppercase transition cursor-pointer hover:bg-yellow-950/20 ${
+                            c.pagamento_status === 'pendente' ? 'bg-yellow-950/20 border-yellow-800 text-yellow-300' : 'border-zinc-900 text-zinc-500'
+                          }`}
+                        >
+                          Pendente
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={() => handleAprovacaoAdministrativa(c.id, 'pago')}
-                        className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-bold uppercase transition cursor-pointer hover:bg-emerald-950/20 ${
-                          c.pagamento_status === 'pago' ? 'bg-emerald-950/20 border-emerald-800 text-emerald-400' : 'border-zinc-900 text-zinc-500'
-                        }`}
-                      >
-                        Quitar
-                      </button>
-                      <button
-                        onClick={() => handleAprovacaoAdministrativa(c.id, 'pendente')}
-                        className={`px-2.5 py-1.5 rounded-lg border text-[9px] font-bold uppercase transition cursor-pointer hover:bg-yellow-950/20 ${
-                          c.pagamento_status === 'pendente' ? 'bg-yellow-950/20 border-yellow-800 text-yellow-300' : 'border-zinc-900 text-zinc-500'
-                        }`}
-                      >
-                        Pendente
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -584,17 +650,22 @@ export default function ExameDetalheClient({ id }: { id: string }) {
                       </td>
                       <td className="px-6 py-4 text-xs">
                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${
-                          c.status === 'aprovado' 
-                            ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/20' 
-                            : c.status === 'reprovado' 
-                            ? 'bg-red-950/30 text-red-400 border border-red-900/20' 
+                          c.status === 'aprovado'
+                            ? 'bg-emerald-950/30 text-emerald-400 border border-emerald-900/20'
+                            : c.status === 'reprovado'
+                            ? 'bg-red-950/30 text-red-400 border border-red-900/20'
+                            : c.status === 'inscrito'
+                            ? 'bg-blue-950/30 text-blue-400 border border-blue-900/20'
                             : 'bg-zinc-900 text-zinc-450 border border-zinc-800'
                         }`}>
-                          {c.status}
+                          {c.status === 'pendente' ? 'Pendente' :
+                           c.status === 'inscrito' ? 'Na Fila' :
+                           c.status === 'aprovado' ? 'Aprovado' :
+                           c.status === 'reprovado' ? 'Reprovado' : c.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end items-center gap-3">
+                        <div className="flex justify-end items-center gap-2 flex-wrap">
                           {c.status === 'aprovado' && c.dados_banca && (
                             <Link
                               href={`/exames/boletim/${c.id}`}
@@ -602,6 +673,26 @@ export default function ExameDetalheClient({ id }: { id: string }) {
                             >
                               Boletim
                             </Link>
+                          )}
+
+                          {/* Admin ou Filial Vinculada: Confirmar candidato pendente na fila */}
+                          {(isAdmin || (isExaminador && c.filial_id === usuario?.id)) && c.status === 'pendente' && exame.status !== 'concluido' && exame.status !== 'cancelado' && (
+                            <button
+                              onClick={() => handleConfirmarCandidato(c.id, 'inscrito')}
+                              className="text-[10px] font-bold bg-blue-900/30 hover:bg-blue-700 text-blue-400 hover:text-white px-3 py-1.5 rounded-lg transition uppercase tracking-widest font-cinzel shadow-sm border border-blue-900/30 cursor-pointer"
+                            >
+                              ✓ Confirmar
+                            </button>
+                          )}
+
+                          {/* Admin ou Filial Vinculada: Devolver candidato inscrito para pendente */}
+                          {(isAdmin || (isExaminador && c.filial_id === usuario?.id)) && c.status === 'inscrito' && exame.status !== 'concluido' && exame.status !== 'cancelado' && (
+                            <button
+                              onClick={() => handleConfirmarCandidato(c.id, 'pendente')}
+                              className="text-[10px] font-bold bg-zinc-900 hover:bg-zinc-700 text-zinc-400 hover:text-white px-2 py-1.5 rounded-lg transition uppercase tracking-widest font-cinzel border border-zinc-800 cursor-pointer"
+                            >
+                              ↩ Pendente
+                            </button>
                           )}
 
                           {exame.status === 'em_andamento' && c.status === 'inscrito' && canEvaluate && (

@@ -5,13 +5,29 @@ from services.audit_service import registrar_log_auditoria
 def create_filial_routes(app: Flask):
     """Cria e registra as rotas de filiais"""
 
+    @app.route("/api/filiais/public", methods=["GET"])
+    def get_public_filiais():
+        filiais_db, error = SupabaseService.get_all("filiais")
+        if error:
+            return jsonify({"error": error}), 500
+        
+        # Filtra apenas filiais homologadas
+        res = []
+        for fil in (filiais_db or []):
+            if fil.get("status") == "ativo":
+                res.append({
+                    "id": fil["id"],
+                    "nome": fil["nome"]
+                })
+        return jsonify({"filiais": res}), 200
+
     @app.route("/api/filiais", methods=["GET", "POST"])
     def register_filial():
         from app import get_current_user
 
         if request.method == "GET":
             user = get_current_user()
-            if not user or user.get("tipo") != "admin":
+            if not user or user.get("tipo") not in ["admin", "filial"]:
                 return jsonify({"error": "Acesso não autorizado"}), 403
 
             filiais_db, error = SupabaseService.get_all("filiais")
@@ -33,6 +49,10 @@ def create_filial_routes(app: Flask):
         email = data.get("email")
         telefone = data.get("telefone")
         senha = data.get("senha")
+        aceita_termos = data.get("aceita_termos")
+
+        if not aceita_termos:
+            return jsonify({"error": "É necessário aceitar os Termos de Serviço e Aviso de Privacidade do Portal GRKK"}), 400
 
         if not nome or not email:
             return jsonify({"error": "Nome e e-mail da filial são obrigatórios"}), 400
@@ -84,6 +104,18 @@ def create_filial_routes(app: Flask):
         if error2:
             return jsonify({"error": error2}), 500
 
+        # Notifica o cadastro pendente do dojo/filial
+        try:
+            from notif_routes import criar_notificacao
+            criar_notificacao(
+                destinatario_id=None,
+                titulo="Nova Filial Cadastrada",
+                mensagem=f"O dojo/filial {nome} solicitou credenciamento no sistema.",
+                tipo="alerta"
+            )
+        except Exception as n_err:
+            print(f"Erro ao criar notificação de cadastro de filial: {n_err}")
+
         return jsonify({"success": True, "filial": filial}), 201
 
     @app.route("/api/filiais/<id>", methods=["PATCH"])
@@ -91,31 +123,75 @@ def create_filial_routes(app: Flask):
         from app import get_current_user
 
         user = get_current_user()
-        if not user or user.get("tipo") != "admin":
+        if not user or (user.get("tipo") != "admin" and str(user.get("id")) != str(id)):
             return jsonify({"error": "Acesso não autorizado"}), 403
 
         data = request.json or {}
-        status = data.get("status")
+        
+        # Se não for admin, removemos campos administrativos
+        if user.get("tipo") != "admin":
+            data.pop("status", None)
+            data.pop("codigo_interno", None)
+            data.pop("tipo", None)
+            data.pop("motivo_reprovacao", None)
 
         update_prof = {}
-        if status:
-            update_prof["status"] = status
+        for field in ["nome", "email", "telefone"]:
+            if field in data:
+                update_prof[field] = data[field]
+        
+        if "nome_fantasia" in data:
+            update_prof["nome_fantasia"] = data["nome_fantasia"]
+        
+        # Mapeia municipio para cidade em profiles
+        if "municipio" in data:
+            update_prof["cidade"] = data["municipio"]
+
+        if user.get("tipo") == "admin" and "status" in data:
+            update_prof["status"] = data["status"]
 
         if update_prof:
             SupabaseService.update("profiles", id, update_prof)
 
-        update_fil = dict(data)
-        res, error = SupabaseService.update("filiais", id, update_fil)
-        if error:
-            return jsonify({"error": error}), 500
+        # Campos permitidos na tabela de filiais
+        update_fil = {}
+        fields_to_update = [
+            "nome", "email", "telefone", "nome_fantasia", "cpf_responsavel", "graduacao_responsavel",
+            "registro_federativo", "cep", "rua", "numero", "bairro", "municipio", "estado"
+        ]
+        
+        if user.get("tipo") == "admin":
+            fields_to_update.extend(["status", "codigo_interno", "tipo", "motivo_reprovacao"])
+
+        for field in fields_to_update:
+            if field in data:
+                update_fil[field] = data[field]
+
+        if update_fil:
+            res, error = SupabaseService.update("filiais", id, update_fil)
+            if error:
+                return jsonify({"error": error}), 500
 
         updated_filial, _ = SupabaseService.get_profile_by_id(id)
+
+        # Se a filial foi homologada (status alterado para ativo)
+        if (update_prof.get("status") == "ativo" or update_fil.get("status") == "ativo") and updated_filial and updated_filial.get("status") == "ativo":
+            try:
+                from notif_routes import criar_notificacao
+                criar_notificacao(
+                    destinatario_id=id,
+                    titulo="Credenciamento Aprovado",
+                    mensagem="O credenciamento do seu dojo/filial foi homologado pela Associação com sucesso!",
+                    tipo="sucesso"
+                )
+            except Exception as n_err:
+                print(f"Erro ao notificar aprovação de filial: {n_err}")
 
         # Registrar log de auditoria
         registrar_log_auditoria(
             user,
             "Atualização de Filial",
-            f"Filial {updated_filial.get('nome') if updated_filial else id} (ID: {id}) atualizada. Status: {status or 'Sem alteração de status'}"
+            f"Filial {updated_filial.get('nome') if updated_filial else id} (ID: {id}) atualizada."
         )
 
         return jsonify(updated_filial), 200

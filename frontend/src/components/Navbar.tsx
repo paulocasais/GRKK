@@ -341,7 +341,7 @@ export default function Navbar() {
                               </div>
                               <div>
                                 <p className="text-[11px] font-bold text-white uppercase tracking-wider">Sou Filial / Dojo</p>
-                                <p className="text-[9px] text-gray-400 mt-0.5">Associe seu dojo à federação</p>
+                                <p className="text-[9px] text-gray-400 mt-0.5">Associe seu dojo à Associação</p>
                               </div>
                             </Link>
                           </div>

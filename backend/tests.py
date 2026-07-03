@@ -151,3 +151,34 @@ def test_team_gallery_routes_exist(client):
     # Testar listagem de galeria
     response = client.get('/api/galeria')
     assert response.status_code == 200
+
+def test_aviso_routes_exist(client):
+    """Testar se as rotas de avisos da diretoria existem"""
+    # Testar listagem de avisos (não autenticado)
+    response = client.get('/api/avisos')
+    # Deve retornar 401 pois não está autenticado
+    assert response.status_code == 401
+
+    # Testar criação de aviso (não autenticado)
+    response = client.post('/api/avisos', json={'titulo': 'Aviso Teste', 'conteudo': 'Conteúdo do aviso'})
+    assert response.status_code == 401
+
+def test_relatorios_routes_no_auth(client):
+    """Testar se as rotas de relatórios exigem autenticação de admin"""
+    # Testar geral (sem auth)
+    response = client.get('/api/relatorios/geral')
+    assert response.status_code == 403
+
+    # Testar financeiro (sem auth)
+    response = client.get('/api/relatorios/financeiro')
+    assert response.status_code == 403
+
+    # Testar atletas (sem auth)
+    response = client.get('/api/relatorios/atletas')
+    assert response.status_code == 403
+
+    # Testar exames (sem auth)
+    response = client.get('/api/relatorios/exames')
+    assert response.status_code == 403
+
+

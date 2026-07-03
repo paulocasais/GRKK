@@ -8,7 +8,7 @@ from supabase import create_client, Client
 # Resolve o caminho do .env de forma robusta e absoluta
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env_path = os.path.join(base_dir, ".env")
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path=env_path, override=True)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 # Prefer service role key for backend operations to bypass RLS, fallback to anon key
@@ -43,6 +43,42 @@ else:
 
 # Caminho do arquivo mock-db.json
 MOCK_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "mock-db.json")
+
+def garantir_protecao_mock_db():
+    """Garante que o arquivo mock-db.json não possa ser lido diretamente pelo Apache no servidor"""
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    htaccess_path = os.path.join(base_dir, ".htaccess")
+    
+    regra = (
+        "\n# Bloqueia acesso publico ao mock-db.json para seguranca de dados\n"
+        "<Files \"mock-db.json\">\n"
+        "    <IfModule mod_authz_core.c>\n"
+        "        Require all denied\n"
+        "    </IfModule>\n"
+        "    <IfModule !mod_authz_core.c>\n"
+        "        Order Allow,Deny\n"
+        "        Deny from all\n"
+        "    </IfModule>\n"
+        "</Files>\n"
+    )
+    
+    try:
+        if os.path.exists(htaccess_path):
+            with open(htaccess_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            if "mock-db.json" not in content:
+                with open(htaccess_path, "a", encoding="utf-8") as f:
+                    f.write(regra)
+                print("Seguranca: Regra de protecao ao mock-db.json anexada ao .htaccess com sucesso.")
+        else:
+            with open(htaccess_path, "w", encoding="utf-8") as f:
+                f.write(regra)
+            print("Seguranca: Criado .htaccess com regra de protecao ao mock-db.json.")
+    except Exception as e:
+        print(f"Erro ao verificar/atualizar protecao do .htaccess: {e}")
+
+# Executa o check de segurança na inicialização do módulo
+garantir_protecao_mock_db()
 
 class MockDb:
     def __init__(self):
@@ -109,12 +145,22 @@ class SupabaseService:
             return items, None
         else:
             try:
-                query = supabase.table(table_name).select("*")
+                # Mapeamento de queries select para lidar com joins
+                SELECT_QUERIES = {
+                    "noticias": "*, profiles(nome, avatar_url)",
+                    "atletas": "*, filiais(nome_fantasia)",
+                    # Adicione outras tabelas e seus joins aqui
+                }
+                select_query = SELECT_QUERIES.get(table_name, "*")
+
+                query = supabase.table(table_name).select(select_query)
+                
                 if filter_dict:
                     for k, v in filter_dict.items():
                         query = query.eq(k, v)
                 if order_by:
                     query = query.order(order_by, desc=not ascending)
+                
                 res = query.execute()
                 return res.data, None
             except Exception as e:
@@ -229,7 +275,11 @@ class SupabaseService:
                         filiais = mock_db.data.get("filiais", [])
                         for f in filiais:
                             if f["id"] == p["id"]:
-                                user_data.update(f)
+                                filial_data = dict(f)
+                                if "tipo" in filial_data:
+                                    filial_data["tipo_filial"] = filial_data.pop("tipo")
+                                user_data.update(filial_data)
+                                user_data["tipo"] = "filial"
                                 break
                     return user_data, None
             return None, "Usuário não encontrado."
@@ -252,7 +302,11 @@ class SupabaseService:
                         elif user_data["tipo"] == "filial":
                             filial_res = supabase.table("filiais").select("*").eq("id", res.user.id).maybe_single().execute()
                             if filial_res.data:
-                                user_data.update(filial_res.data)
+                                filial_data = dict(filial_res.data)
+                                if "tipo" in filial_data:
+                                    filial_data["tipo_filial"] = filial_data.pop("tipo")
+                                user_data.update(filial_data)
+                                user_data["tipo"] = "filial"
                         return user_data, None
                 return None, "Credenciais inválidas."
             except Exception as e:
@@ -276,7 +330,11 @@ class SupabaseService:
                         filiais = mock_db.data.get("filiais", [])
                         for f in filiais:
                             if f["id"] == p["id"]:
-                                user_data.update(f)
+                                filial_data = dict(f)
+                                if "tipo" in filial_data:
+                                    filial_data["tipo_filial"] = filial_data.pop("tipo")
+                                user_data.update(filial_data)
+                                user_data["tipo"] = "filial"
                                 break
                     return user_data, None
             return None, "Perfil não encontrado."
@@ -292,7 +350,11 @@ class SupabaseService:
                     elif user_data["tipo"] == "filial":
                         filial_res = supabase.table("filiais").select("*").eq("id", user_id).maybe_single().execute()
                         if filial_res.data:
-                            user_data.update(filial_res.data)
+                            filial_data = dict(filial_res.data)
+                            if "tipo" in filial_data:
+                                filial_data["tipo_filial"] = filial_data.pop("tipo")
+                            user_data.update(filial_data)
+                            user_data["tipo"] = "filial"
                     return user_data, None
                 return None, "Perfil não encontrado."
             except Exception as e:

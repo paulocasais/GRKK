@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone, Shield, FileText, BookOpen } from 'lucide-react';
+import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone, Shield, FileText, BookOpen, Bell, AlertTriangle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -44,7 +44,8 @@ export default function AdminCMSPage() {
   }
 
   const { usuario, tipo } = useAuth();
-  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens' | 'paginainicial' | 'sensei-ia' | 'academia' | 'transparencia' | 'contato'>('banners');
+  const [activeGroup, setActiveGroup] = useState<'geral' | 'site' | 'transparencia'>('geral');
+  const [activeTab, setActiveTab] = useState<'banners' | 'equipe' | 'galeria' | 'mensagens' | 'paginainicial' | 'sensei-ia' | 'academia' | 'transparencia' | 'contato' | 'avisos' | 'dojo_kun' | 'doc_termos' | 'doc_privacidade' | 'doc_defesa_marca'>('banners');
   
   const [banners, setBanners] = useState<Banner[]>([]);
   const [equipe, setEquipe] = useState<TeamMember[]>([]);
@@ -54,6 +55,47 @@ export default function AdminCMSPage() {
   const [replyText, setReplyText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Avisos da Diretoria
+  interface Aviso {
+    id: string | number;
+    titulo: string;
+    conteudo: string;
+    categoria: string;
+    destinatario: 'todos' | 'filial' | 'atleta';
+    created_at?: string;
+  }
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [loadingAvisos, setLoadingAvisos] = useState(false);
+  const [showAvisoModal, setShowAvisoModal] = useState(false);
+  const [avisoForm, setAvisoForm] = useState({ titulo: '', conteudo: '', categoria: 'Geral', destinatario: 'todos' });
+  const [salvandoAviso, setSalvandoAviso] = useState(false);
+
+  // Formulários de documentos de transparência (persistidos via CMS config)
+  const [docTermosForm, setDocTermosForm] = useState({
+    titulo: 'Termos de Serviço', s1_titulo: '1. Aceitação dos Termos',
+    s1_texto: 'Ao acessar e utilizar o Portal GRKK, você declara estar de acordo com estes Termos de Serviço.',
+    s8_titulo: '8. Disposições Gerais',
+    s8_texto: 'Estes Termos podem ser alterados a qualquer momento. O uso continuado do Portal após alterações constitui aceitação dos novos termos.'
+  });
+  const [docPrivacidadeForm, setDocPrivacidadeForm] = useState({
+    titulo: 'Política de Privacidade',
+    s1_titulo: '1. Informações Coletadas',
+    s1_texto: 'Coletamos informações fornecidas diretamente por você no momento do cadastro.',
+    s5_titulo: '5. Contato',
+    s5_texto: 'Para dúvidas sobre privacidade, entre em contato: contato@gojuryukaratekai.com.br'
+  });
+  const [docDefesaMarcaForm, setDocDefesaMarcaForm] = useState({
+    titulo: 'Defesa de Marca – Goju-Ryu Karate-Kai',
+    s1_titulo: '1. O que é Defesa de Marca?',
+    s1_texto: 'Defesa de Marca é o conjunto de estratégias jurídicas e de branding adotadas para proteger a identidade da marca Goju-Ryu Karate-Kai.',
+    s8_titulo: '8. Contato para Autorização',
+    s8_texto: 'Para solicitar autorização de uso da marca ou reportar uso indevido, entre em contato: contato@gojuryukaratekai.com.br'
+  });
+  const [docDojoKunForm, setDocDojoKunForm] = useState({
+    preambulo: 'O Dojo Kun é o código de ética do karatê Goju-Ryu. Deve ser recitado ao início e término de cada treino como compromisso pessoal e coletivo.',
+    mandamentos: 'Ser fiel ao verdadeiro significado do Caminho do Karatê\nTreinar com sinceridade\nSer esforçado\nSer cortês\nAbster-se de violência impulsiva'
+  });
 
   // Glossário do Sensei IA
   interface GlossaryTerm {
@@ -433,12 +475,64 @@ export default function AdminCMSPage() {
     }
   };
 
+  const carregarAvisos = async () => {
+    setLoadingAvisos(true);
+    try {
+      const res = await fetch(`${API_URL}/api/avisos`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setAvisos(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar avisos:', err);
+    } finally {
+      setLoadingAvisos(false);
+    }
+  };
+
+  const handleSalvarAviso = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!avisoForm.titulo.trim() || !avisoForm.conteudo.trim()) return;
+    setSalvandoAviso(true);
+    try {
+      const res = await fetch(`${API_URL}/api/avisos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(avisoForm)
+      });
+      if (res.ok) {
+        setShowAvisoModal(false);
+        setAvisoForm({ titulo: '', conteudo: '', categoria: 'Geral', destinatario: 'todos' });
+        await carregarAvisos();
+      } else {
+        const err = await res.json();
+        throw new Error(err.error || 'Erro ao salvar aviso.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSalvandoAviso(false);
+    }
+  };
+
+  const handleExcluirAviso = async (id: string | number) => {
+    if (!confirm('Excluir este aviso permanentemente?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/avisos/${id}`, { method: 'DELETE', credentials: 'include' });
+      if (res.ok) setAvisos(avisos.filter(a => a.id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (tipo === 'admin') {
       carregarCMS();
       carregarContatos();
       carregarSiteConfig();
       carregarGlossario();
+      carregarAvisos();
     } else {
       setLoading(false);
     }
@@ -626,13 +720,16 @@ export default function AdminCMSPage() {
           <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold font-sans">Administração dinâmica do portal público</p>
         </div>
 
-        {(activeTab === 'banners' || activeTab === 'equipe' || activeTab === 'galeria' || activeTab === 'sensei-ia') && (
+        {(activeTab === 'banners' || activeTab === 'equipe' || activeTab === 'galeria' || activeTab === 'sensei-ia' || activeTab === 'avisos') && (
           <button
             onClick={() => {
               if (activeTab === 'sensei-ia') {
                 setGlossarioForm({ termo: '', definicao: '' });
                 setIsEditingTerm(false);
                 setShowGlossarioModal(true);
+              } else if (activeTab === 'avisos') {
+                setAvisoForm({ titulo: '', conteudo: '', categoria: 'Geral', destinatario: 'todos' });
+                setShowAvisoModal(true);
               } else {
                 setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
                 setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
@@ -647,80 +744,146 @@ export default function AdminCMSPage() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full max-w-5xl flex-wrap animate-in fade-in duration-300">
-        <button
-          onClick={() => setActiveTab('banners')}
-          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'banners' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <Layout size={12} /> Banners
-        </button>
-        <button
-          onClick={() => setActiveTab('equipe')}
-          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'equipe' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <Users size={12} /> Equipe
-        </button>
-        <button
-          onClick={() => setActiveTab('galeria')}
-          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'galeria' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <Image size={12} /> Galeria
-        </button>
-        <button
-          onClick={() => setActiveTab('mensagens')}
-          className={`flex-1 min-w-[85px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'mensagens' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <MessageSquare size={12} /> Mensagens
-        </button>
-        <button
-          onClick={() => setActiveTab('paginainicial')}
-          className={`flex-1 min-w-[100px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'paginainicial' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <Settings size={12} /> Página Inicial
-        </button>
-        <button
-          onClick={() => setActiveTab('sensei-ia')}
-          className={`flex-1 min-w-[80px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'sensei-ia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <MessageSquare size={12} /> Sensei IA
-        </button>
-        <button
-          onClick={() => setActiveTab('academia')}
-          className={`flex-1 min-w-[90px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'academia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <BookOpen size={12} /> A Academia
-        </button>
-        <button
-          onClick={() => setActiveTab('transparencia')}
-          className={`flex-1 min-w-[100px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 ${
-            activeTab === 'transparencia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <FileText size={12} /> Transparência
-        </button>
-        <button
-          onClick={() => setActiveTab('contato')}
-          className={`flex-1 min-w-[70px] py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex-items-center justify-center gap-1.5 ${
-            activeTab === 'contato' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
-          }`}
-        >
-          <Mail size={12} /> Contato
-        </button>
+      {/* Categorias de Abas Principais (CMS Grouping) */}
+      <div className="flex flex-col md:flex-row gap-4 border-b border-zinc-800/80 pb-6 w-full max-w-5xl animate-in fade-in duration-300">
+        {[
+          { id: 'geral', label: 'Mídia e Mensagens', desc: 'Banners, equipe, galeria e contatos', icon: Layout },
+          { id: 'site', label: 'Conteúdo Institucional', desc: 'Home, academia e dojo kun', icon: BookOpen },
+          { id: 'transparencia', label: 'Transparência e Avisos', desc: 'Documentos oficiais e avisos', icon: Shield }
+        ].map(group => {
+          const Icon = group.icon;
+          const isSelected = activeGroup === group.id;
+          return (
+            <button
+              key={group.id}
+              onClick={() => {
+                setActiveGroup(group.id as any);
+                if (group.id === 'geral') setActiveTab('banners');
+                else if (group.id === 'site') setActiveTab('paginainicial');
+                else if (group.id === 'transparencia') setActiveTab('avisos');
+              }}
+              className={`flex-1 text-left p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+                isSelected 
+                  ? 'border-primary bg-primary/5 text-white shadow-lg shadow-primary/5' 
+                  : 'border-zinc-800 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className={`p-2 rounded-xl transition ${
+                  isSelected ? 'bg-primary text-white' : 'bg-zinc-950 text-zinc-400'
+                }`}>
+                  <Icon size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold font-cinzel tracking-wider">{group.label}</h4>
+                  <p className="text-[10px] text-zinc-500 font-sans mt-0.5">{group.desc}</p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Sub-Abas do Grupo Ativo */}
+      <div className="flex items-center gap-1.5 bg-zinc-900 p-1 border border-zinc-800 rounded-xl w-full max-w-5xl overflow-x-auto whitespace-nowrap flex-nowrap scrollbar-none animate-in slide-in-from-top-2 duration-300">
+        {activeGroup === 'geral' && (
+          <>
+            <button onClick={() => setActiveTab('banners')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'banners' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Layout size={12} /> Banners
+            </button>
+            <button onClick={() => setActiveTab('equipe')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'equipe' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Users size={12} /> Equipe
+            </button>
+            <button onClick={() => setActiveTab('galeria')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'galeria' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Image size={12} /> Galeria
+            </button>
+            <button onClick={() => setActiveTab('mensagens')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'mensagens' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <MessageSquare size={12} /> Mensagens
+            </button>
+            <button onClick={() => setActiveTab('contato')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'contato' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Mail size={12} /> Contato Sec.
+            </button>
+          </>
+        )}
+
+        {activeGroup === 'site' && (
+          <>
+            <button onClick={() => setActiveTab('paginainicial')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'paginainicial' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Settings size={12} /> Página Inicial
+            </button>
+            <button onClick={() => setActiveTab('academia')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'academia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <BookOpen size={12} /> A Academia
+            </button>
+            <button onClick={() => setActiveTab('dojo_kun')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'dojo_kun' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <BookOpen size={12} /> Dojo Kun
+            </button>
+            <button onClick={() => setActiveTab('sensei-ia')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'sensei-ia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <MessageSquare size={12} /> Sensei IA
+            </button>
+          </>
+        )}
+
+        {activeGroup === 'transparencia' && (
+          <>
+            <button onClick={() => setActiveTab('avisos')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'avisos' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Bell size={12} /> Avisos
+            </button>
+            <button onClick={() => setActiveTab('transparencia')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'transparencia' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <FileText size={12} /> Compromissos
+            </button>
+            <button onClick={() => setActiveTab('doc_termos')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'doc_termos' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <FileText size={12} /> Termos
+            </button>
+            <button onClick={() => setActiveTab('doc_privacidade')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'doc_privacidade' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <Shield size={12} /> Privacidade
+            </button>
+            <button onClick={() => setActiveTab('doc_defesa_marca')}
+              className={`px-4 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 ${
+                activeTab === 'doc_defesa_marca' ? 'bg-primary text-white' : 'text-zinc-500 hover:text-white'
+              }`}>
+              <AlertTriangle size={12} /> Def. Marca
+            </button>
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -1509,6 +1672,234 @@ export default function AdminCMSPage() {
                   className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Save size={13} /> Salvar Contato
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'avisos' ? (
+        <div className="space-y-6 max-w-4xl mx-auto w-full">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div>
+                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2">
+                  <Bell className="text-primary" size={16} /> Avisos da Diretoria
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">Comunicados enviados a atletas, filiais ou toda a associação.</p>
+              </div>
+            </div>
+            {loadingAvisos ? (
+              <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
+            ) : avisos.length === 0 ? (
+              <div className="text-center py-12 text-zinc-500 text-xs">Nenhum aviso publicado ainda.</div>
+            ) : (
+              <div className="space-y-3">
+                {avisos.map(aviso => (
+                  <div key={aviso.id} className="bg-zinc-950/50 border border-zinc-850 rounded-2xl p-5 flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-white font-cinzel">{aviso.titulo}</h4>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                          aviso.destinatario === 'todos' ? 'bg-blue-950/30 text-blue-400 border-blue-900/30' :
+                          aviso.destinatario === 'filial' ? 'bg-gold/10 text-gold border-gold/20' :
+                          'bg-emerald-950/30 text-emerald-400 border-emerald-900/30'
+                        }`}>
+                          {aviso.destinatario === 'todos' ? 'Todos' : aviso.destinatario === 'filial' ? 'Filiais' : 'Atletas'}
+                        </span>
+                        <span className="text-[9px] text-zinc-500 font-mono border border-zinc-800 px-2 py-0.5 rounded">{aviso.categoria}</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2">{aviso.conteudo}</p>
+                      {aviso.created_at && (
+                        <p className="text-[10px] text-zinc-600 font-mono">{new Date(aviso.created_at).toLocaleDateString('pt-BR')}</p>
+                      )}
+                    </div>
+                    <button onClick={() => handleExcluirAviso(aviso.id)} className="text-red-400 hover:text-red-300 hover:bg-red-500/10 p-2 rounded-xl transition cursor-pointer shrink-0">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {/* Modal Novo Aviso */}
+          {showAvisoModal && (
+            <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg space-y-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-cinzel text-white text-sm font-bold">Novo Aviso da Diretoria</h3>
+                  <button onClick={() => setShowAvisoModal(false)} className="text-zinc-500 hover:text-white p-1 rounded cursor-pointer"><X size={16} /></button>
+                </div>
+                <form onSubmit={handleSalvarAviso} className="space-y-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Título *</label>
+                    <input required value={avisoForm.titulo} onChange={e => setAvisoForm({...avisoForm, titulo: e.target.value})}
+                      placeholder="Ex: Reunião de Diretoria — Julho/2026"
+                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none focus:border-primary transition font-sans" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Conteúdo *</label>
+                    <textarea required value={avisoForm.conteudo} onChange={e => setAvisoForm({...avisoForm, conteudo: e.target.value})}
+                      rows={4} placeholder="Texto do aviso..."
+                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none focus:border-primary transition font-sans resize-none" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Categoria</label>
+                      <input value={avisoForm.categoria} onChange={e => setAvisoForm({...avisoForm, categoria: e.target.value})}
+                        placeholder="Ex: Geral, Técnico, Financeiro"
+                        className="w-full px-3.5 py-2.5 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none font-sans" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Destinatário</label>
+                      <select value={avisoForm.destinatario} onChange={e => setAvisoForm({...avisoForm, destinatario: e.target.value})}
+                        className="w-full px-3.5 py-2.5 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none font-sans">
+                        <option value="todos">Todos</option>
+                        <option value="filial">Filiais</option>
+                        <option value="atleta">Atletas</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-2 font-cinzel">
+                    <button type="button" onClick={() => setShowAvisoModal(false)} className="px-4 py-2.5 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase transition cursor-pointer">Cancelar</button>
+                    <button type="submit" disabled={salvandoAviso}
+                      className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 disabled:opacity-50">
+                      {salvandoAviso ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />} Publicar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : activeTab === 'dojo_kun' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <BookOpen className="text-gold" size={16} /> Conteúdo do Dojo Kun
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Preâmbulo / Introdução</label>
+                <textarea value={docDojoKunForm.preambulo} onChange={e => setDocDojoKunForm({...docDojoKunForm, preambulo: e.target.value})}
+                  rows={4} placeholder="Texto introdutório do Dojo Kun..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Mandamentos (um por linha)</label>
+                <textarea value={docDojoKunForm.mandamentos} onChange={e => setDocDojoKunForm({...docDojoKunForm, mandamentos: e.target.value})}
+                  rows={8} placeholder="Ser fiel ao verdadeiro significado do Caminho do Karatê&#10;Treinar com sinceridade&#10;..."
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
+                <p className="text-[10px] text-zinc-600 mt-1">Cada linha será exibida como um mandamento separado no site.</p>
+              </div>
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button type="button" onClick={() => handleSaveConfig('dojo_kun', docDojoKunForm)} disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  <Save size={13} /> Salvar Dojo Kun
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'doc_termos' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <FileText className="text-primary" size={16} /> Termos de Serviço — Conteúdo da Página
+            </h3>
+            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/termos</code>.</p>
+            <div className="space-y-4">
+              {([
+                { label: 'Título da Página', field: 'titulo', type: 'input' },
+                { label: '1. Título da Seção 1', field: 's1_titulo', type: 'input' },
+                { label: '1. Texto da Seção 1', field: 's1_texto', type: 'textarea' },
+                { label: '8. Título da Seção Final', field: 's8_titulo', type: 'input' },
+                { label: '8. Texto da Seção Final', field: 's8_texto', type: 'textarea' },
+              ] as { label: string; field: keyof typeof docTermosForm; type: string }[]).map(({ label, field, type }) => (
+                <div key={field}>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
+                  {type === 'textarea' ? (
+                    <textarea value={docTermosForm[field]} onChange={e => setDocTermosForm({...docTermosForm, [field]: e.target.value})}
+                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
+                  ) : (
+                    <input value={docTermosForm[field]} onChange={e => setDocTermosForm({...docTermosForm, [field]: e.target.value})}
+                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
+                  )}
+                </div>
+              ))}
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button type="button" onClick={() => handleSaveConfig('doc_termos', docTermosForm)} disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  <Save size={13} /> Salvar Termos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'doc_privacidade' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <Shield className="text-emerald-500" size={16} /> Política de Privacidade — Conteúdo da Página
+            </h3>
+            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/privacidade</code>.</p>
+            <div className="space-y-4">
+              {([
+                { label: 'Título da Página', field: 'titulo', type: 'input' },
+                { label: '1. Título Informações Coletadas', field: 's1_titulo', type: 'input' },
+                { label: '1. Texto Informações Coletadas', field: 's1_texto', type: 'textarea' },
+                { label: '5. Título Contato / DPO', field: 's5_titulo', type: 'input' },
+                { label: '5. Texto Contato / DPO', field: 's5_texto', type: 'textarea' },
+              ] as { label: string; field: keyof typeof docPrivacidadeForm; type: string }[]).map(({ label, field, type }) => (
+                <div key={field}>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
+                  {type === 'textarea' ? (
+                    <textarea value={docPrivacidadeForm[field]} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, [field]: e.target.value})}
+                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
+                  ) : (
+                    <input value={docPrivacidadeForm[field]} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, [field]: e.target.value})}
+                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
+                  )}
+                </div>
+              ))}
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button type="button" onClick={() => handleSaveConfig('doc_privacidade', docPrivacidadeForm)} disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  <Save size={13} /> Salvar Privacidade
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === 'doc_defesa_marca' ? (
+        <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6 space-y-5">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <AlertTriangle className="text-amber-500" size={16} /> Defesa de Marca — Conteúdo da Página
+            </h3>
+            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/defesa-marca</code>.</p>
+            <div className="space-y-4">
+              {([
+                { label: 'Título da Página', field: 'titulo', type: 'input' },
+                { label: '1. Título — O que é Defesa de Marca?', field: 's1_titulo', type: 'input' },
+                { label: '1. Texto — O que é Defesa de Marca?', field: 's1_texto', type: 'textarea' },
+                { label: '8. Título — Contato para Autorização', field: 's8_titulo', type: 'input' },
+                { label: '8. Texto — Contato para Autorização', field: 's8_texto', type: 'textarea' },
+              ] as { label: string; field: keyof typeof docDefesaMarcaForm; type: string }[]).map(({ label, field, type }) => (
+                <div key={field}>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
+                  {type === 'textarea' ? (
+                    <textarea value={docDefesaMarcaForm[field]} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, [field]: e.target.value})}
+                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
+                  ) : (
+                    <input value={docDefesaMarcaForm[field]} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, [field]: e.target.value})}
+                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
+                  )}
+                </div>
+              ))}
+              <div className="flex justify-end pt-2 font-cinzel">
+                <button type="button" onClick={() => handleSaveConfig('doc_defesa_marca', docDefesaMarcaForm)} disabled={salvandoConfig}
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  <Save size={13} /> Salvar Defesa de Marca
                 </button>
               </div>
             </div>

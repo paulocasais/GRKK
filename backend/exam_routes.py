@@ -3,6 +3,36 @@ from services.supabase_service import SupabaseService
 from datetime import datetime
 from services.audit_service import registrar_log_auditoria
 
+# Tabelas de carência mínima em meses para exames de faixa do Karatê
+REGRAS_INFANTIL = {
+    'Branca/Amarela': 3,
+    'Amarela': 3,
+    'Amarela/Laranja': 3,
+    'Laranja': 4,
+    'Laranja/Verde': 4,
+    'Verde': 5,
+    'Verde/Azul': 6,
+    'Azul': 7,
+    'Azul/Vermelha': 8,
+    'Vermelha': 9,
+    'Marrom': 10,
+    'Marrom I': 11,
+    'Marrom II': 12,
+}
+
+REGRAS_ADULTO = {
+    'Amarela': 4,
+    'Laranja': 4,
+    'Verde': 6,
+    'Azul': 6,
+    'Vermelha': 6,
+    'Marrom': 8,
+    'Marrom I': 10,
+    'Marrom II': 12,
+    'Preta I': 18,
+    'Preta II': 24,
+}
+
 def create_exam_routes(app: Flask):
     """Cria e registra as rotas de exames"""
 
@@ -63,23 +93,115 @@ def create_exam_routes(app: Flask):
 
         elif request.method == "POST":
             data = request.json or {}
-            atleta_perfil, _ = SupabaseService.get_profile_by_id(data.get("atleta_id") or user["id"])
-
-            created_at_val = datetime.utcnow().isoformat() if 'datetime' in globals() else "2026-06-08T00:00:00.000Z"
+            
+            exame_id = data.get("exame_id")
+            if not exame_id:
+                return jsonify({"error": "O campo exame_id é obrigatório"}), 400
+                
+            exames, _ = SupabaseService.get_all("exames")
+            exame = next((ex for ex in (exames or []) if str(ex["id"]) == str(exame_id)), None)
+            if not exame:
+                return jsonify({"error": "Exame não localizado"}), 404
+                
+            atleta_id = data.get("atleta_id") or user["id"]
+            atleta_perfil, _ = SupabaseService.get_profile_by_id(atleta_id)
+            if not atleta_perfil:
+                return jsonify({"error": "Perfil do atleta não localizado"}), 404
+                
+            grad_pretendida = data.get("graduacao_pretendida")
+            if not grad_pretendida:
+                return jsonify({"error": "O campo graduacao_pretendida é obrigatório"}), 400
+                
+            # 1. Validar se o exame aceita a graduação pretendida
+            faixa_alvo_exame = exame.get("faixa_alvo", "Todas") or "Todas"
+            if faixa_alvo_exame.strip().lower() not in ["todas", "todas as faixas", ""]:
+                faixas_permitidas = [f.strip().lower() for f in faixa_alvo_exame.split(",")]
+                if grad_pretendida.strip().lower() not in faixas_permitidas:
+                    return jsonify({"error": f"Este exame não aceita candidatos para a graduação {grad_pretendida}. Faixas permitidas neste exame: {faixa_alvo_exame}"}), 400
+                    
+            # 2. Calcular idade na data do exame
+            data_nasc_str = atleta_perfil.get("data_nascimento")
+            data_exame_str = exame.get("data_exame")
+            idade = 15 # Valor padrão (adulto) caso as datas falhem
+            
+            if data_nasc_str and data_exame_str:
+                try:
+                    if "T" in data_exame_str:
+                        data_exame_str = data_exame_str.split("T")[0]
+                    if "T" in data_nasc_str:
+                        data_nasc_str = data_nasc_str.split("T")[0]
+                    dt_nasc = datetime.strptime(data_nasc_str, "%Y-%m-%d")
+                    dt_exame = datetime.strptime(data_exame_str, "%Y-%m-%d")
+                    idade = dt_exame.year - dt_nasc.year - ((dt_exame.month, dt_exame.day) < (dt_nasc.month, dt_nasc.day))
+                except Exception:
+                    pass
+                    
+            # 3. Determinar o início da faixa atual
+            # Busca todos os exames passados que o atleta foi aprovado
+            candidaturas, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"atleta_id": atleta_id, "status": "aprovado"})
+            if not candidaturas:
+                candidaturas, _ = SupabaseService.get_all("candidatos", filter_dict={"atleta_id": atleta_id, "status": "aprovado"})
+                
+            data_inicio_faixa = None
+            if candidaturas:
+                # Ordena pelo mais recente
+                candidaturas.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+                ultimo_aprovado = candidaturas[0]
+                
+                # Busca a data do exame correspondente
+                exames_list, _ = SupabaseService.get_all("exames")
+                exame_ant = next((ex for ex in (exames_list or []) if str(ex["id"]) == str(ultimo_aprovado.get("exame_id"))), None)
+                if exame_ant:
+                    data_inicio_faixa = exame_ant.get("data_exame")
+                    
+            if not data_inicio_faixa:
+                # Fallback: data de criação do cadastro do atleta
+                data_inicio_faixa = atleta_perfil.get("created_at") or datetime.utcnow().date().isoformat()
+                
+            # 4. Calcular tempo na faixa em meses
+            diferenca_meses = 999 # Valor alto padrão para passar caso datas falhem
+            if data_inicio_faixa and data_exame_str:
+                try:
+                    if "T" in data_inicio_faixa:
+                        data_inicio_faixa = data_inicio_faixa.split("T")[0]
+                    dt_inicio = datetime.strptime(data_inicio_faixa, "%Y-%m-%d")
+                    dt_exame = datetime.strptime(data_exame_str, "%Y-%m-%d")
+                    diferenca_meses = (dt_exame.year - dt_inicio.year) * 12 + (dt_exame.month - dt_inicio.month)
+                    if dt_exame.day < dt_inicio.day:
+                        diferenca_meses -= 1
+                except Exception:
+                    pass
+                    
+            # 5. Validar carência mínima
+            if idade <= 12:
+                carencia_exigida = REGRAS_INFANTIL.get(grad_pretendida)
+            else:
+                carencia_exigida = REGRAS_ADULTO.get(grad_pretendida)
+                
+            if carencia_exigida is not None:
+                if diferenca_meses < carencia_exigida:
+                    return jsonify({
+                        "error": (
+                            f"Período de carência não cumprido. Para a graduação a {grad_pretendida}, "
+                            f"são exigidos no mínimo {carencia_exigida} meses na faixa atual. "
+                            f"Você possui apenas {diferenca_meses} meses de permanência."
+                        )
+                    }), 400
 
             novo_candidato = {
-                "exame_id": data.get("exame_id"),
-                "atleta_id": data.get("atleta_id") or user["id"],
+                "exame_id": exame_id,
+                "atleta_id": atleta_id,
                 "atleta_nome": atleta_perfil.get("nome", "Atleta") if atleta_perfil else "Atleta",
                 "filial_id": atleta_perfil.get("filial_id", "dojo-central") if atleta_perfil else "dojo-central",
                 "filial_nome": atleta_perfil.get("filial_nome", "Dojo Central") if atleta_perfil else "Dojo Central",
                 "faixa_atual": atleta_perfil.get("faixa", "Branca") if atleta_perfil else "Branca",
-                "graduacao_pretendida": data.get("graduacao_pretendida", "Amarela"),
+                "graduacao_pretendida": grad_pretendida,
                 "status": "pendente",
                 "autorizacao_tecnica": True if user.get("tipo") in ["admin", "filial"] else False,
                 "pagamento_status": "pendente",
-                "dados_banca": {},
-                "created_at": created_at_val
+                "avaliado_por": None,
+                "dados_banca": None,
+                "created_at": datetime.utcnow().isoformat()
             }
             res, error = SupabaseService.insert("candidatos_exame", novo_candidato)
             if error:
@@ -149,8 +271,12 @@ def create_exam_routes(app: Flask):
                     "faixa": res.get("graduacao_pretendida", "Amarela")
                 })
 
-            if data.get("status") in ["aprovado", "reprovado"] or "avaliado_por" in data:
+            # Redistribuir fila sempre que status mudar para inscrito, aprovado, reprovado
+            # ou quando avaliado_por for alterado
+            if data.get("status") in ["inscrito", "aprovado", "reprovado"] or "avaliado_por" in data:
                 distribuir_proximos_fila(res.get("exame_id"))
+
+
 
             return jsonify(res), 200
 
@@ -173,7 +299,7 @@ def create_exam_routes(app: Flask):
 
             return jsonify({"sucesso": True}), 200
 
-    @app.route("/api/exames/<id>", methods=["GET", "PATCH"])
+    @app.route("/api/exames/<id>", methods=["GET", "PATCH", "DELETE"])
     def handle_exame_detail(id):
         from app import get_current_user
 
@@ -223,6 +349,49 @@ def create_exam_routes(app: Flask):
                 distribuir_proximos_fila(id)
 
             return jsonify(res), 200
+
+        elif request.method == "DELETE":
+            if user.get("tipo") != "admin":
+                return jsonify({"error": "Não autorizado"}), 403
+
+            exames, _ = SupabaseService.get_all("exames")
+            exame = next((ex for ex in (exames or []) if str(ex["id"]) == id), None)
+            if not exame:
+                return jsonify({"error": "Exame não encontrado"}), 404
+
+            # Exclui candidatos associados
+            candidatos, _ = SupabaseService.get_all("candidatos_exame")
+            if candidatos:
+                cands_exame = [c for c in candidatos if str(c.get("exame_id")) == id]
+                for c in cands_exame:
+                    SupabaseService.delete("candidatos_exame", c["id"])
+
+            cands_alt, _ = SupabaseService.get_all("candidatos")
+            if cands_alt:
+                cands_exame_alt = [c for c in cands_alt if str(c.get("exame_id")) == id]
+                for c in cands_exame_alt:
+                    SupabaseService.delete("candidatos", c["id"])
+
+            # Exclui examinadores vinculados
+            examinadores, _ = SupabaseService.get_all("examinadores_exame")
+            if examinadores:
+                exs_exame = [ex for ex in examinadores if str(ex.get("exame_id")) == id]
+                for ex in exs_exame:
+                    SupabaseService.delete("examinadores_exame", ex["id"])
+
+            # Exclui o exame
+            res, error = SupabaseService.delete("exames", id)
+            if error:
+                return jsonify({"error": error}), 500
+
+            # Registrar log de auditoria
+            registrar_log_auditoria(
+                user,
+                "Exclusão de Exame",
+                f"Exame de faixa '{exame.get('titulo')}' (ID: {id}) foi permanentemente excluído."
+            )
+
+            return jsonify({"sucesso": True}), 200
 
     @app.route("/api/exames/<id>/examinadores", methods=["POST"])
     def vincular_examinadores(id):
@@ -292,32 +461,44 @@ def create_exam_routes(app: Flask):
         return jsonify({"examinadores": examinadores}), 200
 
 def distribuir_proximos_fila(exame_id):
-    """Distribui os próximos candidatos na fila para um exame específico"""
-    # Obter candidatos para o exame
+    """Distribui candidatos 'inscrito' sem banca para os examinadores vinculados ao exame (máx 3 por banca)."""
+    # Busca todos os candidatos do exame
     candidatos_exame, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"exame_id": exame_id})
     if not candidatos_exame:
         candidatos_exame, _ = SupabaseService.get_all("candidatos", filter_dict={"exame_id": exame_id})
-    
+
     if not candidatos_exame:
         return
-    
-    # Filtrar candidatos que ainda não foram avaliados (status != "aprovado" e != "reprovado")
-    candidatos_pendentes = [
-        c for c in (candidatos_exame or []) 
-        if c.get("status") not in ["aprovado", "reprovado"]
-    ]
-    
-    if not candidatos_pendentes:
+
+    tabela = "candidatos_exame"
+
+    # Busca examinadores vinculados a este exame
+    vinculos, _ = SupabaseService.get_all("examinadores_exame", filter_dict={"exame_id": exame_id})
+    if not vinculos:
         return
-    
-    # Ordenar por data de criação (mais antigo primeiro)
-    candidatos_pendentes.sort(key=lambda x: x.get("created_at", ""))
-    
-    # Atualizar o primeiro candidato pendente para "em_andamento"
-    primeiro_pendente = candidatos_pendentes[0]
-    tabela = "candidatos_exame" if "exame_id" in primeiro_pendente else "candidatos"
-    
-    # Atualizar o status para em_andamento
-    SupabaseService.update(tabela, primeiro_pendente["id"], {
-        "status": "em_andamento"
-    })
+
+    examinador_ids = [v["examinador_id"] for v in vinculos]
+
+    # Candidatos na fila: inscrito e sem examinador designado
+    candidatos_fila = [
+        c for c in candidatos_exame
+        if c.get("status") == "inscrito" and not c.get("avaliado_por")
+    ]
+
+    if not candidatos_fila:
+        return
+
+    # Para cada candidato sem banca, encontrar o examinador com menos de 3 ativos
+    for cand in candidatos_fila:
+        for ex_id in examinador_ids:
+            ativos_do_ex = [
+                c for c in candidatos_exame
+                if c.get("avaliado_por") == ex_id and c.get("status") == "inscrito"
+            ]
+            if len(ativos_do_ex) < 3:
+                SupabaseService.update(tabela, cand["id"], {"avaliado_por": ex_id})
+                # Atualiza localmente para evitar dupla contagem no loop
+                cand["avaliado_por"] = ex_id
+                break
+
+

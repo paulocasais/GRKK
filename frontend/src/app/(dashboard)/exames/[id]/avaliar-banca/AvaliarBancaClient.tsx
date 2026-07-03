@@ -25,7 +25,17 @@ interface Candidato {
 }
 
 export default function AvaliarBancaClient({ params }: { params: Promise<{ id: string }> }) {
-  const { id: exameId } = use(params);
+  const { id: exameIdProp } = use(params);
+  
+  // Resolução de ID real para exportação estática (Apache/HostGator)
+  let exameId = exameIdProp;
+  if (typeof window !== 'undefined' && (exameIdProp === 'exame-1' || exameIdProp === 'exame-2' || exameIdProp === 'exame-3')) {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length >= 2 && parts[0] === 'exames') {
+      exameId = parts[1];
+    }
+  }
+
   const router = useRouter();
   const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial';

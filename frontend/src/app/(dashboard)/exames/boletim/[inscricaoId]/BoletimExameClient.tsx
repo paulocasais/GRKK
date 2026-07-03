@@ -37,7 +37,17 @@ interface Candidato {
 }
 
 export default function BoletimExameClient({ params }: { params: Promise<{ inscricaoId: string }> }) {
-  const { inscricaoId } = use(params);
+  const { inscricaoId: inscricaoIdProp } = use(params);
+  
+  // Resolução de ID real para exportação estática (Apache/HostGator)
+  let inscricaoId = inscricaoIdProp;
+  if (typeof window !== 'undefined' && (inscricaoIdProp === 'cand-1' || inscricaoIdProp === 'cand-2')) {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length >= 3 && parts[0] === 'exames' && parts[1] === 'boletim') {
+      inscricaoId = parts[2];
+    }
+  }
+
   const router = useRouter();
   const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial';

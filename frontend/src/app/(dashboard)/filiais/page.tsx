@@ -93,7 +93,7 @@ export default function FiliaisPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
         <ShieldAlert className="w-16 h-16 text-red-500" />
         <h2 className="text-xl font-bold text-white font-cinzel">Acesso Negado</h2>
-        <p className="text-zinc-500 text-sm">Apenas administradores homologados pela Federação podem acessar a gestão de filiais.</p>
+        <p className="text-zinc-500 text-sm">Apenas administradores homologados pela Associação podem acessar a gestão de filiais.</p>
       </div>
     );
   }

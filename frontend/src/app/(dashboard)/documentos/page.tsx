@@ -64,7 +64,7 @@ export default function DocumentosPage() {
       setDocumentos([
         { id: "doc-1", titulo: "Apostila Técnica de Kyu (Coloridas)", tipo: "Regulamento", desc: "Programa oficial de exames de faixa do 7º Kyu ao 1º Kyu.", arquivo_url: "https://gojuryukaratekai.com.br/arquivos/apostila-kyu.pdf" },
         { id: "doc-2", titulo: "Manual de Competição Goju-Ryu 2026", tipo: "Regras", desc: "Regulamento técnico unificado para Kata e Kumite.", arquivo_url: "https://gojuryukaratekai.com.br/arquivos/manual-competicao.pdf" },
-        { id: "doc-3", titulo: "Estatuto Oficial da Federação", tipo: "Institucional", desc: "Regimento interno e diretrizes organizacionais do dojo.", arquivo_url: "https://gojuryukaratekai.com.br/arquivos/estatuto.pdf" },
+        { id: "doc-3", titulo: "Estatuto Oficial da Associação", tipo: "Institucional", desc: "Regimento interno e diretrizes organizacionais do dojo.", arquivo_url: "https://gojuryukaratekai.com.br/arquivos/estatuto.pdf" },
         { id: "doc-4", titulo: "Tabela de Taxas e Anuidades 2026", tipo: "Financeiro", desc: "Valores vigentes para credenciamentos e exames.", arquivo_url: "https://gojuryukaratekai.com.br/arquivos/tabela-taxas.pdf" },
       ]);
     } finally {
@@ -179,7 +179,7 @@ export default function DocumentosPage() {
         <div>
           <h1 className="text-2xl font-black text-white font-cinzel tracking-wider">Documentação Oficial</h1>
           <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold font-sans">
-            Regulamentos, Manuais, Certificados e Estatutos da Federação
+            Regulamentos, Manuais, Certificados e Estatutos da Associação
           </p>
         </div>
         {isAdmin && (

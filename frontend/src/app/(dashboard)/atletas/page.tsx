@@ -31,7 +31,89 @@ interface Atleta {
   medico_diagnosticos?: string;
 }
 
-const FAIXAS = ['Branca', 'Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+const FAIXAS = [
+  'Branca',
+  'Branca/Amarela',
+  'Amarela',
+  'Amarela/Laranja',
+  'Laranja',
+  'Laranja/Verde',
+  'Verde',
+  'Verde/Azul',
+  'Azul',
+  'Azul/Vermelha',
+  'Vermelha',
+  'Marrom',
+  'Marrom I',
+  'Marrom II',
+  'Preta I',
+  'Preta II',
+];
+
+const FAIXAS_INFANTIL = [
+  'Branca',
+  'Branca/Amarela',
+  'Amarela',
+  'Amarela/Laranja',
+  'Laranja',
+  'Laranja/Verde',
+  'Verde',
+  'Verde/Azul',
+  'Azul',
+  'Azul/Vermelha',
+  'Vermelha',
+  'Marrom',
+  'Marrom I',
+  'Marrom II',
+];
+
+const FAIXAS_ADULTO = [
+  'Branca',
+  'Amarela',
+  'Laranja',
+  'Verde',
+  'Azul',
+  'Vermelha',
+  'Marrom',
+  'Marrom I',
+  'Marrom II',
+  'Preta I',
+  'Preta II',
+];
+
+function renderFaixaBadge(faixa: string) {
+  const cores: Record<string, { bg: string, border: string, text: string, stripe?: string }> = {
+    'Branca':          { bg: 'bg-white',        border: 'border-zinc-300',   text: 'text-zinc-900' },
+    'Branca/Amarela':  { bg: 'bg-yellow-200',   border: 'border-yellow-400', text: 'text-zinc-900' },
+    'Amarela':         { bg: 'bg-yellow-400',   border: 'border-yellow-600', text: 'text-zinc-950' },
+    'Amarela/Laranja': { bg: 'bg-orange-300',   border: 'border-orange-500', text: 'text-zinc-950' },
+    'Laranja':         { bg: 'bg-orange-500',   border: 'border-orange-600', text: 'text-white' },
+    'Laranja/Verde':   { bg: 'bg-green-500',    border: 'border-green-700',  text: 'text-white' },
+    'Verde':           { bg: 'bg-emerald-700',  border: 'border-emerald-900',text: 'text-white' },
+    'Verde/Azul':      { bg: 'bg-teal-600',     border: 'border-teal-800',   text: 'text-white' },
+    'Azul':            { bg: 'bg-blue-600',     border: 'border-blue-800',   text: 'text-white' },
+    'Azul/Vermelha':   { bg: 'bg-indigo-600',   border: 'border-indigo-800', text: 'text-white' },
+    'Vermelha':        { bg: 'bg-red-600',      border: 'border-red-800',    text: 'text-white' },
+    'Marrom':          { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white' },
+    'Marrom I':        { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white', stripe: 'bg-white' },
+    'Marrom II':       { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white', stripe: 'bg-amber-400' },
+    'Preta I':         { bg: 'bg-zinc-950',     border: 'border-yellow-600', text: 'text-gold',  stripe: 'bg-yellow-500' },
+    'Preta II':        { bg: 'bg-zinc-950',     border: 'border-yellow-500', text: 'text-gold',  stripe: 'bg-yellow-400' },
+  };
+
+  const cor = cores[faixa] || { bg: 'bg-zinc-800', border: 'border-zinc-700', text: 'text-white' };
+
+  return (
+    <div className={`relative flex items-center justify-between px-2.5 py-1 rounded border text-[9px] font-black uppercase tracking-wider ${cor.bg} ${cor.border} ${cor.text} shadow-sm overflow-hidden h-[22px] w-[95px] select-none`}>
+      <span className="truncate pr-1">{faixa}</span>
+      {cor.stripe ? (
+        <div className={`absolute right-0 top-0 bottom-0 w-2.5 ${cor.stripe}`} title="Ponteira de Graduação" />
+      ) : (
+        <div className="absolute right-0 top-0 bottom-0 w-1 bg-zinc-950/20" />
+      )}
+    </div>
+  );
+}
 
 export default function AtletasPage() {
   const { usuario, tipo, isAdmin } = useAuth();
@@ -40,9 +122,15 @@ export default function AtletasPage() {
   const [busca, setBusca] = useState('');
   const [statusFiltro, setStatusFiltro] = useState<'todos' | 'ativo' | 'pendente'>('todos');
   
+  interface Filial {
+    id: string;
+    nome: string;
+  }
+  const [filiais, setFiliais] = useState<Filial[]>([]);
   const [selectedAtleta, setSelectedAtleta] = useState<Atleta | null>(null);
   const [viewingAtleta, setViewingAtleta] = useState<Atleta | null>(null);
   const [novaFaixa, setNovaFaixa] = useState('');
+  const [novaFilialId, setNovaFilialId] = useState('');
   const [salvando, setSalvando] = useState(false);
 
   const carregarAtletas = async () => {
@@ -64,8 +152,21 @@ export default function AtletasPage() {
     }
   };
 
+  const carregarFiliais = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/filiais`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setFiliais(data.filiais || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar filiais na área administrativa:", err);
+    }
+  };
+
   useEffect(() => {
     carregarAtletas();
+    carregarFiliais();
   }, []);
 
   const handleStatusChange = async (atletaId: string, novoStatus: 'ativo' | 'inativo' | 'pendente') => {
@@ -102,18 +203,37 @@ export default function AtletasPage() {
     if (!selectedAtleta) return;
     setSalvando(true);
     try {
+      const filialSelecionada = filiais.find(f => f.id === novaFilialId);
+      const filialNome = filialSelecionada ? filialSelecionada.nome : 'Dojo Central / Sem Filial';
+
       const res = await fetch(`${API_URL}/api/atletas/${selectedAtleta.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ faixa: novaFaixa })
+        body: JSON.stringify({ 
+          faixa: novaFaixa,
+          filial_id: novaFilialId || null,
+          filial_nome: novaFilialId ? filialNome : null
+        })
       });
       if (res.ok) {
-        setAtletas(atletas.map(a => a.id === selectedAtleta.id ? { ...a, faixa: novaFaixa } : a));
+        setAtletas(atletas.map(a => a.id === selectedAtleta.id ? { 
+          ...a, 
+          faixa: novaFaixa,
+          filial_id: novaFilialId || undefined,
+          filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial'
+        } : a));
         setSelectedAtleta(null);
       }
     } catch (err) {
-      setAtletas(atletas.map(a => a.id === selectedAtleta.id ? { ...a, faixa: novaFaixa } : a));
+      const filialSelecionada = filiais.find(f => f.id === novaFilialId);
+      const filialNome = filialSelecionada ? filialSelecionada.nome : 'Dojo Central / Sem Filial';
+      setAtletas(atletas.map(a => a.id === selectedAtleta.id ? { 
+        ...a, 
+        faixa: novaFaixa,
+        filial_id: novaFilialId || undefined,
+        filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial'
+      } : a));
       setSelectedAtleta(null);
     } finally {
       setSalvando(false);
@@ -212,9 +332,12 @@ export default function AtletasPage() {
                 <p className="text-[10px] text-zinc-400 flex items-center gap-1.5 font-mono">
                   <Phone size={11} className="text-zinc-650" /> {atleta.telefone || 'Não informado'}
                 </p>
-                <p className="text-[10px] text-zinc-400 flex items-center gap-1.5 font-mono">
-                  <Trophy size={11} className="text-zinc-650" /> Graduação: <strong className="text-gold">{atleta.faixa}</strong>
-                </p>
+                <div className="text-[10px] text-zinc-400 flex items-center justify-between gap-1.5 pt-1 border-t border-zinc-800/10">
+                  <span className="flex items-center gap-1.5 font-mono">
+                    <Trophy size={11} className="text-zinc-650" /> Graduação:
+                  </span>
+                  {renderFaixaBadge(atleta.faixa)}
+                </div>
               </div>
             </div>
 
@@ -262,10 +385,11 @@ export default function AtletasPage() {
                   onClick={() => {
                     setSelectedAtleta(atleta);
                     setNovaFaixa(atleta.faixa);
+                    setNovaFilialId((atleta as any).filial_id || '');
                   }}
                   className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
                 >
-                  Alterar Faixa
+                  Faixa / Dojo
                 </button>
               </div>
               <button
@@ -285,27 +409,48 @@ export default function AtletasPage() {
         )}
       </div>
 
-      {/* Modal Edição de Faixa */}
+      {/* Modal Edição de Faixa e Dojo */}
       {selectedAtleta && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-zinc-900 border border-zinc-850 rounded-2xl w-full max-w-sm p-6 relative">
-            <h3 className="text-base font-bold text-white font-cinzel mb-1">Graduar Atleta</h3>
+            <h3 className="text-base font-bold text-white font-cinzel mb-1">Dados Técnicos do Atleta</h3>
             <p className="text-[10px] text-zinc-400 uppercase tracking-wider mb-5">Atleta: <strong className="text-white">{selectedAtleta.nome}</strong></p>
-
+ 
             <form onSubmit={handleSalvarEdicao} className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-zinc-450 uppercase mb-1.5">Faixa / Graduação</label>
                 <select
                   value={novaFaixa}
                   onChange={(e) => setNovaFaixa(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold"
                 >
-                  {FAIXAS.map(faixa => (
-                    <option key={faixa} value={faixa}>{faixa}</option>
-                  ))}
+                  <optgroup label="── Divisão Infantil ──">
+                    {FAIXAS_INFANTIL.map(faixa => (
+                      <option key={`inf-${faixa}`} value={faixa}>{faixa}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="── Divisão Adulto ──">
+                    {FAIXAS_ADULTO.map(faixa => (
+                      <option key={`adu-${faixa}`} value={faixa}>{faixa}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-450 uppercase mb-1.5">Dojo / Filial</label>
+                <select
+                  value={novaFilialId}
+                  onChange={(e) => setNovaFilialId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold"
+                >
+                  <option value="">Dojo Central (Nenhuma Filial)</option>
+                  {filiais.map(f => (
+                    <option key={f.id} value={f.id}>{f.nome}</option>
+                  ))}
+                </select>
+              </div>
+ 
               <div className="flex gap-2.5 pt-2">
                 <button
                   type="button"
@@ -336,7 +481,10 @@ export default function AtletasPage() {
 
             <div className="flex justify-between items-start border-b border-zinc-900 pb-4">
               <div>
-                <h3 className="text-xl font-bold text-white font-cinzel tracking-wider">{viewingAtleta.nome}</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <h3 className="text-xl font-bold text-white font-cinzel tracking-wider">{viewingAtleta.nome}</h3>
+                  {renderFaixaBadge(viewingAtleta.faixa)}
+                </div>
                 <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold mt-1">Ficha Cadastral e Ficha Médica</p>
               </div>
               <button 

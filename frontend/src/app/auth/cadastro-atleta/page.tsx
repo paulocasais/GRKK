@@ -24,21 +24,47 @@ function formatarTelefone(valor: string) {
 }
 
 export default function CadastroAtletaPage() {
+  interface Filial {
+    id: string;
+    nome: string;
+  }
+
   const [form, setForm] = useState({
     nome: '',
     email: '',
     telefone: '',
     senha: '',
     confirmarSenha: '',
+    filial_id: '',
+    aceita_termos: false
   });
 
+  const [filiais, setFiliais] = useState<Filial[]>([]);
+  const [loadingFiliais, setLoadingFiliais] = useState(true);
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [sucesso, setSucesso] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  React.useEffect(() => {
+    const carregarFiliais = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/filiais/public`);
+        if (res.ok) {
+          const data = await res.json();
+          setFiliais(data.filiais || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar filiais públicas:", err);
+      } finally {
+        setLoadingFiliais(false);
+      }
+    };
+    carregarFiliais();
+  }, []);
+
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const setFormatado = (field: string, formatter: (val: string) => string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -56,9 +82,16 @@ export default function CadastroAtletaPage() {
       setErrorMsg('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
+    if (!(form as any).aceita_termos) {
+      setErrorMsg('É necessário aceitar os Termos de Serviço e Aviso de Privacidade do Portal GRKK.');
+      return;
+    }
 
     setLoading(true);
     try {
+      const filialSelecionada = filiais.find(f => f.id === form.filial_id);
+      const filialNome = filialSelecionada ? filialSelecionada.nome : null;
+
       const res = await fetch(`${API_URL}/api/atletas/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -67,6 +100,9 @@ export default function CadastroAtletaPage() {
           email: form.email.trim(),
           telefone: form.telefone.replace(/\D/g, ''),
           senha: form.senha,
+          filial_id: form.filial_id || null,
+          filial_nome: filialNome,
+          aceita_termos: (form as any).aceita_termos,
         }),
       });
 

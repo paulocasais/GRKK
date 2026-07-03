@@ -13,6 +13,9 @@ def create_atleta_routes(app: Flask):
         email = data.get("email")
         telefone = data.get("telefone")
         senha = data.get("senha")
+        aceita_termos = data.get("aceita_termos")
+        if not aceita_termos:
+            return jsonify({"error": "É necessário aceitar os Termos de Serviço e Aviso de Privacidade do Portal GRKK"}), 400
 
         if not nome or not email or not telefone:
             return jsonify({"error": "Nome, e-mail e telefone são obrigatórios"}), 400
@@ -57,11 +60,25 @@ def create_atleta_routes(app: Flask):
             "email": email,
             "telefone": telefone,
             "status": "pendente",
-            "faixa": "Branca"
+            "faixa": "Branca",
+            "filial_id": data.get("filial_id"),
+            "filial_nome": data.get("filial_nome")
         }
         atleta, error2 = SupabaseService.insert("atletas", atleta_item)
         if error2:
             return jsonify({"error": error2}), 500
+
+        # Notifica o cadastro pendente do atleta
+        try:
+            from notif_routes import criar_notificacao
+            criar_notificacao(
+                destinatario_id=None,
+                titulo="Nova Solicitação de Cadastro",
+                mensagem=f"O atleta {nome} se cadastrou e aguarda homologação.",
+                tipo="alerta"
+            )
+        except Exception as n_err:
+            print(f"Erro ao criar notificação de cadastro de atleta: {n_err}")
 
         return jsonify({"success": True, "atleta": atleta}), 201
 
@@ -155,6 +172,19 @@ def create_atleta_routes(app: Flask):
         res, error = SupabaseService.update("atletas", id, update_atl)
         if error:
             return jsonify({"error": error}), 500
+
+        # Se foi homologado (status alterado para ativo)
+        if (update_prof.get("status") == "ativo" or update_atl.get("status") == "ativo") and existing_atleta and existing_atleta.get("status") != "ativo":
+            try:
+                from notif_routes import criar_notificacao
+                criar_notificacao(
+                    destinatario_id=id,
+                    titulo="Cadastro Homologado",
+                    mensagem="Seu perfil de atleta foi homologado com sucesso!",
+                    tipo="sucesso"
+                )
+            except Exception as n_err:
+                print(f"Erro ao notificar aprovação de atleta: {n_err}")
 
         # Registrar log de auditoria
         campos_atualizados = list(update_prof.keys()) + list(update_atl.keys())

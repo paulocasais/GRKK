@@ -45,11 +45,28 @@ const PONTOS_EVENTOS: Record<string, { label: string; pontos: number; cor: strin
   medalha_prata: { label: 'Medalha de Prata 🥈', pontos: 50, cor: 'text-slate-300 bg-slate-500/10 border-slate-500/20' },
   medalha_bronze: { label: 'Medalha de Bronze 🥉', pontos: 30, cor: 'text-amber-600 bg-amber-700/10 border-amber-700/20' },
   arbitragem: { label: 'Atuação como Árbitro', pontos: 40, cor: 'text-purple-400 bg-purple-500/10' },
-  curso: { label: 'Curso Federativo / Técnico', pontos: 25, cor: 'text-teal-400 bg-teal-500/10' },
-  exame: { label: 'Aprovação em Exame de Faixa', pontos: 80, cor: 'text-red-400 bg-red-500/10' },
+  curso: { label: 'Curso da Associação / Técnico', pontos: 25, cor: 'text-teal-400 bg-teal-500/10' },
+  exame: { label: 'Aprovação em Graduação de Faixa', pontos: 80, cor: 'text-red-400 bg-red-500/10' },
 };
 
-const FAIXAS = ['Branca', 'Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+const FAIXAS = [
+  'Branca',
+  'Branca/Amarela',
+  'Amarela',
+  'Amarela/Laranja',
+  'Laranja',
+  'Laranja/Verde',
+  'Verde',
+  'Verde/Azul',
+  'Azul',
+  'Azul/Vermelha',
+  'Vermelha',
+  'Marrom',
+  'Marrom I',
+  'Marrom II',
+  'Preta I',
+  'Preta II',
+];
 
 export default function RankingPage() {
   const { usuario, isAdmin } = useAuth();
@@ -200,7 +217,7 @@ export default function RankingPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white font-cinzel tracking-wider">Ranking de Atletas</h1>
-          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Tabela consolidada de pontos acumulados da Federação</p>
+          <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Tabela consolidada de pontos acumulados da Associação</p>
         </div>
         {isAdmin && (
           <button

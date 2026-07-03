@@ -7,6 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'backend'))
 
 from backend.app import app
+app.testing = True
 
 def test_app_structure():
     """Testar a estrutura do app refatorado"""
@@ -220,16 +221,94 @@ def test_finance_module():
     print("SUCCESS: Todos os testes do módulo financeiro passaram!")
     return True
 
+def test_exame_module():
+    """Testar regras de negócio, faixas permitidas e carência mínima do módulo de exames"""
+    print("\nTestando módulo de exames (múltiplas faixas, carência, idade)...")
+    
+    with app.test_client() as client:
+        # 1. Login como Admin
+        res = client.post('/api/auth/login', json={'email': 'admin@grkk.com.br'})
+        assert res.status_code == 200
+        
+        # 2. Criar um novo exame publicado com faixas restritas
+        res = client.post('/api/exames', json={
+            'titulo': 'Exame Teste Restrito',
+            'descricao': 'Exame para teste de faixas e carência',
+            'data_exame': '2026-07-15',
+            'local': 'Dojo de Teste',
+            'modalidade': 'Karate Goju-Ryu',
+            'faixa_alvo': 'Amarela, Laranja', # múltiplas faixas
+            'taxa_valor': 80.00,
+            'status': 'publicado'
+        })
+        assert res.status_code == 201
+        exame_criado = res.get_json()
+        exame_id = exame_criado.get('id')
+        assert exame_id is not None
+        print("PASS: Criado exame publicado com múltiplas faixas permitidas")
+        
+        # Logout do admin
+        client.post('/api/auth/logout')
+        
+        # 3. Login como Atleta
+        res = client.post('/api/auth/login', json={'email': 'atleta@grkk.com.br'})
+        assert res.status_code == 200
+        
+        # 4. Tentar se inscrever em uma faixa não permitida pelo exame (ex: Azul)
+        res = client.post('/api/exames/candidatos', json={
+            'exame_id': exame_id,
+            'graduacao_pretendida': 'Azul'
+        })
+        assert res.status_code == 400
+        data = res.get_json()
+        assert 'Este exame não aceita candidatos' in data.get('error', '')
+        print("PASS: Tentativa de inscrição em faixa não permitida pelo exame é rejeitada (400)")
+        
+        # 5. Tentar se inscrever na faixa Amarela sem cumprir a carência (criado recentemente)
+        res = client.post('/api/exames/candidatos', json={
+            'exame_id': exame_id,
+            'graduacao_pretendida': 'Amarela'
+        })
+        assert res.status_code == 400
+        data = res.get_json()
+        assert 'Período de carência não cumprido' in data.get('error', '')
+        print("PASS: Inscrição sem cumprir o período de carência é rejeitada (400)")
+        
+        # Logout
+        client.post('/api/auth/logout')
+        
+        # 6. Login de admin para excluir o exame
+        res = client.post('/api/auth/login', json={'email': 'admin@grkk.com.br'})
+        assert res.status_code == 200
+        
+        # 7. Excluir o exame
+        res = client.delete(f'/api/exames/{exame_id}')
+        assert res.status_code == 200
+        print("PASS: Exame excluído com sucesso (200)")
+        
+        # 8. Verificar se o exame foi excluído
+        res = client.get(f'/api/exames/{exame_id}')
+        assert res.status_code == 404
+        print("PASS: Exame excluído não é mais localizado (404)")
+        
+        # Logout
+        client.post('/api/auth/logout')
+        
+    print("SUCCESS: Todos os testes do módulo de exames passaram!")
+    return True
+
 if __name__ == '__main__':
     try:
         test_app_structure()
         test_finance_module()
+        test_exame_module()
         print("\n[SUCCESS] Todos os testes de validação foram concluídos com sucesso!")
-        print("\nResumo das melhorias financeiras validadas:")
+        print("\nResumo das melhorias validadas:")
         print("1. Rotas de faturamento restritas contra IDOR e privilégios")
         print("2. Validação estrita de tipo de fatura, valor positivo e formato de data")
         print("3. Filtragem automática no banco de dados com base na sessão")
         print("4. Geração automática de logs de auditoria")
+        print("5. Exame com múltiplas faixas e validação de carência mínima no backend")
     except Exception as e:
         print(f"\n[ERROR] Erro durante os testes: {e}")
         import traceback

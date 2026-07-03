@@ -1,8 +1,15 @@
 RewriteEngine On
 
+# ----------------------------------------------------------------------
+# SEGURANÇA E ISOLAMENTO DE SUBDOMÍNIOS (Evita quebrar a API)
+# Garante que as regras deste .htaccess só se apliquem ao domínio principal.
+# Impede herança indesejada de reescritas no subdomínio api.gojuryukaratekai.com.br
+# ----------------------------------------------------------------------
+RewriteCond %{HTTP_HOST} !^(www\.)?gojuryukaratekai\.com\.br$ [NC]
+RewriteRule ^ - [L]
+
 # -------------------------------------------------------
 # LIBERAR ACESSO DIRETO À PASTA _next (Next.js estático)
-# Deve vir ANTES de qualquer outra regra de reescrita.
 # -------------------------------------------------------
 RewriteCond %{REQUEST_URI} ^/_next/
 RewriteRule ^ - [L]

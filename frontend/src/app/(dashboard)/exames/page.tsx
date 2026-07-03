@@ -144,14 +144,42 @@ export default function ExamesPage() {
     }
   };
 
-  const FAIXAS = ['Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Preta'];
+  const FAIXAS_INFANTIL = [
+    'Branca/Amarela',
+    'Amarela',
+    'Amarela/Laranja',
+    'Laranja',
+    'Laranja/Verde',
+    'Verde',
+    'Verde/Azul',
+    'Azul',
+    'Azul/Vermelha',
+    'Vermelha',
+    'Marrom',
+    'Marrom I',
+    'Marrom II',
+  ];
+
+  const FAIXAS_ADULTO = [
+    'Amarela',
+    'Laranja',
+    'Verde',
+    'Azul',
+    'Vermelha',
+    'Marrom',
+    'Marrom I',
+    'Marrom II',
+    'Preta I',
+    'Preta II',
+  ];
+
   const MODALIDADES = ['Karate Goju-Ryu', 'Kobudo', 'Defesa Pessoal'];
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
-        <p className="text-zinc-500 font-cinzel text-xs tracking-widest uppercase">Carregando exames...</p>
+        <p className="text-zinc-500 font-cinzel text-xs tracking-widest uppercase">Carregando exames de graduação...</p>
       </div>
     );
   }
@@ -164,7 +192,7 @@ export default function ExamesPage() {
         <div>
           <h1 className="text-2xl font-bold text-white font-cinzel tracking-wider flex items-center gap-2.5">
             <Trophy className="text-primary" size={24} />
-            Exames de Faixa
+            Exames de Graduação
           </h1>
           <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-semibold">
             Inscrições, cronograma e bancas de avaliação da federação
@@ -177,7 +205,7 @@ export default function ExamesPage() {
               onClick={() => setShowNovoExameModal(true)}
               className="px-5 py-2.5 bg-gradient-to-r from-primary to-primary-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-102 cursor-pointer shadow-lg shadow-red-950/20"
             >
-              Novo Exame
+              Novo Exame de Graduação
             </button>
           )}
 
@@ -192,7 +220,7 @@ export default function ExamesPage() {
               }}
               className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-102 cursor-pointer shadow-lg shadow-gold/10"
             >
-              Solicitar Graduação
+              Solicitar Exame de Graduação
             </button>
           )}
         </div>
@@ -290,8 +318,8 @@ export default function ExamesPage() {
 
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-bold text-white font-cinzel tracking-wider">Novo Exame</h3>
-                <p className="text-xs text-zinc-500 mt-1">Cadastre um exame no sistema. Ele será criado como rascunho.</p>
+                <h3 className="text-lg font-bold text-white font-cinzel tracking-wider">Novo Exame de Graduação</h3>
+                <p className="text-xs text-zinc-500 mt-1">Cadastre um exame de graduação no sistema. Ele será criado como rascunho.</p>
               </div>
               <button 
                 onClick={() => setShowNovoExameModal(false)}
@@ -303,7 +331,7 @@ export default function ExamesPage() {
 
             <form onSubmit={handleCriarExame} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Título do Exame *</label>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Título do Exame de Graduação *</label>
                 <input
                   type="text" required
                   placeholder="Ex: Exame de Faixas Coloridas - Salvador"
@@ -361,7 +389,13 @@ export default function ExamesPage() {
                     onChange={(e) => setNovoExameForm({ ...novoExameForm, faixa_alvo: e.target.value })}
                     className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
                   >
-                    {FAIXAS.map(f => <option key={f} value={f}>{f}</option>)}
+                    <option value="Todas">Todas as Faixas</option>
+                    <optgroup label="── Divisão Infantil ──">
+                      {FAIXAS_INFANTIL.map(f => <option key={`inf-${f}`} value={f}>{f}</option>)}
+                    </optgroup>
+                    <optgroup label="── Divisão Adulto ──">
+                      {FAIXAS_ADULTO.map(f => <option key={`adu-${f}`} value={f}>{f}</option>)}
+                    </optgroup>
                   </select>
                 </div>
                 <div>
@@ -388,7 +422,7 @@ export default function ExamesPage() {
                   type="submit"
                   className="px-6 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:bg-primary-dark cursor-pointer shadow-lg shadow-red-950/20 font-cinzel"
                 >
-                  Criar Exame
+                  Criar Exame de Graduação
                 </button>
               </div>
             </form>
@@ -438,7 +472,12 @@ export default function ExamesPage() {
                   onChange={(e) => setInscricaoForm({ ...inscricaoForm, graduacao_pretendida: e.target.value })}
                   className="w-full px-4 py-3 bg-zinc-900 border border-zinc-850 rounded-xl text-white text-xs focus:outline-none focus:border-primary"
                 >
-                  {FAIXAS.map(f => <option key={f} value={f}>{f}</option>)}
+                  <optgroup label="── Divisão Infantil ──">
+                    {FAIXAS_INFANTIL.map(f => <option key={`inf-${f}`} value={f}>{f}</option>)}
+                  </optgroup>
+                  <optgroup label="── Divisão Adulto ──">
+                    {FAIXAS_ADULTO.map(f => <option key={`adu-${f}`} value={f}>{f}</option>)}
+                  </optgroup>
                 </select>
               </div>
 

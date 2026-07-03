@@ -65,7 +65,7 @@ function ValidarCertificadoContent() {
             </div>
           </div>
           <h2 className="text-sm font-bold uppercase tracking-widest text-primary font-cinzel">Autenticando Documento</h2>
-          <p className="text-xs text-gray-500 font-body">Buscando na base de dados federativa...</p>
+          <p className="text-xs text-gray-500 font-body">Buscando na base de dados da associação...</p>
         </div>
       ) : error ? (
         /* Invalid Warning */
@@ -76,7 +76,7 @@ function ValidarCertificadoContent() {
           <div className="space-y-2">
             <h2 className="text-lg font-black text-red-400 font-cinzel uppercase tracking-wider">Certificado não localizado</h2>
             <p className="text-xs text-gray-400 max-w-sm mx-auto font-body">
-              O código de verificação <span className="font-mono text-white font-bold bg-zinc-900 px-2 py-0.5 rounded">{codigo}</span> não corresponde a nenhum documento autêntico da nossa Federação.
+              O código de verificação <span className="font-mono text-white font-bold bg-zinc-900 px-2 py-0.5 rounded">{codigo}</span> não corresponde a nenhum documento autêntico da nossa Associação.
             </p>
           </div>
           <div className="pt-2">
@@ -129,7 +129,7 @@ function ValidarCertificadoContent() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Federação Baiana de Goju-Ryu Karate-Kai</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Associação Goju-Ryu Karatê-Kai</p>
                 <h3 className="text-xl sm:text-2xl font-black text-white font-cinzel print:text-black">CERTIFICADO DE AUTENTICIDADE TÉCNICA</h3>
                 <div className="w-16 h-0.5 bg-gold/35 mx-auto" />
               </div>
@@ -160,7 +160,7 @@ function ValidarCertificadoContent() {
                   <p className="uppercase text-[8px] font-bold tracking-wider print:text-gray-600">Presidente da Banca</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="font-cinzel tracking-wider italic text-gray-300 print:text-black">Federação GRKK</p>
+                  <p className="font-cinzel tracking-wider italic text-gray-300 print:text-black">Associação GRKK</p>
                   <div className="w-24 h-px bg-zinc-800 mx-auto print:bg-black/20" />
                   <p className="uppercase text-[8px] font-bold tracking-wider print:text-gray-600">Secretaria Técnica</p>
                 </div>

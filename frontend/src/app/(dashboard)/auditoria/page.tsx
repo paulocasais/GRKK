@@ -38,7 +38,7 @@ export default function AuditoriaPage() {
   };
 
   useEffect(() => {
-    if (tipo === 'admin') {
+    if (tipo && tipo !== 'atleta') {
       carregarLogs();
     } else {
       setLoading(false);
@@ -53,12 +53,16 @@ export default function AuditoriaPage() {
     );
   }
 
-  if (tipo !== 'admin') {
+  if (!usuario || tipo === 'atleta') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
         <ShieldAlert className="w-16 h-16 text-red-500" />
         <h2 className="text-xl font-bold text-white font-cinzel">Acesso Negado</h2>
-        <p className="text-zinc-500 text-sm">Apenas administradores homologados têm acesso aos relatórios e logs de auditoria.</p>
+        <p className="text-zinc-500 text-sm">
+          {!usuario 
+            ? "Realize login para acessar os relatórios e logs de auditoria." 
+            : "Apenas administradores e representantes de filiais homologados têm acesso aos relatórios e logs de auditoria."}
+        </p>
       </div>
     );
   }
@@ -84,7 +88,7 @@ export default function AuditoriaPage() {
             <thead>
               <tr className="border-b border-zinc-800/60 bg-zinc-950/20 text-[10px] font-black uppercase tracking-wider text-zinc-500">
                 <th className="p-4">Data / Hora</th>
-                <th className="p-4">Administrador</th>
+                <th className="p-4">Usuário</th>
                 <th className="p-4">Ação</th>
                 <th className="p-4">Detalhes</th>
                 <th className="p-4">Endereço IP</th>

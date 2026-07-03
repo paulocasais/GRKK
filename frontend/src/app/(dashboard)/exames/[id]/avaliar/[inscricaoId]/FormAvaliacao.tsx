@@ -197,7 +197,7 @@ export default function FormAvaliacao({
 
         <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-6 shadow-sm space-y-6">
           <h3 className="font-bold text-white flex items-center gap-2 font-cinzel text-xs uppercase tracking-wider border-b border-zinc-900 pb-3">
-            <ClipboardList size={16} className="text-primary" /> Testes de Avaliação (FKB)
+            <ClipboardList size={16} className="text-primary" /> Testes de Avaliação (GRKK)
           </h3>
 
           <div className="space-y-6 divide-y divide-zinc-900/60">
@@ -291,7 +291,7 @@ export default function FormAvaliacao({
           </div>
         )}
 
-        {/* Fórmula FKB Card */}
+        {/* Formulário GRKK Card */}
         {!isMulti && (
           <div className="bg-zinc-900/30 border border-zinc-900 rounded-2xl p-5 space-y-4 shadow-sm">
             <h3 className="font-bold text-white flex items-center gap-2 font-cinzel text-xs uppercase tracking-wider border-b border-zinc-900 pb-2">
@@ -300,7 +300,7 @@ export default function FormAvaliacao({
 
             <div className="space-y-3">
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                <strong>Regra FKB:</strong> 50% + 1 dos conceitos devem ser R, B ou E (ou seja, satisfatório/aprovador).
+                <strong>Regra GRKK:</strong> 50% + 1 dos conceitos devem ser R, B ou E (ou seja, satisfatório/aprovador).
               </p>
 
               <div className="bg-zinc-950 border border-zinc-900 p-3 rounded-xl space-y-2">
@@ -344,7 +344,7 @@ export default function FormAvaliacao({
           <div className="space-y-4">
             {isMulti && (
               <div className="bg-zinc-950 border border-zinc-900 p-3 rounded-xl flex items-center justify-between text-xs">
-                <span className="text-zinc-400 font-medium">Fórmula FKB ({passingCount}/{requiredPassing}):</span>
+                <span className="text-zinc-400 font-medium">Formulário GRKK ({passingCount}/{requiredPassing}):</span>
                 {passingCount >= requiredPassing ? (
                   <span className="text-emerald-400 font-bold flex items-center gap-1">
                     <CheckCircle size={13} /> APROVADO

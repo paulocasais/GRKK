@@ -55,7 +55,7 @@ COLUNAS_VALIDAS = {
     "eventos": ["id", "titulo", "descricao", "data_inicio", "data_fim", "tipo", "imagem_url", "created_at", "updated_at"],
     "eventos_inscricoes": ["id", "evento_id", "atleta_id", "atleta_nome", "filial_id", "filial_nome", "categoria", "faixa", "idade", "pagamento_status", "status", "created_at"],
     "eventos_chaves": ["id", "evento_id", "modalidade", "brackets", "created_at", "updated_at"],
-    "exames": ["id", "titulo", "descricao", "data_exame", "status", "created_at"],
+    "exames": ["id", "titulo", "descricao", "data_exame", "status", "local", "modalidade", "faixa_alvo", "taxa_valor", "created_at"],
     "candidatos_exame": ["id", "exame_id", "atleta_id", "atleta_nome", "filial_id", "filial_nome", "faixa_atual", "graduacao_pretendida", "status", "autorizacao_tecnica", "pagamento_status", "dados_banca", "created_at"],
     "financeiro": ["id", "atleta_id", "atleta_nome", "filial_id", "filial_nome", "tipo", "valor", "data_vencimento", "status", "created_at"],
     "noticias": ["id", "titulo", "subtitulo", "conteudo", "categoria", "imagem_url", "publicado", "autor_id", "created_at"],

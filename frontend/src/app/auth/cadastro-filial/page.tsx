@@ -30,6 +30,7 @@ export default function CadastroFilialPage() {
     telefone: '',
     senha: '',
     confirmarSenha: '',
+    aceita_termos: false,
   });
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
@@ -55,6 +56,10 @@ export default function CadastroFilialPage() {
       setErrorMsg('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
+    if (!form.aceita_termos) {
+      setErrorMsg('É necessário aceitar os Termos de Serviço e Aviso de Privacidade do Portal GRKK.');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -66,6 +71,7 @@ export default function CadastroFilialPage() {
           email: form.email.trim(),
           telefone: form.telefone.replace(/\D/g, ''),
           senha: form.senha,
+          aceita_termos: form.aceita_termos,
         }),
       });
 
@@ -261,7 +267,24 @@ export default function CadastroFilialPage() {
               <p className="text-red-400 text-xs bg-red-400/10 border border-red-400/20 px-4 py-3 rounded-xl font-body">{errorMsg}</p>
             )}
 
-            <div className="flex gap-4 pt-4 border-t border-zinc-800 font-cinzel">
+            {/* Checkbox de aceite dos termos */}
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="aceitaTermosFilial"
+                checked={form.aceita_termos}
+                onChange={(e) => setForm((prev) => ({ ...prev, aceita_termos: e.target.checked }))}
+                className="w-4 h-4 mt-0.5 accent-red-700 bg-zinc-950 border border-gray-600 rounded cursor-pointer flex-shrink-0"
+              />
+              <label htmlFor="aceitaTermosFilial" className="text-gray-400 text-xs font-cinzel tracking-wider cursor-pointer leading-relaxed">
+                Li e aceito os{' '}
+                <span className="text-primary underline underline-offset-2">Termos de Serviço e Aviso de Privacidade</span>
+                {' '}do Portal GRKK *
+              </label>
+            </div>
+
+            {/* Botões de ação */}
+            <div className="flex gap-4 pt-2 border-t border-zinc-800 font-cinzel">
               <Link href="/auth" className="border border-zinc-800 text-gray-400 hover:text-white text-xs tracking-widest uppercase px-6 py-4 rounded-xl hover:bg-zinc-900 transition-all duration-300 flex-1 text-center">
                 Cancelar
               </Link>

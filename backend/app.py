@@ -14,7 +14,7 @@ from services.supabase_service import SupabaseService
 # Resolve o caminho do .env de forma robusta e absoluta
 app_dir = os.path.dirname(os.path.abspath(__file__))
 env_path = os.path.join(app_dir, ".env")
-load_dotenv(dotenv_path=env_path)
+load_dotenv(dotenv_path=env_path, override=True)
 
 app = Flask(__name__)
 
@@ -49,9 +49,10 @@ if prod_origin not in origins:
     origins.append(prod_origin)
 CORS(
     app,
-    resources={r"/api/*": {"origins": origins, "allow_headers": "*"}},
+    resources={r"/api/*": {"origins": origins}},
     supports_credentials=True,
-    expose_headers="*",
+    allow_headers=["Content-Type", "Authorization", "X-Requested-With", "Accept", "Cookie", "X-CSRF-Token"],
+    expose_headers=["Content-Type", "Authorization", "Set-Cookie"],
     max_age=86400,
 )
 
@@ -106,6 +107,10 @@ from finance_routes import create_finance_routes
 from event_routes import create_event_routes
 from auditoria_routes import create_auditoria_routes
 from estoque_routes import create_estoque_routes
+from aviso_routes import create_aviso_routes
+from relatorio_routes import create_relatorio_routes
+from dojo_routes import create_dojo_routes
+from fornecedor_routes import create_fornecedor_routes
 
 # Registrar todas as rotas
 create_auth_routes(app)
@@ -122,6 +127,10 @@ create_finance_routes(app)
 create_event_routes(app)
 create_auditoria_routes(app)
 create_estoque_routes(app)
+create_aviso_routes(app)
+create_relatorio_routes(app)
+create_dojo_routes(app)
+create_fornecedor_routes(app)
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
@@ -133,9 +142,36 @@ def health_check():
 
 @app.route("/api/debug-version", methods=["GET"])
 def debug_version():
+    import os
+    # Tenta importar com segurança para não quebrar a rota se der import error
+    try:
+        from services.ai_service import has_gemini, has_gemini_sdk, GEMINI_API_KEY
+    except Exception as e:
+        has_gemini, has_gemini_sdk, GEMINI_API_KEY = False, False, f"Erro ao importar: {str(e)}"
+        
+    try:
+        from services.email_service import EmailService
+        smtp_conf = EmailService.is_configured()
+    except Exception as e:
+        smtp_conf = f"Erro ao importar EmailService: {str(e)}"
+
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    expected_env_path = os.path.join(app_dir, ".env")
+
     return jsonify({
-        "version": "v1.0.3-debug",
-        "message": "Nova versão do backend com suporte a debug de exclusão está rodando!"
+        "version": "v1.0.5-diagnostico-caminhos",
+        "has_gemini_sdk": has_gemini_sdk,
+        "has_gemini_configured": has_gemini,
+        "gemini_key_exists": bool(GEMINI_API_KEY and GEMINI_API_KEY.strip() != "" and "sua-chave" not in GEMINI_API_KEY),
+        "gemini_key_length": len(GEMINI_API_KEY) if GEMINI_API_KEY else 0,
+        "smtp_configured": smtp_conf,
+        "smtp_server": os.environ.get("SMTP_SERVER"),
+        "smtp_port": os.environ.get("SMTP_PORT"),
+        "smtp_user": os.environ.get("SMTP_USER"),
+        "current_working_dir": os.getcwd(),
+        "app_file_path": os.path.abspath(__file__),
+        "env_file_path": expected_env_path,
+        "env_file_exists": os.path.exists(expected_env_path)
     }), 200
 
 if __name__ == "__main__":

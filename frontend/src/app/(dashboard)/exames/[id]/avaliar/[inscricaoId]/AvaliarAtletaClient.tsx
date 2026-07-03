@@ -24,7 +24,19 @@ interface Candidato {
 }
 
 export default function AvaliarAtletaClient({ params }: { params: Promise<{ id: string; inscricaoId: string }> }) {
-  const { id: exameId, inscricaoId } = use(params);
+  const { id: exameIdProp, inscricaoId: inscricaoIdProp } = use(params);
+  
+  // Resolução de IDs reais para exportação estática (Apache/HostGator)
+  let exameId = exameIdProp;
+  let inscricaoId = inscricaoIdProp;
+  if (typeof window !== 'undefined' && (exameIdProp === 'exame-1' || exameIdProp === 'exame-2' || exameIdProp === 'exame-3')) {
+    const parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length >= 4 && parts[0] === 'exames' && parts[2] === 'avaliar') {
+      exameId = parts[1];
+      inscricaoId = parts[3];
+    }
+  }
+
   const router = useRouter();
   const { usuario, tipo, isAdmin, carregando } = useAuth();
   const isExaminador = tipo === 'filial'; // Na GRKK, representantes de filial atuam como examinadores

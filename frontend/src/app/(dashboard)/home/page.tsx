@@ -15,18 +15,42 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
-const FAIXAS = ['Branca', 'Amarela', 'Laranja', 'Verde', 'Azul', 'Roxa', 'Marrom', 'Vermelha', 'Preta'];
+const FAIXAS = [
+  'Branca',
+  'Branca/Amarela',
+  'Amarela',
+  'Amarela/Laranja',
+  'Laranja',
+  'Laranja/Verde',
+  'Verde',
+  'Verde/Azul',
+  'Azul',
+  'Azul/Vermelha',
+  'Vermelha',
+  'Marrom',
+  'Marrom I',
+  'Marrom II',
+  'Preta I',
+  'Preta II',
+];
 
 const BELT_STYLE: Record<string, string> = {
-  Branca: 'bg-white border border-gray-300',
-  Amarela: 'bg-yellow-400',
-  Laranja: 'bg-orange-500',
-  Verde: 'bg-green-600',
-  Azul: 'bg-blue-600',
-  Roxa: 'bg-purple-700',
-  Marrom: 'bg-amber-800',
-  Vermelha: 'bg-red-500',
-  Preta: 'bg-zinc-900 border border-zinc-700',
+  'Branca': 'bg-white border border-gray-300',
+  'Branca/Amarela': 'bg-gradient-to-r from-white to-yellow-400 border border-yellow-400',
+  'Amarela': 'bg-yellow-400',
+  'Amarela/Laranja': 'bg-gradient-to-r from-yellow-400 to-orange-500',
+  'Laranja': 'bg-orange-500',
+  'Laranja/Verde': 'bg-gradient-to-r from-orange-500 to-emerald-700',
+  'Verde': 'bg-emerald-600',
+  'Verde/Azul': 'bg-gradient-to-r from-emerald-600 to-blue-600',
+  'Azul': 'bg-blue-600',
+  'Azul/Vermelha': 'bg-gradient-to-r from-blue-600 to-red-500',
+  'Vermelha': 'bg-red-500',
+  'Marrom': 'bg-amber-800',
+  'Marrom I': 'bg-amber-900',
+  'Marrom II': 'bg-amber-950',
+  'Preta I': 'bg-zinc-900 border border-zinc-700',
+  'Preta II': 'bg-zinc-950 border border-gold/40',
 };
 
 function formatDate(iso: string) {
@@ -64,20 +88,20 @@ function StatCard({ label, value, icon: Icon, color, loading }: StatCardProps) {
   }[color];
 
   return (
-    <div className={`relative bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 flex flex-col gap-5 ${styles.glow} transition-all duration-300 group`}>
+    <div className={`relative bg-zinc-900 border border-zinc-800/80 rounded-2xl p-4 sm:p-6 flex flex-col gap-4 sm:gap-5 ${styles.glow} transition-all duration-300 group`}>
       <div className="flex items-start justify-between">
-        <div className={`w-12 h-12 ${styles.iconBg} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-          <Icon className={`w-6 h-6 ${styles.icon}`} />
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 ${styles.iconBg} rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
         </div>
         <BarChart3 className="w-4 h-4 text-zinc-650 group-hover:text-zinc-400 transition-colors" />
       </div>
       <div>
         {loading ? (
-          <div className="h-9 w-16 bg-zinc-800 rounded-xl animate-pulse mb-2" />
+          <div className="h-8 w-16 bg-zinc-800 rounded-xl animate-pulse mb-2" />
         ) : (
-          <p className="text-3xl font-black text-white leading-none mb-1.5 font-cinzel">{value}</p>
+          <p className="text-2xl sm:text-3xl font-black text-white leading-none mb-1.5 font-cinzel">{value}</p>
         )}
-        <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">{label}</p>
+        <p className="text-[10px] sm:text-xs text-zinc-500 font-bold uppercase tracking-wider">{label}</p>
       </div>
     </div>
   );
@@ -100,11 +124,11 @@ function QuickItem({ label, href, icon: Icon, color }: QuickItemProps) {
   }[color];
 
   return (
-    <Link href={href} className={`flex flex-col items-center gap-3 py-5 px-4 rounded-2xl border transition-all duration-200 group hover:scale-[1.03] text-center ${styles}`}>
-      <div className="w-10 h-10 rounded-xl bg-current/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200 opacity-80">
-        <Icon className="w-5 h-5" />
+    <Link href={href} className={`flex flex-col items-center gap-2.5 py-4 px-3 sm:py-5 sm:px-4 rounded-2xl border transition-all duration-200 group hover:scale-[1.03] text-center ${styles}`}>
+      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-current/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200 opacity-80">
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
-      <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors leading-tight">
+      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white transition-colors leading-tight">
         {label}
       </span>
     </Link>
@@ -164,27 +188,27 @@ function AdminDashboard({ usuario }: { usuario: any }) {
   }, []);
 
   return (
-    <main className="p-6 lg:p-10 space-y-8 w-full">
-      <div className="relative overflow-hidden bg-gradient-to-br from-red-950/20 via-zinc-900 to-zinc-900 border border-red-900/20 rounded-3xl p-8">
-        <div className="relative z-10 flex items-center justify-between gap-5 flex-wrap">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-gradient-to-br from-red-500/20 to-red-700/10 rounded-2xl flex items-center justify-center border border-red-500/25 shrink-0">
-              <ShieldCheck className="w-8 h-8 text-red-500" />
+    <main className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 w-full">
+      <div className="relative overflow-hidden bg-gradient-to-br from-red-950/20 via-zinc-900 to-zinc-900 border border-red-900/20 rounded-3xl p-5 sm:p-8">
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+          <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-5">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500/20 to-red-700/10 rounded-2xl flex items-center justify-center border border-red-500/25 shrink-0">
+              <ShieldCheck className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
             </div>
             <div>
-              <p className="text-xs text-red-400 font-bold uppercase tracking-[0.2em] mb-1">Painel do Administrador</p>
-              <h1 className="text-3xl font-black text-white font-cinzel">{usuario?.nome ?? 'Administrador'}</h1>
-              <p className="text-xs text-zinc-400 mt-1">Federação Baiana de Karatê Goju-Ryu</p>
+              <p className="text-[10px] sm:text-xs text-red-400 font-bold uppercase tracking-[0.2em] mb-1">Painel do Administrador</p>
+              <h1 className="text-2xl sm:text-3xl font-black text-white font-cinzel">{usuario?.nome ?? 'Administrador'}</h1>
+              <p className="text-xs text-zinc-400 mt-1">Associação Goju-Ryu Karatê-Kai</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 shrink-0">
+          <div className="flex items-center justify-center self-center sm:self-auto gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 shrink-0">
             <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
             <span className="text-xs font-bold text-emerald-400">Sistema Online</span>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard label="Atletas Ativos" value={stats.activeAthletes} icon={Users} color="brand" loading={loading} />
         <StatCard label="Eventos em Aberto" value={stats.openEvents} icon={CalendarDays} color="gold" loading={loading} />
         <StatCard label="Exames Pendentes" value={stats.pendingExams} icon={Trophy} color="blue" loading={loading} />
@@ -196,12 +220,12 @@ function AdminDashboard({ usuario }: { usuario: any }) {
           <h2 className="text-lg font-bold text-white font-cinzel">Ações Rápidas</h2>
           <p className="text-xs text-zinc-500 mt-0.5">Acesso direto a todos os módulos do sistema</p>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3">
           <QuickItem label="Filiais" href="/filiais" icon={Building2} color="brand" />
           <QuickItem label="Atletas" href="/atletas" icon={Users} color="gold" />
           <QuickItem label="Eventos" href="/eventos-dash" icon={CalendarDays} color="blue" />
           <QuickItem label="Notícias" href="/noticias" icon={Star} color="green" />
-          <QuickItem label="Exames" href="/exames" icon={Trophy} color="brand" />
+          <QuickItem label="Graduações" href="/exames" icon={Trophy} color="brand" />
           <QuickItem label="Financeiro" href="/financeiro" icon={CreditCard} color="gold" />
           <QuickItem label="Ranking" href="/ranking" icon={Medal} color="blue" />
         </div>
@@ -211,9 +235,20 @@ function AdminDashboard({ usuario }: { usuario: any }) {
 }
 
 /* --- FILIAL DASHBOARD --- */
+interface Aviso {
+  id: string | number;
+  titulo: string;
+  conteudo: string;
+  categoria: string;
+  destinatario: 'todos' | 'filial' | 'atleta';
+  created_at?: string;
+}
+
 function FilialDashboard({ usuario }: { usuario: any }) {
   const [stats, setStats] = useState({ totalAlunos: 0, alunosAtivos: 0, preAvaliacoes: 0 });
   const [loading, setLoading] = useState(true);
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [loadingAvisos, setLoadingAvisos] = useState(true);
 
   useEffect(() => {
     async function loadFilialStats() {
@@ -237,7 +272,21 @@ function FilialDashboard({ usuario }: { usuario: any }) {
         setLoading(false);
       }
     }
+    async function loadAvisos() {
+      try {
+        const res = await fetch(`${API_URL}/api/avisos`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setAvisos(data || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar avisos:", err);
+      } finally {
+        setLoadingAvisos(false);
+      }
+    }
     loadFilialStats();
+    loadAvisos();
   }, []);
 
   return (
@@ -264,16 +313,36 @@ function FilialDashboard({ usuario }: { usuario: any }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6">
           <h3 className="text-sm font-bold text-white font-cinzel mb-4">Avisos da Diretoria</h3>
-          <div className="space-y-3">
-            <div className="p-3 bg-zinc-950 border border-zinc-850 rounded-xl">
-              <p className="text-xs text-gold font-bold uppercase tracking-wider mb-1">Seminário Técnico</p>
-              <p className="text-xs text-zinc-400 leading-relaxed">Prepare seus alunos graduados. O próximo gasshuku será em Julho.</p>
-            </div>
+          <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+            {loadingAvisos ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
+              </div>
+            ) : avisos.length > 0 ? (
+              avisos.map(aviso => (
+                <div key={aviso.id} className="p-4 bg-zinc-950/60 border border-zinc-850 rounded-xl space-y-1.5 transition hover:border-zinc-800">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/20">
+                      {aviso.categoria}
+                    </span>
+                    {aviso.created_at && (
+                      <span className="text-[9px] text-zinc-500 font-mono">
+                        {new Date(aviso.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-white font-cinzel">{aviso.titulo}</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{aviso.conteudo}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-zinc-500 italic py-4">Nenhum aviso no momento.</p>
+            )}
           </div>
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6">
-          <h3 className="text-sm font-bold text-white font-cinzel mb-4">Próximos Exames</h3>
+          <h3 className="text-sm font-bold text-white font-cinzel mb-4">Próximas Graduações</h3>
           <EmptySection icon={GraduationCap} text="Nenhum exame agendado para o seu dojo." />
         </div>
       </div>
@@ -286,16 +355,35 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
   const nome = usuario?.nome ?? 'Atleta';
   const iniciais = nome.split(' ').filter(Boolean).slice(0, 2).map((p: string) => p[0]).join('').toUpperCase();
   const cpfMask = usuario?.cpf ? usuario.cpf.replace(/(\d{3})\.\d{3}\.(\d{3})-(\d{2})/, '$1.***.***-$3') : '—';
-  const regNum = usuario?.id ? `GRKKK-${usuario.id.slice(0, 8).toUpperCase()}` : '—';
+  const regNum = usuario?.id ? `GRKK-${usuario.id.slice(0, 8).toUpperCase()}` : '—';
   const faixa = usuario?.faixa ?? 'Branca';
   const faixaIdx = FAIXAS.indexOf(faixa);
+  const [avisos, setAvisos] = useState<Aviso[]>([]);
+  const [loadingAvisos, setLoadingAvisos] = useState(true);
+
+  useEffect(() => {
+    async function loadAvisos() {
+      try {
+        const res = await fetch(`${API_URL}/api/avisos`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setAvisos(data || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar avisos:", err);
+      } finally {
+        setLoadingAvisos(false);
+      }
+    }
+    loadAvisos();
+  }, []);
 
   return (
     <main className="p-6 lg:p-10 space-y-8 w-full">
       <div>
         <p className="text-xs text-cobalt-400 font-bold uppercase tracking-[0.2em]">Área do Aluno</p>
         <h1 className="text-3xl sm:text-4xl font-black text-white mt-1 leading-tight font-cinzel">{nome}</h1>
-        <p className="text-xs text-zinc-400 mt-1.5">Matrícula ativa na Federação Baiana de Karatê Goju-Ryu</p>
+        <p className="text-xs text-zinc-400 mt-1.5">Matrícula ativa na Associação Goju-Ryu Karatê-Kai</p>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -320,8 +408,8 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
                     <span className="font-cinzel text-gold text-xs font-bold">GR</span>
                   </div>
                   <div>
-                    <p className="text-[8px] font-black uppercase tracking-[0.25em] text-gold/80">Federação Baiana de</p>
-                    <p className="text-base font-black text-white tracking-wider leading-none mt-0.5 font-cinzel">KARATÊ GOJU-RYU</p>
+                    <p className="text-[8px] font-black uppercase tracking-[0.25em] text-gold/80">Associação</p>
+                    <p className="text-base font-black text-white tracking-wider leading-none mt-0.5 font-cinzel">GOJU-RYU KARATÊ-KAI</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1">
@@ -350,15 +438,22 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
                     ))}
                   </div>
                 </div>
-                <div className="w-14 h-14 bg-zinc-950 border border-zinc-850 rounded-xl flex flex-col items-center justify-center gap-1 shrink-0">
-                  <QrCode className="w-6 h-6 text-zinc-500" />
-                  <p className="text-[7px] text-zinc-500 font-bold uppercase tracking-wider">QR</p>
+                <div className="w-14 h-14 bg-white border border-zinc-850 rounded-xl flex items-center justify-center shrink-0 p-0.5 overflow-hidden">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&color=09090b&margin=0&data=${encodeURIComponent(
+                      typeof window !== 'undefined' 
+                        ? `${window.location.origin}/transparencia/validar-certificado?codigo=${usuario?.id}`
+                        : `https://gojuryukaratekai.com.br/transparencia/validar-certificado?codigo=${usuario?.id}`
+                    )}`}
+                    alt="QR Code"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
               </div>
             </div>
             <div className="relative z-10 px-6 py-3 border-t border-zinc-900 bg-black/10 flex items-center justify-between">
-              <p className="text-[8px] text-zinc-500 uppercase tracking-[0.15em]">Válido com verificação digital · GRKKK.org.br</p>
-              <p className="text-[8px] font-mono text-zinc-500">GRKKK · {new Date().getFullYear()}</p>
+              <p className="text-[8px] text-zinc-500 uppercase tracking-[0.15em]">Válido com verificação digital · gojuryukaratekai.com.br</p>
+              <p className="text-[8px] font-mono text-zinc-500">GRKK · {new Date().getFullYear()}</p>
             </div>
           </div>
         </div>
@@ -398,6 +493,37 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
         </div>
       </div>
 
+      {/* Avisos da Diretoria */}
+      <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6">
+        <h3 className="text-sm font-bold text-white font-cinzel mb-4">Avisos da Diretoria</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {loadingAvisos ? (
+            <div className="col-span-full flex items-center justify-center py-8">
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            </div>
+          ) : avisos.length > 0 ? (
+            avisos.map(aviso => (
+              <div key={aviso.id} className="p-4 bg-zinc-950/60 border border-zinc-850 rounded-xl space-y-1.5 transition hover:border-zinc-800">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/20">
+                    {aviso.categoria}
+                  </span>
+                  {aviso.created_at && (
+                    <span className="text-[9px] text-zinc-500 font-mono">
+                      {new Date(aviso.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-bold text-white font-cinzel">{aviso.titulo}</p>
+                <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{aviso.conteudo}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-zinc-500 italic py-4 col-span-full">Nenhum aviso no momento.</p>
+          )}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {[
           { icon: FileWarning, title: 'Pendências Documentais', msg: 'Sua documentação está em dia!' },
@@ -418,7 +544,7 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <EmptySection icon={GraduationCap} text="Nenhum exame de faixa agendado." />
+        <EmptySection icon={GraduationCap} text="Nenhuma graduação de faixa agendada." />
         <EmptySection icon={CalendarDays} text="Você não está inscrito em eventos." />
         <EmptySection icon={Award} text="Nenhum certificado emitido para este perfil." />
       </div>

@@ -7,6 +7,7 @@ import PageHero from "@/components/PageHero";
 import SectionHeader from "@/components/SectionHeader";
 import { FileText, Download, Shield, Eye, ShieldCheck, ArrowRight, Loader2, BookOpen, Award } from "lucide-react";
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -38,10 +39,17 @@ export default function TransparenciaPage() {
     hero_breadcrumb: 'Transparência',
     intro_text: 'A GRKK disponibiliza seu estatuto social, diretoria vigência, CNPJ, regulamentos e documentos institucionais para consulta pública, reafirmando seu compromisso com a transparência e a boa governança esportiva.',
     compromisso_title: 'Nosso Compromisso',
-    compromisso_text: 'A GRKK atua como executora de projetos esportivos e sociais, operando de forma organizada, transparente e descentralizada, garantindo a lisura de suas atividades administrativas e esportivas.'
+    compromisso_text: 'A GRKK atua como executora de projetos esportivos e sociais, operando de forma organizada, transparente e descentralizada, garantindo a lisura de suas atividades administrativas e esportivas.',
+    doc_estatuto: { titulo: 'Estatuto Social', desc: 'Documento constitutivo da GRKK com suas normas e objetivos.', tipo: 'Institucional', arquivo_url: '' },
+    doc_diretoria: { titulo: 'Diretoria Vigente', desc: 'Composição atual da diretoria executiva da associação.', tipo: 'Institucional', arquivo_url: '' },
+    doc_cnpj: { titulo: 'CNPJ', desc: 'Dados cadastrais da pessoa jurídica da GRKK.', tipo: 'Institucional', arquivo_url: '' },
+    doc_regulamentos: { titulo: 'Regulamentos', desc: 'Normas e regulamentos técnicos e administrativos.', tipo: 'Regulamento', arquivo_url: '' },
+    doc_docs_institucionais: { titulo: 'Documentos Institucionais', desc: 'Documentação oficial da associação.', tipo: 'Institucional', arquivo_url: '' },
+    doc_termos: { titulo: 'Termos de Serviço', desc: 'Condições de uso do Portal GRKK.', tipo: 'Institucional', arquivo_url: '/transparencia/termos' },
+    doc_privacidade: { titulo: 'Aviso de Privacidade', desc: 'Política de tratamento de dados pessoais.', tipo: 'Institucional', arquivo_url: '/transparencia/privacidade' },
+    doc_defesa_marca: { titulo: 'Defesa de Marca – Goju-Ryu Karate-Kai', desc: 'Apresentação sobre branding e proteção da marca.', tipo: 'Institucional', arquivo_url: '/transparencia/defesa-marca' },
   });
 
-  const [documentos, setDocumentos] = useState<Documento[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(true);
 
   useEffect(() => {
@@ -53,35 +61,29 @@ export default function TransparenciaPage() {
         const res = await fetch(`${API_URL}/api/cms/config`);
         if (res.ok) {
           const data = await res.json();
-          if (data.config && data.config.transparencia) {
-            setSiteConfig(prev => ({ ...prev, ...data.config.transparencia }));
+          if (data.config) {
+            setSiteConfig(prev => ({
+              ...prev,
+              ...(data.config.transparencia || {}),
+              doc_estatuto: data.config.doc_estatuto || prev.doc_estatuto,
+              doc_diretoria: data.config.doc_diretoria || prev.doc_diretoria,
+              doc_cnpj: data.config.doc_cnpj || prev.doc_cnpj,
+              doc_regulamentos: data.config.doc_regulamentos || prev.doc_regulamentos,
+              doc_docs_institucionais: data.config.doc_docs_institucionais || prev.doc_docs_institucionais,
+              doc_termos: data.config.doc_termos || prev.doc_termos,
+              doc_privacidade: data.config.doc_privacidade || prev.doc_privacidade,
+              doc_defesa_marca: data.config.doc_defesa_marca || prev.doc_defesa_marca,
+            }));
           }
         }
       } catch (err) {
         console.error("Erro ao carregar configurações do CMS:", err);
-      }
-    };
-
-    // Carrega Documentos reais
-    const carregarDocs = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/documentos`);
-        if (res.ok) {
-          const data = await res.json();
-          // Filtra apenas tipos pertinentes à transparência pública
-          const publicTypes = ['Regulamento', 'Regras', 'Institucional', 'Financeiro'];
-          const filtered = (data.documentos || []).filter((d: Documento) => publicTypes.includes(d.tipo));
-          setDocumentos(filtered);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar documentos:", err);
       } finally {
         setLoadingDocs(false);
       }
     };
 
     carregarConfig();
-    carregarDocs();
   }, []);
 
   const handleValidar = (e: React.FormEvent) => {
@@ -91,14 +93,17 @@ export default function TransparenciaPage() {
     }
   };
 
-  // Fallback caso a lista do banco esteja vazia
-  const documentosExibidos = documentos.length > 0 ? documentos : [
-    { titulo: "Estatuto Social", desc: "Documento constitutivo da GRKK com suas normas e objetivos.", tipo: "Institucional", arquivo_url: "" },
-    { titulo: "Diretoria Vigente", desc: "Composição atual da diretoria executiva da federação.", tipo: "Institucional", arquivo_url: "" },
-    { titulo: "CNPJ", desc: "Dados cadastrais da pessoa jurídica da GRKK.", tipo: "Institucional", arquivo_url: "" },
-    { titulo: "Regulamentos", desc: "Normas e regulamentos técnicos e administrativos.", tipo: "Regulamento", arquivo_url: "" },
-    { titulo: "Documentos Institucionais", desc: "Documentação oficial da federação.", tipo: "Institucional", arquivo_url: "" },
-  ];
+  // Lê os documentos das configurações do CMS
+  const documentosExibidos: Documento[] = [
+    siteConfig.doc_estatuto,
+    siteConfig.doc_diretoria,
+    siteConfig.doc_cnpj,
+    ...(Array.isArray(siteConfig.doc_regulamentos) ? siteConfig.doc_regulamentos : [siteConfig.doc_regulamentos].filter(Boolean)),
+    ...(Array.isArray(siteConfig.doc_docs_institucionais) ? siteConfig.doc_docs_institucionais : [siteConfig.doc_docs_institucionais].filter(Boolean)),
+    siteConfig.doc_termos,
+    siteConfig.doc_privacidade,
+    siteConfig.doc_defesa_marca,
+  ].filter(Boolean);
 
   return (
     <>
@@ -160,8 +165,8 @@ export default function TransparenciaPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-                {documentosExibidos.map((doc, i) => (
-                  <div key={i} className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-3xl group cursor-pointer hover:border-primary/20 transition-all duration-300">
+                {documentosExibidos.map((doc, i) => {
+                  const inner = (
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 bg-primary/10 border border-primary/20 text-primary rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-white group-hover:border-transparent transition-all duration-300">
                         {getIcon(doc.tipo)}
@@ -170,16 +175,21 @@ export default function TransparenciaPage() {
                         <h3 className="font-bold text-white text-sm mb-1 group-hover:text-primary transition font-cinzel truncate">
                           {doc.titulo}
                         </h3>
-                        <p className="text-xs text-gray-500 leading-relaxed font-body line-clamp-3">{doc.desc || `Documento oficial da federação, sob a categoria ${doc.tipo}.`}</p>
-                        {doc.arquivo_url ? (
-                          <a
-                            href={doc.arquivo_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold-light mt-3 font-body font-bold transition-colors cursor-pointer"
-                          >
-                            <Download size={12} /> Download PDF
-                          </a>
+                        <p className="text-xs text-gray-500 leading-relaxed font-body line-clamp-3">{doc.desc || `Documento oficial da associação, sob a categoria ${doc.tipo}.`}</p>
+                        {(doc as any).slug && (doc as any).s1_titulo ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-gold mt-3 font-body font-bold">
+                            <Eye size={12} /> Acessar
+                          </span>
+                        ) : doc.arquivo_url ? (
+                          doc.arquivo_url.startsWith('/') ? (
+                            <span className="inline-flex items-center gap-1.5 text-xs text-gold mt-3 font-body font-bold">
+                              <Eye size={12} /> Acessar
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-xs text-gold mt-3 font-body font-bold">
+                              <Download size={12} /> Download PDF
+                            </span>
+                          )
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs text-gray-600 mt-3 font-body">
                             <Download size={10} /> Em breve
@@ -187,8 +197,38 @@ export default function TransparenciaPage() {
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+
+                  if ((doc as any).slug && (doc as any).s1_titulo) {
+                    return (
+                      <Link key={i} href={`/transparencia/documento?slug=${(doc as any).slug}`} className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-3xl group cursor-pointer hover:border-primary/20 transition-all duration-300 block">
+                        {inner}
+                      </Link>
+                    );
+                  }
+
+                  if (!doc.arquivo_url) {
+                    return (
+                      <div key={i} className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-3xl group">
+                        {inner}
+                      </div>
+                    );
+                  }
+
+                  if (doc.arquivo_url.startsWith('/')) {
+                    return (
+                      <Link key={i} href={doc.arquivo_url} className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-3xl group cursor-pointer hover:border-primary/20 transition-all duration-300 block">
+                        {inner}
+                      </Link>
+                    );
+                  }
+
+                  return (
+                    <a key={i} href={doc.arquivo_url} target="_blank" rel="noopener noreferrer" className="border border-zinc-900 bg-zinc-900/20 p-6 rounded-3xl group cursor-pointer hover:border-primary/20 transition-all duration-300 block">
+                      {inner}
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>

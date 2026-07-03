@@ -9,6 +9,15 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
+interface Fornecedor {
+  id: string;
+  nome: string;
+  contato?: string;
+  telefone?: string;
+  email?: string;
+  created_at?: string;
+}
+
 interface Produto {
   id: string;
   nome: string;
@@ -18,6 +27,9 @@ interface Produto {
   preco_venda: number;
   quantidade_estoque: number;
   estoque_minimo: number;
+  fornecedor_id?: string;
+  fornecedor_nome?: string;
+  tamanho?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -35,13 +47,15 @@ interface Movimentacao {
 }
 
 const CATEGORIAS = ['Kimono', 'Faixa', 'Protetores', 'Acessórios', 'Outros'];
+const TAMANHOS = ['Único', 'M0', 'M1', 'M2', 'M3', 'A0', 'A1', 'A2', 'A3', 'A4', 'A5', '1', '2', '3', '4', '5', '6', '7', 'P', 'M', 'G', 'GG'];
 
 export default function EstoquePage() {
   const { usuario, tipo, isAdmin, isFilial } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'inventario' | 'historico'>('inventario');
+  const [activeTab, setActiveTab] = useState<'inventario' | 'historico' | 'fornecedores'>('inventario');
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
+  const [fornecedores, setFornecedores] = useState<Fornecedor[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -54,6 +68,7 @@ export default function EstoquePage() {
   const [showNovoProdutoModal, setShowNovoProdutoModal] = useState(false);
   const [showEditarProdutoModal, setShowEditarProdutoModal] = useState(false);
   const [showNovaMovimentacaoModal, setShowNovaMovimentacaoModal] = useState(false);
+  const [showNovoFornecedorModal, setShowNovoFornecedorModal] = useState(false);
   
   // Estados para itens selecionados
   const [selectedProduto, setSelectedProduto] = useState<Produto | null>(null);
@@ -66,7 +81,17 @@ export default function EstoquePage() {
     preco_compra: '',
     preco_venda: '',
     quantidade_estoque: '0',
-    estoque_minimo: '5'
+    estoque_minimo: '5',
+    fornecedor_id: '',
+    tamanho: 'Único'
+  });
+
+  // Form Lançamento Fornecedor
+  const [fornecedorForm, setFornecedorForm] = useState({
+    nome: '',
+    contato: '',
+    telefone: '',
+    email: ''
   });
 
   // Form Lançamento Movimentação
@@ -107,11 +132,26 @@ export default function EstoquePage() {
     }
   };
 
+  const carregarFornecedores = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/estoque/fornecedores`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setFornecedores(data.fornecedores || []);
+      } else {
+        throw new Error("Erro ao carregar fornecedores");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const carregarDados = async () => {
     setLoading(true);
     setErro(null);
     await carregarProdutos();
     await carregarMovimentacoes();
+    await carregarFornecedores();
     setLoading(false);
   };
 
@@ -127,6 +167,7 @@ export default function EstoquePage() {
     if (!produtoForm.nome || !produtoForm.categoria) return;
 
     try {
+      const fNome = fornecedores.find(f => f.id === produtoForm.fornecedor_id)?.nome || '';
       const payload = {
         nome: produtoForm.nome,
         descricao: produtoForm.descricao,
@@ -134,7 +175,10 @@ export default function EstoquePage() {
         preco_compra: parseFloat(produtoForm.preco_compra || '0'),
         preco_venda: parseFloat(produtoForm.preco_venda || '0'),
         quantidade_estoque: parseInt(produtoForm.quantidade_estoque || '0'),
-        estoque_minimo: parseInt(produtoForm.estoque_minimo || '5')
+        estoque_minimo: parseInt(produtoForm.estoque_minimo || '5'),
+        fornecedor_id: produtoForm.fornecedor_id || null,
+        fornecedor_nome: fNome,
+        tamanho: produtoForm.tamanho || 'Único'
       };
 
       const res = await fetch(`${API_URL}/api/estoque/produtos`, {
@@ -153,7 +197,9 @@ export default function EstoquePage() {
           preco_compra: '',
           preco_venda: '',
           quantidade_estoque: '0',
-          estoque_minimo: '5'
+          estoque_minimo: '5',
+          fornecedor_id: '',
+          tamanho: 'Único'
         });
         carregarDados();
       } else {
@@ -171,13 +217,17 @@ export default function EstoquePage() {
     if (!selectedProduto) return;
 
     try {
+      const fNome = fornecedores.find(f => f.id === produtoForm.fornecedor_id)?.nome || '';
       const payload = {
         nome: produtoForm.nome,
         descricao: produtoForm.descricao,
         categoria: produtoForm.categoria,
         preco_compra: parseFloat(produtoForm.preco_compra || '0'),
         preco_venda: parseFloat(produtoForm.preco_venda || '0'),
-        estoque_minimo: parseInt(produtoForm.estoque_minimo || '5')
+        estoque_minimo: parseInt(produtoForm.estoque_minimo || '5'),
+        fornecedor_id: produtoForm.fornecedor_id || null,
+        fornecedor_nome: fNome,
+        tamanho: produtoForm.tamanho || 'Único'
       };
 
       const res = await fetch(`${API_URL}/api/estoque/produtos/${selectedProduto.id}`, {
@@ -198,6 +248,56 @@ export default function EstoquePage() {
     } catch (err) {
       console.error(err);
       alert("Falha de conexão com a API.");
+    }
+  };
+
+  const handleCriarFornecedor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fornecedorForm.nome) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/estoque/fornecedores`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(fornecedorForm)
+      });
+
+      if (res.ok) {
+        setShowNovoFornecedorModal(false);
+        setFornecedorForm({
+          nome: '',
+          contato: '',
+          telefone: '',
+          email: ''
+        });
+        carregarDados();
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Erro ao criar fornecedor");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Falha de conexão com a API.");
+    }
+  };
+
+  const handleDeletarFornecedor = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este fornecedor?")) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/estoque/fornecedores/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (res.ok) {
+        carregarDados();
+      } else {
+        alert("Erro ao excluir fornecedor.");
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -313,7 +413,7 @@ export default function EstoquePage() {
             Equipamentos, Kimonos, Faixas e Acessórios da Federação
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center">
           <button
             onClick={() => {
               setMovimentacaoForm({
@@ -324,31 +424,45 @@ export default function EstoquePage() {
               });
               setShowNovaMovimentacaoModal(true);
             }}
-            className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-850 text-white border border-zinc-800 rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer flex items-center gap-2"
+            className="px-4 py-2.5 bg-zinc-950/40 hover:bg-zinc-900 text-zinc-350 hover:text-white border border-zinc-800/80 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
           >
-            <History size={14} />
+            <History size={14} className="text-zinc-500" />
             Movimentar Estoque
           </button>
           
           {isAdmin && (
-            <button
-              onClick={() => {
-                setProdutoForm({
-                  nome: '',
-                  descricao: '',
-                  categoria: 'Kimono',
-                  preco_compra: '',
-                  preco_venda: '',
-                  quantidade_estoque: '0',
-                  estoque_minimo: '5'
-                });
-                setShowNovoProdutoModal(true);
-              }}
-              className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer flex items-center gap-2"
-            >
-              <Plus size={14} />
-              Novo Produto
-            </button>
+            <>
+              <button
+                onClick={() => {
+                  setFornecedorForm({ nome: '', contato: '', telefone: '', email: '' });
+                  setShowNovoFornecedorModal(true);
+                }}
+                className="px-4 py-2.5 bg-zinc-950/40 hover:bg-zinc-900 text-zinc-350 hover:text-white border border-zinc-800/80 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              >
+                <Plus size={14} className="text-zinc-500" />
+                Novo Fornecedor
+              </button>
+              <button
+                onClick={() => {
+                  setProdutoForm({
+                    nome: '',
+                    descricao: '',
+                    categoria: 'Kimono',
+                    preco_compra: '',
+                    preco_venda: '',
+                    quantidade_estoque: '0',
+                    estoque_minimo: '5',
+                    fornecedor_id: '',
+                    tamanho: 'Único'
+                  });
+                  setShowNovoProdutoModal(true);
+                }}
+                className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-gold/10 hover:shadow-gold/20"
+              >
+                <Plus size={14} />
+                Novo Produto
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -426,6 +540,17 @@ export default function EstoquePage() {
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
           )}
           Histórico de Movimentações
+        </button>
+        <button
+          onClick={() => setActiveTab('fornecedores')}
+          className={`pb-3 text-sm font-bold uppercase tracking-wider relative transition-colors ${
+            activeTab === 'fornecedores' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+          }`}
+        >
+          {activeTab === 'fornecedores' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+          )}
+          Fornecedores
         </button>
       </div>
 
@@ -515,9 +640,19 @@ export default function EstoquePage() {
                       return (
                         <tr key={item.id} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
                           <td className="p-4">
-                            <p className="font-bold text-white text-[13px]">{item.nome}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-white text-[13px]">{item.nome}</p>
+                              {item.tamanho && item.tamanho !== 'Único' && (
+                                <span className="bg-zinc-800 text-zinc-450 text-[9px] font-bold rounded px-1.5 py-0.5 border border-zinc-750" title="Tamanho">
+                                  {item.tamanho}
+                                </span>
+                              )}
+                            </div>
                             {item.descricao && (
                               <p className="text-[10px] text-zinc-500 max-w-sm truncate mt-0.5">{item.descricao}</p>
+                            )}
+                            {item.fornecedor_nome && (
+                              <p className="text-[9px] text-zinc-650 mt-0.5 uppercase tracking-wider font-semibold">Fornecedor: <strong className="text-zinc-500">{item.fornecedor_nome}</strong></p>
                             )}
                           </td>
                           <td className="p-4">
@@ -538,9 +673,24 @@ export default function EstoquePage() {
                             {min}
                           </td>
                           <td className="p-4 text-center">
-                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${statusCls}`}>
-                              {statusLabel}
-                            </span>
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${statusCls}`}>
+                                {statusLabel}
+                              </span>
+                              {qty <= min && item.fornecedor_id && (
+                                <button
+                                  onClick={() => {
+                                    const forn = fornecedores.find(f => f.id === item.fornecedor_id);
+                                    if (forn) {
+                                      alert(`Fornecedor: ${forn.nome}\nContato: ${forn.contato || 'N/A'}\nTelefone: ${forn.telefone || 'N/A'}\nE-mail: ${forn.email || 'N/A'}`);
+                                    }
+                                  }}
+                                  className="text-[9px] text-gold hover:text-gold-light underline font-bold cursor-pointer"
+                                >
+                                  Contato Fornecedor
+                                </button>
+                              )}
+                            </div>
                           </td>
                           <td className="p-4">
                             <div className="flex gap-2 justify-end">
@@ -573,7 +723,9 @@ export default function EstoquePage() {
                                         preco_compra: String(item.preco_compra),
                                         preco_venda: String(item.preco_venda),
                                         quantidade_estoque: String(item.quantidade_estoque),
-                                        estoque_minimo: String(item.estoque_minimo)
+                                        estoque_minimo: String(item.estoque_minimo),
+                                        fornecedor_id: item.fornecedor_id || '',
+                                        tamanho: item.tamanho || 'Único'
                                       });
                                       setShowEditarProdutoModal(true);
                                     }}
@@ -676,6 +828,62 @@ export default function EstoquePage() {
         </div>
       )}
 
+      {/* Tab: Fornecedores */}
+      {activeTab === 'fornecedores' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">Fornecedores Cadastrados ({fornecedores.length})</h2>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider text-[10px] bg-zinc-950/20">
+                    <th className="p-4">Nome / Empresa</th>
+                    <th className="p-4">Pessoa de Contato</th>
+                    <th className="p-4">Telefone</th>
+                    <th className="p-4">E-mail</th>
+                    {isAdmin && <th className="p-4 text-right">Ações</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {fornecedores.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="p-10 text-center text-zinc-600 italic">
+                        Nenhum fornecedor cadastrado.
+                      </td>
+                    </tr>
+                  ) : (
+                    fornecedores.map((item) => (
+                      <tr key={item.id} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
+                        <td className="p-4 font-bold text-white text-[13px]">{item.nome}</td>
+                        <td className="p-4 text-zinc-300">{item.contato || 'Não informado'}</td>
+                        <td className="p-4 text-zinc-450 font-semibold">{item.telefone || 'Não informado'}</td>
+                        <td className="p-4 text-zinc-450 font-semibold">{item.email || 'Não informado'}</td>
+                        {isAdmin && (
+                          <td className="p-4">
+                            <div className="flex gap-2 justify-end">
+                              <button
+                                title="Excluir Fornecedor"
+                                onClick={() => handleDeletarFornecedor(item.id)}
+                                className="p-1.5 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white rounded-lg transition border border-red-500/10 cursor-pointer"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL: NOVO PRODUTO */}
       {showNovoProdutoModal && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -755,15 +963,43 @@ export default function EstoquePage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Tamanho *</label>
+                  <select
+                    value={produtoForm.tamanho}
+                    onChange={(e) => setProdutoForm({ ...produtoForm, tamanho: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors cursor-pointer"
+                  >
+                    {TAMANHOS.map(sz => (
+                      <option key={sz} value={sz}>{sz}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Quantidade Inicial *</label>
+                  <input
+                    type="number" required
+                    placeholder="10"
+                    value={produtoForm.quantidade_estoque}
+                    onChange={(e) => setProdutoForm({ ...produtoForm, quantidade_estoque: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Quantidade Estoque Inicial *</label>
-                <input
-                  type="number" required
-                  placeholder="10"
-                  value={produtoForm.quantidade_estoque}
-                  onChange={(e) => setProdutoForm({ ...produtoForm, quantidade_estoque: e.target.value })}
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
-                />
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Fornecedor Associado</label>
+                <select
+                  value={produtoForm.fornecedor_id}
+                  onChange={(e) => setProdutoForm({ ...produtoForm, fornecedor_id: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors cursor-pointer"
+                >
+                  <option value="">Nenhum fornecedor selecionado</option>
+                  {fornecedores.map(f => (
+                    <option key={f.id} value={f.id}>{f.nome}</option>
+                  ))}
+                </select>
               </div>
 
               <button
@@ -854,6 +1090,34 @@ export default function EstoquePage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Tamanho *</label>
+                  <select
+                    value={produtoForm.tamanho}
+                    onChange={(e) => setProdutoForm({ ...produtoForm, tamanho: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors cursor-pointer"
+                  >
+                    {TAMANHOS.map(sz => (
+                      <option key={sz} value={sz}>{sz}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Fornecedor Associado</label>
+                  <select
+                    value={produtoForm.fornecedor_id}
+                    onChange={(e) => setProdutoForm({ ...produtoForm, fornecedor_id: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors cursor-pointer"
+                  >
+                    <option value="">Nenhum fornecedor selecionado</option>
+                    {fornecedores.map(f => (
+                      <option key={f.id} value={f.id}>{f.nome}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 className="w-full py-3 mt-2 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer"
@@ -932,6 +1196,72 @@ export default function EstoquePage() {
                 className="w-full py-3 mt-2 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer"
               >
                 Confirmar Lançamento
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: NOVO FORNECEDOR */}
+      {showNovoFornecedorModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl w-full max-w-md p-6 relative">
+            <button onClick={() => setShowNovoFornecedorModal(false)} className="absolute right-4 top-4 text-zinc-500 hover:text-white cursor-pointer">
+              <X size={16} />
+            </button>
+            <h3 className="text-lg font-bold text-white font-cinzel mb-4">Cadastrar Novo Fornecedor</h3>
+            
+            <form onSubmit={handleCriarFornecedor} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Nome / Empresa *</label>
+                <input
+                  type="text" required
+                  placeholder="Ex: Koral Fight Co."
+                  value={fornecedorForm.nome}
+                  onChange={(e) => setFornecedorForm({ ...fornecedorForm, nome: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Pessoa de Contato</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Carlos Santos (Vendas)"
+                  value={fornecedorForm.contato}
+                  onChange={(e) => setFornecedorForm({ ...fornecedorForm, contato: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Telefone</label>
+                  <input
+                    type="text"
+                    placeholder="Ex: (11) 99999-9999"
+                    value={fornecedorForm.telefone}
+                    onChange={(e) => setFornecedorForm({ ...fornecedorForm, telefone: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">E-mail</label>
+                  <input
+                    type="email"
+                    placeholder="Ex: vendas@koral.com.br"
+                    value={fornecedorForm.email}
+                    onChange={(e) => setFornecedorForm({ ...fornecedorForm, email: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 mt-2 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer"
+              >
+                Cadastrar Fornecedor
               </button>
             </form>
           </div>
