@@ -27,14 +27,5 @@
         }
       ]
     }
-  ],
-  "experimentalServices": {
-    "grkk": {
-      "type": "web",
-      "root": "backend",
-      "entrypoint": "app:app",
-      "routePrefix": "/",
-      "buildCommand": "pip install -r requirements.txt"
-    }
-  }
+  ]
 }
