@@ -1,31 +1,49 @@
 RewriteEngine On
 
-# Mapeamento de payloads Next.js RSC (correção do bug de exportação estática com App Router)
-# Exemplo: /exames/__next.!KGRhc2hib2FyZCk.exames.__PAGE__.txt -> /exames/__next.!KGRhc2hib2FyZCk/exames/__PAGE__.txt
+# -------------------------------------------------------
+# LIBERAR ACESSO DIRETO À PASTA _next (Next.js estático)
+# Deve vir ANTES de qualquer outra regra de reescrita.
+# -------------------------------------------------------
+RewriteCond %{REQUEST_URI} ^/_next/
+RewriteRule ^ - [L]
+
+# -------------------------------------------------------
+# MAPEAMENTO DE PAYLOADS RSC DO NEXT.JS (App Router)
+# -------------------------------------------------------
 RewriteCond %{REQUEST_URI} ^/(.+)/__next\.!([^.]+)\.([^.]+)\.__PAGE__\.txt$
 RewriteRule ^.*$ /%1/__next.!%2/%3/__PAGE__.txt [L]
 
-# Exemplo: /exames/__next.!KGRhc2hib2FyZCk.exames.txt -> /exames/__next.!KGRhc2hib2FyZCk/exames.txt
 RewriteCond %{REQUEST_URI} ^/(.+)/__next\.!([^.]+)\.([^.]+)\.txt$
 RewriteRule ^.*$ /%1/__next.!%2/%3.txt [L]
 
-# Roteamento padrão de arquivos estáticos HTML (.html opcional na URL)
+# -------------------------------------------------------
+# ROTEAMENTO HTML — serve .html sem extensão na URL
+# -------------------------------------------------------
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
 RewriteRule ^(.*)$ $1.html [L]
 
-# Configuração de Cache-Control para evitar cache do HTML (previne carregar CSS/JS antigos de builds anteriores)
+# -------------------------------------------------------
+# MIME TYPES
+# -------------------------------------------------------
+<IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType text/css .css
+    AddType font/woff2 .woff2
+</IfModule>
+
+# -------------------------------------------------------
+# CACHE-CONTROL
+# -------------------------------------------------------
 <IfModule mod_headers.c>
-    # Não cachear arquivos HTML (garante carregar sempre o HTML novo)
     <FilesMatch "\.(html|htm)$">
         Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
         Header set Pragma "no-cache"
         Header set Expires "0"
     </FilesMatch>
 
-    # Cache longo para arquivos com hash de build (_next/static)
-    <FilesMatch "\.(css|js|woff2|png|jpg|jpeg|svg|ico)$">
+    <FilesMatch "\.(js|mjs|css|woff2|png|jpg|jpeg|svg|ico|webp)$">
         Header set Cache-Control "max-age=31536000, public, immutable"
     </FilesMatch>
 </IfModule>
