@@ -49,24 +49,7 @@ const PONTOS_EVENTOS: Record<string, { label: string; pontos: number; cor: strin
   exame: { label: 'Aprovação em Graduação de Faixa', pontos: 80, cor: 'text-red-400 bg-red-500/10' },
 };
 
-const FAIXAS = [
-  'Branca',
-  'Branca/Amarela',
-  'Amarela',
-  'Amarela/Laranja',
-  'Laranja',
-  'Laranja/Verde',
-  'Verde',
-  'Verde/Azul',
-  'Azul',
-  'Azul/Vermelha',
-  'Vermelha',
-  'Marrom',
-  'Marrom I',
-  'Marrom II',
-  'Preta I',
-  'Preta II',
-];
+import { FAIXAS } from '@/constants/faixas';
 
 export default function RankingPage() {
   const { usuario, isAdmin } = useAuth();

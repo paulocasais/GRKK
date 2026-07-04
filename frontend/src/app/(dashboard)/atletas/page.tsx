@@ -31,77 +31,10 @@ interface Atleta {
   medico_diagnosticos?: string;
 }
 
-const FAIXAS = [
-  'Branca',
-  'Branca/Amarela',
-  'Amarela',
-  'Amarela/Laranja',
-  'Laranja',
-  'Laranja/Verde',
-  'Verde',
-  'Verde/Azul',
-  'Azul',
-  'Azul/Vermelha',
-  'Vermelha',
-  'Marrom',
-  'Marrom I',
-  'Marrom II',
-  'Preta I',
-  'Preta II',
-];
-
-const FAIXAS_INFANTIL = [
-  'Branca',
-  'Branca/Amarela',
-  'Amarela',
-  'Amarela/Laranja',
-  'Laranja',
-  'Laranja/Verde',
-  'Verde',
-  'Verde/Azul',
-  'Azul',
-  'Azul/Vermelha',
-  'Vermelha',
-  'Marrom',
-  'Marrom I',
-  'Marrom II',
-];
-
-const FAIXAS_ADULTO = [
-  'Branca',
-  'Amarela',
-  'Laranja',
-  'Verde',
-  'Azul',
-  'Vermelha',
-  'Marrom',
-  'Marrom I',
-  'Marrom II',
-  'Preta I',
-  'Preta II',
-];
+import { FAIXAS, FAIXAS_INFANTIL, FAIXAS_ADULTO, CORES_FAIXAS } from '@/constants/faixas';
 
 function renderFaixaBadge(faixa: string) {
-  const cores: Record<string, { bg: string, border: string, text: string, stripe?: string }> = {
-    'Branca':          { bg: 'bg-white',        border: 'border-zinc-300',   text: 'text-zinc-900' },
-    'Branca/Amarela':  { bg: 'bg-yellow-200',   border: 'border-yellow-400', text: 'text-zinc-900' },
-    'Amarela':         { bg: 'bg-yellow-400',   border: 'border-yellow-600', text: 'text-zinc-950' },
-    'Amarela/Laranja': { bg: 'bg-orange-300',   border: 'border-orange-500', text: 'text-zinc-950' },
-    'Laranja':         { bg: 'bg-orange-500',   border: 'border-orange-600', text: 'text-white' },
-    'Laranja/Verde':   { bg: 'bg-green-500',    border: 'border-green-700',  text: 'text-white' },
-    'Verde':           { bg: 'bg-emerald-700',  border: 'border-emerald-900',text: 'text-white' },
-    'Verde/Azul':      { bg: 'bg-teal-600',     border: 'border-teal-800',   text: 'text-white' },
-    'Azul':            { bg: 'bg-blue-600',     border: 'border-blue-800',   text: 'text-white' },
-    'Azul/Vermelha':   { bg: 'bg-indigo-600',   border: 'border-indigo-800', text: 'text-white' },
-    'Vermelha':        { bg: 'bg-red-600',      border: 'border-red-800',    text: 'text-white' },
-    'Marrom':          { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white' },
-    'Marrom I':        { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white', stripe: 'bg-white' },
-    'Marrom II':       { bg: 'bg-amber-900',    border: 'border-amber-950',  text: 'text-white', stripe: 'bg-amber-400' },
-    'Preta I':         { bg: 'bg-zinc-950',     border: 'border-yellow-600', text: 'text-gold',  stripe: 'bg-yellow-500' },
-    'Preta II':        { bg: 'bg-zinc-950',     border: 'border-yellow-500', text: 'text-gold',  stripe: 'bg-yellow-400' },
-  };
-
-  const cor = cores[faixa] || { bg: 'bg-zinc-800', border: 'border-zinc-700', text: 'text-white' };
+  const cor = CORES_FAIXAS[faixa] || { bg: 'bg-zinc-800', border: 'border-zinc-700', text: 'text-white' };
 
   return (
     <div className={`relative flex items-center justify-between px-2.5 py-1 rounded border text-[9px] font-black uppercase tracking-wider ${cor.bg} ${cor.border} ${cor.text} shadow-sm overflow-hidden h-[22px] w-[95px] select-none`}>

@@ -65,6 +65,95 @@ def create_exam_routes(app: Flask):
 
             return jsonify(res), 201
 
+    @app.route("/api/exames/validar-carencia", methods=["GET"])
+    def validar_carencia():
+        from app import get_current_user
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Não autenticado"}), 401
+
+        exame_id = request.args.get("exame_id")
+        grad_pretendida = request.args.get("graduacao_pretendida")
+        atleta_id = request.args.get("atleta_id") or user.get("id")
+
+        if not exame_id or not grad_pretendida:
+            return jsonify({"error": "Parâmetros exame_id e graduacao_pretendida são obrigatórios"}), 400
+
+        exames, _ = SupabaseService.get_all("exames")
+        exame = next((ex for ex in (exames or []) if str(ex["id"]) == str(exame_id)), None)
+        if not exame:
+            return jsonify({"error": "Exame não localizado"}), 404
+
+        atleta_perfil, _ = SupabaseService.get_profile_by_id(atleta_id)
+        if not atleta_perfil:
+            return jsonify({"error": "Perfil do atleta não localizado"}), 404
+
+        # 1. Calcular idade na data do exame
+        data_nasc_str = atleta_perfil.get("data_nascimento")
+        data_exame_str = exame.get("data_exame")
+        idade = 15
+        if data_nasc_str and data_exame_str:
+            try:
+                if "T" in data_exame_str:
+                    data_exame_str = data_exame_str.split("T")[0]
+                if "T" in data_nasc_str:
+                    data_nasc_str = data_nasc_str.split("T")[0]
+                dt_nasc = datetime.strptime(data_nasc_str, "%Y-%m-%d")
+                dt_exame = datetime.strptime(data_exame_str, "%Y-%m-%d")
+                idade = dt_exame.year - dt_nasc.year - ((dt_exame.month, dt_exame.day) < (dt_nasc.month, dt_nasc.day))
+            except Exception:
+                pass
+
+        # 2. Determinar o início da faixa atual
+        candidaturas, _ = SupabaseService.get_all("candidatos_exame", filter_dict={"atleta_id": atleta_id, "status": "aprovado"})
+        if not candidaturas:
+            candidaturas, _ = SupabaseService.get_all("candidatos", filter_dict={"atleta_id": atleta_id, "status": "aprovado"})
+
+        data_inicio_faixa = None
+        if candidaturas:
+            candidaturas.sort(key=lambda x: x.get("created_at", ""), reverse=True)
+            ultimo_aprovado = candidaturas[0]
+            exames_list, _ = SupabaseService.get_all("exames")
+            exame_ant = next((ex for ex in (exames_list or []) if str(ex["id"]) == str(ultimo_aprovado.get("exame_id"))), None)
+            if exame_ant:
+                data_inicio_faixa = exame_ant.get("data_exame")
+
+        if not data_inicio_faixa:
+            data_inicio_faixa = atleta_perfil.get("created_at") or datetime.utcnow().date().isoformat()
+
+        # 3. Calcular tempo na faixa em meses
+        diferenca_meses = 999
+        if data_inicio_faixa and data_exame_str:
+            try:
+                if "T" in data_inicio_faixa:
+                    data_inicio_faixa = data_inicio_faixa.split("T")[0]
+                dt_inicio = datetime.strptime(data_inicio_faixa, "%Y-%m-%d")
+                dt_exame = datetime.strptime(data_exame_str, "%Y-%m-%d")
+                diferenca_meses = (dt_exame.year - dt_inicio.year) * 12 + (dt_exame.month - dt_inicio.month)
+                if dt_exame.day < dt_inicio.day:
+                    diferenca_meses -= 1
+            except Exception:
+                pass
+
+        # 4. Validar carência mínima
+        if idade <= 12:
+            carencia_exigida = REGRAS_INFANTIL.get(grad_pretendida)
+        else:
+            carencia_exigida = REGRAS_ADULTO.get(grad_pretendida)
+
+        apto = True
+        if carencia_exigida is not None:
+            if diferenca_meses < carencia_exigida:
+                apto = False
+
+        return jsonify({
+            "apto": apto,
+            "idade": idade,
+            "diferenca_meses": diferenca_meses if diferenca_meses != 999 else 0,
+            "carencia_exigida": carencia_exigida,
+            "data_inicio_faixa": data_inicio_faixa
+        }), 200
+
     # Rotas fixas DEVEM vir antes das rotas com <id> para evitar shadowing
     @app.route("/api/exames/candidatos", methods=["GET", "POST"])
     def handle_candidatos():

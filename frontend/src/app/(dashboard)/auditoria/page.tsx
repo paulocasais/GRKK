@@ -19,6 +19,8 @@ export default function AuditoriaPage() {
   const { usuario, tipo } = useAuth();
   const [logs, setLogs] = useState<LogItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState('');
+  const [filtroAcao, setFiltroAcao] = useState('todos');
 
   const carregarLogs = async () => {
     try {
@@ -44,6 +46,19 @@ export default function AuditoriaPage() {
       setLoading(false);
     }
   }, [tipo]);
+
+  const acoesDisponiveis = Array.from(new Set(logs.map(log => log.acao))).filter(Boolean);
+
+  const logsFiltrados = logs.filter(log => {
+    const correspondeBusca = 
+      (log.usuario_nome?.toLowerCase() || '').includes(busca.toLowerCase()) ||
+      (log.detalhes?.toLowerCase() || '').includes(busca.toLowerCase());
+      
+    const correspondeAcao = 
+      filtroAcao === 'todos' || log.acao === filtroAcao;
+      
+    return correspondeBusca && correspondeAcao;
+  });
 
   if (loading) {
     return (
@@ -76,8 +91,35 @@ export default function AuditoriaPage() {
         <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Logs de Segurança e Ações Administrativas</p>
       </div>
 
+      {/* Filtros e Busca */}
+      <div className="flex flex-col sm:flex-row gap-4 bg-zinc-900/30 border border-zinc-900 rounded-2xl p-4">
+        <div className="flex-1">
+          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Buscar Ações ou Detalhes</label>
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Pesquise por usuário, descrição..."
+            className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs placeholder-zinc-650 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-sans"
+          />
+        </div>
+        <div className="sm:w-64">
+          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">Filtrar por Ação</label>
+          <select
+            value={filtroAcao}
+            onChange={(e) => setFiltroAcao(e.target.value)}
+            className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-white text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-sans"
+          >
+            <option value="todos">Todas as Ações</option>
+            {acoesDisponiveis.map(ac => (
+              <option key={ac} value={ac}>{ac}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* Tabela de Logs */}
-      <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
+      <div className="bg-zinc-900 border border-zinc-850 rounded-2xl overflow-hidden">
         <div className="p-4 border-b border-zinc-800/60 flex items-center gap-2 bg-zinc-950/20">
           <Terminal size={14} className="text-zinc-500" />
           <span className="text-[10px] font-black uppercase tracking-wider text-zinc-400">Terminal de Ações</span>
@@ -95,7 +137,7 @@ export default function AuditoriaPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/40 text-zinc-300 font-mono">
-              {logs.map(log => (
+              {logsFiltrados.map(log => (
                 <tr key={log.id} className="hover:bg-white/[0.01]">
                   <td className="p-4 whitespace-nowrap text-zinc-500 flex items-center gap-1.5">
                     <Clock size={11} />
@@ -108,10 +150,10 @@ export default function AuditoriaPage() {
                 </tr>
               ))}
 
-              {logs.length === 0 && (
+              {logsFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-zinc-500 text-xs">
-                    Nenhum log registrado até o momento.
+                  <td colSpan={5} className="p-8 text-center text-zinc-500 text-xs font-sans">
+                    Nenhum log encontrado para os filtros selecionados.
                   </td>
                 </tr>
               )}

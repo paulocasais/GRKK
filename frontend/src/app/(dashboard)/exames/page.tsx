@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { FAIXAS_INFANTIL, FAIXAS_ADULTO } from '@/constants/faixas';
 import {
   Trophy, Plus, Calendar, MapPin, Loader2,
   AlertCircle, ClipboardList, CheckCircle2, ChevronRight
@@ -59,7 +60,60 @@ export default function ExamesPage() {
     graduacao_pretendida: 'Amarela'
   });
 
+  const [carenciaInfo, setCarenciaInfo] = useState<{
+    apto: boolean;
+    idade: number;
+    diferenca_meses: number;
+    carencia_exigida: number;
+    data_inicio_faixa: string;
+    loading: boolean;
+    error?: string;
+  } | null>(null);
+
   const [notif, setNotif] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: '' });
+
+  useEffect(() => {
+    if (!inscricaoForm.exame_id || !inscricaoForm.graduacao_pretendida || !usuario?.id) {
+      setCarenciaInfo(null);
+      return;
+    }
+
+    const verificarCarencia = async () => {
+      setCarenciaInfo({ apto: true, idade: 15, diferenca_meses: 0, carencia_exigida: 0, data_inicio_faixa: '', loading: true });
+      try {
+        const res = await fetch(
+          `${API_URL}/api/exames/validar-carencia?exame_id=${inscricaoForm.exame_id}&graduacao_pretendida=${inscricaoForm.graduacao_pretendida}&atleta_id=${usuario.id}`,
+          { credentials: 'include' }
+        );
+        if (!res.ok) {
+          const data = await res.json();
+          throw new Error(data.error || 'Erro ao validar carência.');
+        }
+        const data = await res.json();
+        setCarenciaInfo({
+          apto: data.apto,
+          idade: data.idade,
+          diferenca_meses: data.diferenca_meses,
+          carencia_exigida: data.carencia_exigida,
+          data_inicio_faixa: data.data_inicio_faixa,
+          loading: false
+        });
+      } catch (err: any) {
+        console.error(err);
+        setCarenciaInfo({
+          apto: false,
+          idade: 15,
+          diferenca_meses: 0,
+          carencia_exigida: 0,
+          data_inicio_faixa: '',
+          loading: false,
+          error: err.message || 'Falha ao validar carência.'
+        });
+      }
+    };
+
+    verificarCarencia();
+  }, [inscricaoForm.exame_id, inscricaoForm.graduacao_pretendida, usuario]);
 
   const carregarExames = async () => {
     try {
@@ -143,35 +197,6 @@ export default function ExamesPage() {
       setNotif({ type: 'error', msg: err.message || 'Falha ao realizar inscrição.' });
     }
   };
-
-  const FAIXAS_INFANTIL = [
-    'Branca/Amarela',
-    'Amarela',
-    'Amarela/Laranja',
-    'Laranja',
-    'Laranja/Verde',
-    'Verde',
-    'Verde/Azul',
-    'Azul',
-    'Azul/Vermelha',
-    'Vermelha',
-    'Marrom',
-    'Marrom I',
-    'Marrom II',
-  ];
-
-  const FAIXAS_ADULTO = [
-    'Amarela',
-    'Laranja',
-    'Verde',
-    'Azul',
-    'Vermelha',
-    'Marrom',
-    'Marrom I',
-    'Marrom II',
-    'Preta I',
-    'Preta II',
-  ];
 
   const MODALIDADES = ['Karate Goju-Ryu', 'Kobudo', 'Defesa Pessoal'];
 
@@ -481,6 +506,52 @@ export default function ExamesPage() {
                 </select>
               </div>
 
+              {/* Alerta de Carência */}
+              {carenciaInfo && (
+                <div className={`p-4 rounded-xl border text-xs space-y-1.5 ${
+                  carenciaInfo.loading 
+                    ? 'bg-zinc-900 border-zinc-800 text-zinc-400' 
+                    : carenciaInfo.error 
+                    ? 'bg-red-950/20 border-red-900/30 text-red-400'
+                    : carenciaInfo.apto
+                    ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-400'
+                    : 'bg-yellow-950/20 border-yellow-900/30 text-yellow-300'
+                }`}>
+                  {carenciaInfo.loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Validando carência para faixa {inscricaoForm.graduacao_pretendida}...</span>
+                    </div>
+                  ) : carenciaInfo.error ? (
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>{carenciaInfo.error}</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-center gap-1.5 font-bold mb-1">
+                        {carenciaInfo.apto ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-yellow-300" />
+                        )}
+                        <span>{carenciaInfo.apto ? 'Apto para Exame' : 'Carência Mínima Pendente'}</span>
+                      </div>
+                      <p className="text-[11px] opacity-80 leading-relaxed">
+                        Início da Faixa Atual: <strong>{carenciaInfo.data_inicio_faixa.split('T')[0].split('-').reverse().join('/')}</strong> ({carenciaInfo.diferenca_meses} meses de permanência).
+                        <br />
+                        Carência exigida para a {inscricaoForm.graduacao_pretendida}: <strong>{carenciaInfo.carencia_exigida} meses</strong>.
+                        {!carenciaInfo.apto && (
+                          <span className="block mt-1.5 font-bold text-red-400">
+                            Faltam {carenciaInfo.carencia_exigida - carenciaInfo.diferenca_meses} meses para cumprir a carência mínima.
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="pt-4 border-t border-zinc-900 flex justify-end gap-3 mt-6">
                 <button
                   type="button"
@@ -491,7 +562,8 @@ export default function ExamesPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-gold text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:bg-gold-dark cursor-pointer shadow-lg shadow-gold/15 font-cinzel"
+                  disabled={carenciaInfo?.loading || carenciaInfo?.apto === false}
+                  className="px-6 py-2.5 bg-gold disabled:bg-zinc-800 disabled:text-zinc-500 disabled:shadow-none text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:bg-gold-dark cursor-pointer shadow-lg shadow-gold/15 font-cinzel"
                 >
                   Inscrever-se
                 </button>

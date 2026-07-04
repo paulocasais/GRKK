@@ -15,43 +15,7 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
-const FAIXAS = [
-  'Branca',
-  'Branca/Amarela',
-  'Amarela',
-  'Amarela/Laranja',
-  'Laranja',
-  'Laranja/Verde',
-  'Verde',
-  'Verde/Azul',
-  'Azul',
-  'Azul/Vermelha',
-  'Vermelha',
-  'Marrom',
-  'Marrom I',
-  'Marrom II',
-  'Preta I',
-  'Preta II',
-];
-
-const BELT_STYLE: Record<string, string> = {
-  'Branca': 'bg-white border border-gray-300',
-  'Branca/Amarela': 'bg-gradient-to-r from-white to-yellow-400 border border-yellow-400',
-  'Amarela': 'bg-yellow-400',
-  'Amarela/Laranja': 'bg-gradient-to-r from-yellow-400 to-orange-500',
-  'Laranja': 'bg-orange-500',
-  'Laranja/Verde': 'bg-gradient-to-r from-orange-500 to-emerald-700',
-  'Verde': 'bg-emerald-600',
-  'Verde/Azul': 'bg-gradient-to-r from-emerald-600 to-blue-600',
-  'Azul': 'bg-blue-600',
-  'Azul/Vermelha': 'bg-gradient-to-r from-blue-600 to-red-500',
-  'Vermelha': 'bg-red-500',
-  'Marrom': 'bg-amber-800',
-  'Marrom I': 'bg-amber-900',
-  'Marrom II': 'bg-amber-950',
-  'Preta I': 'bg-zinc-900 border border-zinc-700',
-  'Preta II': 'bg-zinc-950 border border-gold/40',
-};
+import { FAIXAS, CORES_FAIXAS } from '@/constants/faixas';
 
 function formatDate(iso: string) {
   if (!iso) return 'A definir';
@@ -466,7 +430,7 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
             </p>
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className={`w-12 h-4 rounded-full ${BELT_STYLE[faixa] ?? 'bg-zinc-800'}`} />
+                <div className={`w-12 h-4 rounded-full ${CORES_FAIXAS[faixa]?.progressClass ?? 'bg-zinc-800'}`} />
                 <span className="font-bold text-white font-cinzel">{faixa}</span>
               </div>
               <div className="flex gap-1 mb-2">
