@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { UserCheck, ShieldAlert, Loader2, Search, CheckCircle2, User, Trophy, Mail, Phone } from 'lucide-react';
+import { UserCheck, ShieldAlert, Loader2, Search, CheckCircle2, User, Trophy, Mail, Phone, Printer } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -115,6 +115,244 @@ export default function AtletasPage() {
     } catch (err) {
       setAtletas(atletas.map(a => a.id === atletaId ? { ...a, status: novoStatus } : a));
     }
+  };
+
+  const handleImprimirFicha = (atleta: Atleta) => {
+    const dataNasc = atleta.data_nascimento 
+      ? atleta.data_nascimento.split('-').reverse().join('/') 
+      : 'Não informada';
+    const cpf = atleta.cpf 
+      ? atleta.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') 
+      : 'Não informado';
+    const idade = atleta.data_nascimento 
+      ? (new Date().getFullYear() - new Date(atleta.data_nascimento).getFullYear()) 
+      : '—';
+    const isMenor = atleta.data_nascimento && (new Date().getFullYear() - new Date(atleta.data_nascimento).getFullYear() < 18);
+    const respCpf = atleta.responsavel_cpf 
+      ? atleta.responsavel_cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') 
+      : 'Não informado';
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <html>
+      <head>
+        <title>Ficha Cadastral e Médica - ${atleta.nome}</title>
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;600;800&display=swap');
+          body {
+            font-family: 'Inter', sans-serif;
+            color: #111;
+            background-color: #fff;
+            padding: 30px;
+            font-size: 11px;
+            line-height: 1.4;
+          }
+          .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+          }
+          .header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 18px;
+            margin: 0 0 4px 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+          }
+          .header p {
+            font-size: 9px;
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #555;
+          }
+          .section-title {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: bold;
+            border-bottom: 1px solid #111;
+            padding-bottom: 3px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+          }
+          .grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+          }
+          .grid-full {
+            grid-column: span 2;
+          }
+          .grid-full-3 {
+            grid-column: span 3;
+          }
+          .field {
+            display: flex;
+            flex-direction: column;
+          }
+          .label {
+            font-size: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 3px;
+          }
+          .value {
+            font-size: 11px;
+            font-weight: 600;
+            color: #000;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            min-height: 14px;
+          }
+          .value-large {
+            min-height: 40px;
+          }
+          .signature-area {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            gap: 30px;
+          }
+          .signature-box {
+            flex: 1;
+            text-align: center;
+          }
+          .signature-line {
+            border-top: 1px solid #111;
+            margin-top: 35px;
+            padding-top: 5px;
+            font-size: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Associação Goju-Ryu Karate Kai</h1>
+          <p>Ficha de Matrícula & Ficha Médica de Emergência</p>
+        </div>
+
+        <div class="section-title">Dados Gerais e Técnicos</div>
+        <div class="grid grid-3">
+          <div class="field grid-full-3">
+            <span class="label">Nome Completo</span>
+            <span class="value">${atleta.nome}</span>
+          </div>
+          <div class="field">
+            <span class="label">Graduação Atual</span>
+            <span class="value">${atleta.faixa}</span>
+          </div>
+          <div class="field">
+            <span class="label">Dojo / Filial</span>
+            <span class="value">${atleta.filial_nome || 'Dojo Central'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Professor Responsável</span>
+            <span class="value">${atleta.nome_professor || 'Não informado'}</span>
+          </div>
+        </div>
+
+        <div class="section-title">Informações Pessoais</div>
+        <div class="grid">
+          <div class="field">
+            <span class="label">CPF</span>
+            <span class="value">${cpf}</span>
+          </div>
+          <div class="field">
+            <span class="label">Data de Nascimento</span>
+            <span class="value">${dataNasc} (Idade: ${idade} anos)</span>
+          </div>
+          <div class="field">
+            <span class="label">Sexo</span>
+            <span class="value">${atleta.sexo === 'M' ? 'Masculino' : atleta.sexo === 'F' ? 'Feminino' : 'Outro'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Celular</span>
+            <span class="value">${atleta.telefone || 'Não informado'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">E-mail</span>
+            <span class="value">${atleta.email}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Endereço Residencial</span>
+            <span class="value">${atleta.endereco || 'Não cadastrado'} ${atleta.cidade ? `, ${atleta.cidade} - ${atleta.uf || 'BA'}` : ''}</span>
+          </div>
+        </div>
+
+        ${isMenor ? `
+        <div class="section-title">Responsável Legal (Menor de 18 Anos)</div>
+        <div class="grid">
+          <div class="field grid-full">
+            <span class="label">Nome do Responsável</span>
+            <span class="value">${atleta.responsavel_nome || 'Não informado'}</span>
+          </div>
+          <div class="field">
+            <span class="label">CPF do Responsável</span>
+            <span class="value">${respCpf}</span>
+          </div>
+          <div class="field">
+            <span class="label">Celular do Responsável</span>
+            <span class="value">${atleta.responsavel_telefone || 'Não informado'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">E-mail do Responsável</span>
+            <span class="value">${atleta.responsavel_email || 'Não informado'}</span>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="section-title">Ficha Médica & Restrições</div>
+        <div class="grid">
+          <div class="field grid-full">
+            <span class="label">Alergias Alimentares / Medicamentosas</span>
+            <span class="value value-large">${atleta.medico_alergias || 'Nenhuma alergia relatada.'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Plano de Saúde / Convênio</span>
+            <span class="value">${atleta.medico_plano || 'Sem informações de convênio médico.'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Restrições Físicas / Recomendações Médicas</span>
+            <span class="value value-large">${atleta.medico_restricoes || 'Nenhuma restrição física relatada.'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Diagnósticos Clínicos / Patologias</span>
+            <span class="value value-large">${atleta.medico_diagnosticos || 'Nenhum diagnóstico relatado.'}</span>
+          </div>
+        </div>
+
+        <div class="signature-area">
+          <div class="signature-box">
+            <div class="signature-line">Assinatura do Atleta (ou Responsável Legal)</div>
+          </div>
+          <div class="signature-box">
+            <div class="signature-line">Assinatura do Sensei Responsável</div>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
   };
 
   const handleExcluir = async (atletaId: string) => {
@@ -485,7 +723,14 @@ export default function AtletasPage() {
               </div>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-zinc-900">
+            <div className="flex justify-end gap-3 pt-4 border-t border-zinc-900">
+              <button
+                onClick={() => handleImprimirFicha(viewingAtleta)}
+                className="px-5 py-2.5 bg-gold hover:bg-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider font-cinzel transition cursor-pointer flex items-center gap-1.5 shadow-lg shadow-gold/10"
+              >
+                <Printer size={13} />
+                Imprimir Ficha
+              </button>
               <button
                 onClick={() => setViewingAtleta(null)}
                 className="px-6 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider font-cinzel transition cursor-pointer"
