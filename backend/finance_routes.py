@@ -196,3 +196,123 @@ def create_finance_routes(app: Flask):
         registrar_log_auditoria(user, acao, detalhes)
 
         return jsonify(res), 200
+
+    # ── PIX ───────────────────────────────────────────────────────────────
+    @app.route("/api/financeiro/<id>/gerar-pix", methods=["POST"])
+    def gerar_pix_fatura(id):
+        from app import get_current_user
+        from services import payment_service
+
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Não autenticado"}), 401
+
+        faturas, _ = SupabaseService.get_all("financeiro")
+        fatura = next((f for f in (faturas or []) if str(f.get("id")) == str(id)), None)
+        if not fatura:
+            return jsonify({"error": "Fatura não encontrada"}), 404
+        if fatura.get("status") == "pago":
+            return jsonify({"error": "Esta fatura já foi paga"}), 400
+
+        # Obtém dados do atleta para o Asaas
+        profiles, _ = SupabaseService.get_all("profiles")
+        atleta_id = fatura.get("atleta_id") or user.get("id")
+        atleta = next((p for p in (profiles or []) if str(p.get("id")) == str(atleta_id)), {})
+        atleta["email"] = atleta.get("email") or user.get("email", "")
+
+        try:
+            resultado = payment_service.gerar_pix(atleta, fatura)
+            # Salva id da cobrança na fatura para polling posterior
+            SupabaseService.update("financeiro", id, {
+                "asaas_id": resultado.get("id_cobranca"),
+                "metodo_pagamento": "pix"
+            })
+            return jsonify(resultado), 200
+        except Exception as e:
+            return jsonify({"error": f"Erro ao gerar PIX: {str(e)}"}), 500
+
+    # ── Boleto ────────────────────────────────────────────────────────────
+    @app.route("/api/financeiro/<id>/gerar-boleto", methods=["POST"])
+    def gerar_boleto_fatura(id):
+        from app import get_current_user
+        from services import payment_service
+
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Não autenticado"}), 401
+
+        faturas, _ = SupabaseService.get_all("financeiro")
+        fatura = next((f for f in (faturas or []) if str(f.get("id")) == str(id)), None)
+        if not fatura:
+            return jsonify({"error": "Fatura não encontrada"}), 404
+        if fatura.get("status") == "pago":
+            return jsonify({"error": "Esta fatura já foi paga"}), 400
+
+        profiles, _ = SupabaseService.get_all("profiles")
+        atleta_id = fatura.get("atleta_id") or user.get("id")
+        atleta = next((p for p in (profiles or []) if str(p.get("id")) == str(atleta_id)), {})
+        atleta["email"] = atleta.get("email") or user.get("email", "")
+
+        try:
+            resultado = payment_service.gerar_boleto(atleta, fatura)
+            SupabaseService.update("financeiro", id, {
+                "asaas_id": resultado.get("id_cobranca"),
+                "metodo_pagamento": "boleto"
+            })
+            return jsonify(resultado), 200
+        except Exception as e:
+            return jsonify({"error": f"Erro ao gerar boleto: {str(e)}"}), 500
+
+    # ── Status (polling do frontend) ──────────────────────────────────────
+    @app.route("/api/financeiro/<id>/status-pagamento", methods=["GET"])
+    def status_pagamento_fatura(id):
+        from app import get_current_user
+        from services import payment_service
+
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Não autenticado"}), 401
+
+        faturas, _ = SupabaseService.get_all("financeiro")
+        fatura = next((f for f in (faturas or []) if str(f.get("id")) == str(id)), None)
+        if not fatura:
+            return jsonify({"error": "Fatura não encontrada"}), 404
+
+        if fatura.get("status") == "pago":
+            return jsonify({"status": "RECEIVED", "fatura_status": "pago"}), 200
+
+        asaas_id = fatura.get("asaas_id")
+        resultado = payment_service.verificar_status(asaas_id or "")
+
+        # Se Asaas confirmar pagamento, atualiza a fatura automaticamente
+        if resultado.get("status") in ("RECEIVED", "CONFIRMED"):
+            SupabaseService.update("financeiro", id, {"status": "pago"})
+            resultado["fatura_status"] = "pago"
+
+        return jsonify(resultado), 200
+
+    # ── Webhook Asaas (chamado pelo Asaas quando pagamento é confirmado) ──
+    @app.route("/api/financeiro/webhook/asaas", methods=["POST"])
+    def webhook_asaas():
+        import os
+        token_esperado = os.environ.get("ASAAS_WEBHOOK_TOKEN", "")
+        token_recebido = request.headers.get("asaas-access-token", "")
+        if token_esperado and token_recebido != token_esperado:
+            return jsonify({"error": "Token inválido"}), 403
+
+        evento = request.json or {}
+        payment_data = evento.get("payment", {})
+        event_type = evento.get("event", "")
+
+        if event_type in ("PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"):
+            external_ref = payment_data.get("externalReference", "")
+            asaas_id = payment_data.get("id", "")
+            if external_ref:
+                SupabaseService.update("financeiro", external_ref, {"status": "pago"})
+            elif asaas_id:
+                faturas, _ = SupabaseService.get_all("financeiro")
+                fat = next((f for f in (faturas or []) if f.get("asaas_id") == asaas_id), None)
+                if fat:
+                    SupabaseService.update("financeiro", fat["id"], {"status": "pago"})
+
+        return jsonify({"received": True}), 200

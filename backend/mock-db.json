@@ -8713,7 +8713,7 @@
       "titulo": "Nova Filial Cadastrada",
       "mensagem": "O dojo/filial Test Filial solicitou credenciamento no sistema.",
       "tipo": "alerta",
-      "lida": false,
+      "lida": true,
       "created_at": "2026-07-03T00:55:15.540123"
     }
   ],
@@ -13307,6 +13307,69 @@
       "detalhes": "Perfil do atleta Aluno Lucas Almeida (ID: st-2) atualizado. Campos: filial_id, filial_nome, faixa",
       "ip": "127.0.0.1",
       "created_at": "2026-07-03T20:05:02.739789"
+    },
+    {
+      "id": "5ccb7b8e-410c-4f70-b09d-1607731b9250",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T18:49:57.112828"
+    },
+    {
+      "id": "b8838129-6144-4daa-a077-8b8c9e52760a",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T19:03:28.183161"
+    },
+    {
+      "id": "7739110d-2bb1-4d48-a9e7-3f1538833de0",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T19:04:16.823745"
+    },
+    {
+      "id": "8e9423aa-8fa8-449d-adba-df2795f59077",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-2 (MENSALIDADE) de R$ 120.00 para Atleta de Teste atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T19:05:51.454051"
+    },
+    {
+      "id": "c0a67c56-1322-494f-982e-478e744c22e6",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T19:35:30.476056"
+    },
+    {
+      "id": "c46de772-a9f6-41b6-83bc-cf8953ada46a",
+      "usuario_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "usuario_nome": "Filial Salvador Centro",
+      "acao": "Lançamento de Frequência",
+      "detalhes": "Lançada chamada para 1 atletas na data 2026-07-04 pela filial ID: 7513aa27-452f-462e-8f5a-b3f2052612f0.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T19:51:35.349694"
+    },
+    {
+      "id": "42005f26-16ef-424e-bf76-f8e66afd4c51",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-04T21:11:58.902514"
     }
   ],
   "cms_config": [
@@ -13470,7 +13533,7 @@
       "tipo": "mensalidade",
       "valor": 120.0,
       "data_vencimento": "2026-05-10",
-      "status": "pendente",
+      "status": "pago",
       "created_at": "2026-05-01T10:00:00.000Z"
     },
     {
@@ -13816,6 +13879,144 @@
       "status": "confirmado",
       "id": "56fe6ee6-31b0-4b0e-938b-3b43a7923e8d",
       "created_at": "2026-07-03T19:48:12.371100"
+    }
+  ],
+  "presencas": [
+    {
+      "id": "pres-mock-1",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-01",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-2",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-03",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-3",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-08",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-4",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-10",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-5",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-15",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-6",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-17",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-7",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-22",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-8",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-24",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-9",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-06-29",
+      "status": "presente"
+    },
+    {
+      "id": "pres-mock-10",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-07-01",
+      "status": "presente"
+    },
+    {
+      "id": "d8c896ef-60ba-4284-8d17-c23c77b834dc",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "data": "2026-07-04",
+      "status": "presente",
+      "created_at": "2026-07-04T19:51:35.297281"
+    }
+  ],
+  "documentos_assinados": [
+    {
+      "id": "doc-ass-2",
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "titulo": "Declaração de Saúde e Anamnese Técnica",
+      "tipo_documento": "declaracao_saude",
+      "status": "pendente",
+      "created_at": "2026-07-04T12:00:00.000Z",
+      "signed_at": null,
+      "assinatura_hash": null,
+      "arquivo_url": "/static/documentos/declaracao_saude_8513aa27-452f-462e-8f5a-b3f2052612f1.pdf"
+    },
+    {
+      "id": "105dafab-69e5-4c5d-861c-21ca02b8433f",
+      "atleta_id": "atleta-s9rxjaztv1q",
+      "atleta_nome": "Paulo Roberto",
+      "titulo": "Termo Unificado de Matrícula e Prestação de Serviços",
+      "tipo_documento": "termo_unificado",
+      "status": "assinado",
+      "created_at": "2026-07-05T01:48:59.899810",
+      "signed_at": "2026-07-05T02:18:24.050546Z",
+      "assinatura_hash": "3FC59B8005C9657217781E5F246F8C4C1FD665F5F6F2B32D81A06009F28EA59A",
+      "arquivo_url": "/static/documentos/termo_unificado_atleta-s9rxjaztv1q.pdf"
+    }
+  ],
+  "despesas": [
+    {
+      "id": "desp-1",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Dojo Central",
+      "categoria": "Aluguel",
+      "descricao": "Aluguel da sala comercial do Dojo Central - Julho/2026",
+      "valor": 1200.0,
+      "data_pagamento": "2026-07-01",
+      "created_at": "2026-07-01T10:00:00.000Z"
+    },
+    {
+      "id": "desp-2",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Dojo Central",
+      "categoria": "Energia/Água",
+      "descricao": "Fatura de Energia Elétrica - Dojo Central",
+      "valor": 280.5,
+      "data_pagamento": "2026-07-03",
+      "created_at": "2026-07-03T10:00:00.000Z"
+    },
+    {
+      "id": "desp-3",
+      "filial_id": null,
+      "filial_nome": "Matriz / Associação",
+      "categoria": "Marketing",
+      "descricao": "Panfletos de divulgação da GRKK e Banner",
+      "valor": 450.0,
+      "data_pagamento": "2026-07-04",
+      "created_at": "2026-07-04T15:00:00.000Z"
     }
   ]
 }

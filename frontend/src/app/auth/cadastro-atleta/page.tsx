@@ -82,7 +82,7 @@ export default function CadastroAtletaPage() {
       setErrorMsg('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
-    if (!(form as any).aceita_termos) {
+    if (!form.aceita_termos) {
       setErrorMsg('É necessário aceitar os Termos de Serviço e Aviso de Privacidade do Portal GRKK.');
       return;
     }
@@ -102,7 +102,7 @@ export default function CadastroAtletaPage() {
           senha: form.senha,
           filial_id: form.filial_id || null,
           filial_nome: filialNome,
-          aceita_termos: (form as any).aceita_termos,
+          aceita_termos: form.aceita_termos,
         }),
       });
 
@@ -280,6 +280,28 @@ export default function CadastroAtletaPage() {
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Checkbox de aceite dos termos */}
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="aceitaTermosAtleta"
+                checked={form.aceita_termos}
+                onChange={(e) => setForm((prev) => ({ ...prev, aceita_termos: e.target.checked }))}
+                className="w-4 h-4 mt-0.5 accent-gold bg-zinc-950 border border-gray-600 rounded cursor-pointer flex-shrink-0"
+              />
+              <label htmlFor="aceitaTermosAtleta" className="text-gray-400 text-xs font-cinzel tracking-wider cursor-pointer leading-relaxed">
+                Li e aceito os{' '}
+                <Link href="/transparencia/termos" target="_blank" className="text-gold underline hover:text-gold-light transition-colors">
+                  Termos de Serviço
+                </Link>
+                {' '}e o{' '}
+                <Link href="/transparencia/privacidade" target="_blank" className="text-gold underline hover:text-gold-light transition-colors">
+                  Aviso de Privacidade
+                </Link>
+                {' '}do Portal GRKK *
+              </label>
             </div>
 
             {errorMsg && (

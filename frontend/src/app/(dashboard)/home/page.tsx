@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { GraficoMatriculas, GraficoReceita, GraficoFaixas, GraficoFrequencia } from '@/components/dashboard/charts/AdminCharts';
 import {
   CalendarDays, Users, Trophy, TrendingUp,
   Clock, ArrowUpRight, Zap, Loader2,
@@ -10,7 +11,7 @@ import {
   Star, Lock, Newspaper, ChevronRight,
   Activity, BarChart3, Award, QrCode, Medal,
   FileWarning, DollarSign, CreditCard, History,
-  GraduationCap, CheckCircle2, MapPin, Flame
+  GraduationCap, CheckCircle2, MapPin, Flame, ClipboardCheck
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -117,9 +118,38 @@ function EmptySection({ icon: Icon, text }: { icon: React.ComponentType<any>; te
 }
 
 /* --- ADMIN DASHBOARD --- */
+
+interface AnalyticsData {
+  matriculas_por_mes: { mes: string; atletas: number }[];
+  receita_por_mes: { mes: string; receita: number; pendente: number }[];
+  distribuicao_faixas: { faixa: string; total: number }[];
+  frequencia_por_filial: { filial: string; treinos: number }[];
+  kpis: {
+    variacao_atletas_pct: number;
+    variacao_receita_pct: number;
+    taxa_adimplencia: number;
+    taxa_aprovacao_exames: number;
+    total_atletas: number;
+    total_filiais: number;
+  };
+}
+
+function VariacaoBadge({ pct }: { pct: number }) {
+  const positivo = pct >= 0;
+  return (
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+      positivo ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'
+    }`}>
+      {positivo ? '▲' : '▼'} {Math.abs(pct)}%
+    </span>
+  );
+}
+
 function AdminDashboard({ usuario }: { usuario: any }) {
-  const [stats, setStats] = useState({ activeAthletes: 0, openEvents: 0, pendingExams: 0, filiationsThisMonth: 0 });
+  const [stats, setStats] = useState({ activeAthletes: 0, openEvents: 0, pendingExams: 0, totalFiliais: 0 });
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
@@ -130,30 +160,47 @@ function AdminDashboard({ usuario }: { usuario: any }) {
           fetch(`${API_URL}/api/exames`, { credentials: 'include' }).then(r => r.ok ? r.json() : null),
           fetch(`${API_URL}/api/filiais`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
         ]);
-
-        const totalAtletas = resAtletas?.atletas?.filter((a: any) => a.status === 'ativo').length || 0;
-        const totalEventos = resEventos?.eventos?.length || 0;
-        const totalExames = resExames?.exames?.filter((e: any) => e.status === 'publicado' || e.status === 'em_andamento').length || 0;
-        const totalFiliais = resFiliais?.filiais?.length || 0;
-
         setStats({
-          activeAthletes: totalAtletas,
-          openEvents: totalEventos,
-          pendingExams: totalExames,
-          filiationsThisMonth: totalFiliais
+          activeAthletes: resAtletas?.atletas?.filter((a: any) => a.status === 'ativo').length || 0,
+          openEvents: resEventos?.eventos?.length || 0,
+          pendingExams: resExames?.exames?.filter((e: any) => e.status === 'publicado' || e.status === 'em_andamento').length || 0,
+          totalFiliais: resFiliais?.filiais?.length || 0,
         });
       } catch (err) {
-        console.error("Erro ao carregar estatísticas do admin:", err);
+        console.error('Erro ao carregar stats:', err);
       } finally {
         setLoading(false);
       }
     }
+
+    async function loadAnalytics() {
+      try {
+        const res = await fetch(`${API_URL}/api/relatorios/analytics`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setAnalytics(data);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar analytics:', err);
+      } finally {
+        setLoadingAnalytics(false);
+      }
+    }
+
     loadStats();
+    loadAnalytics();
   }, []);
+
+  const varAtleta = analytics?.kpis.variacao_atletas_pct ?? 0;
+  const varReceita = analytics?.kpis.variacao_receita_pct ?? 0;
+  const taxaAdimpl = analytics?.kpis.taxa_adimplencia ?? 100;
+  const taxaAprov = analytics?.kpis.taxa_aprovacao_exames ?? 100;
 
   return (
     <main className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 w-full">
+      {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-red-950/20 via-zinc-900 to-zinc-900 border border-red-900/20 rounded-3xl p-5 sm:p-8">
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-red-600/5 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-5">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500/20 to-red-700/10 rounded-2xl flex items-center justify-center border border-red-500/25 shrink-0">
@@ -165,33 +212,121 @@ function AdminDashboard({ usuario }: { usuario: any }) {
               <p className="text-xs text-zinc-400 mt-1">Associação Goju-Ryu Karatê-Kai</p>
             </div>
           </div>
-          <div className="flex items-center justify-center self-center sm:self-auto gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 shrink-0">
-            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-xs font-bold text-emerald-400">Sistema Online</span>
+          <div className="flex flex-col sm:items-end gap-2">
+            <div className="flex items-center justify-center sm:justify-end gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5 shrink-0">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-xs font-bold text-emerald-400">Sistema Online</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 text-center sm:text-right">
+              {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
+            </p>
           </div>
         </div>
       </div>
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <StatCard label="Atletas Ativos" value={stats.activeAthletes} icon={Users} color="brand" loading={loading} />
-        <StatCard label="Eventos em Aberto" value={stats.openEvents} icon={CalendarDays} color="gold" loading={loading} />
-        <StatCard label="Exames Pendentes" value={stats.pendingExams} icon={Trophy} color="blue" loading={loading} />
-        <StatCard label="Filiações no Mês" value={stats.filiationsThisMonth} icon={TrendingUp} color="green" loading={loading} />
+        {[
+          { label: 'Atletas Ativos', value: stats.activeAthletes, icon: Users, color: 'brand' as const, badge: <VariacaoBadge pct={varAtleta} /> },
+          { label: 'Eventos em Aberto', value: stats.openEvents, icon: CalendarDays, color: 'gold' as const, badge: null },
+          { label: 'Exames Ativos', value: stats.pendingExams, icon: Trophy, color: 'blue' as const, badge: null },
+          { label: 'Filiais Credenciadas', value: stats.totalFiliais, icon: Building2, color: 'green' as const, badge: null },
+        ].map(({ label, value, icon: IconComp, color, badge }) => (
+          <div key={label} className={`relative bg-zinc-900 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-300 group
+            ${{ brand: 'hover:border-red-500/30', gold: 'hover:border-gold/30', blue: 'hover:border-cobalt-500/30', green: 'hover:border-emerald-500/30' }[color]}`}>
+            <div className="flex items-start justify-between">
+              <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300
+                ${{ brand: 'bg-red-500/15', gold: 'bg-gold/15', blue: 'bg-cobalt-500/15', green: 'bg-emerald-500/15' }[color]}`}>
+                <IconComp className={`w-5 h-5 sm:w-5 sm:h-5 ${{ brand: 'text-red-500', gold: 'text-gold', blue: 'text-cobalt-400', green: 'text-emerald-400' }[color]}`} />
+              </div>
+              {badge}
+            </div>
+            <div>
+              {loading ? (
+                <div className="h-8 w-16 bg-zinc-800 rounded-xl animate-pulse mb-2" />
+              ) : (
+                <p className="text-2xl sm:text-3xl font-black text-white leading-none mb-1.5 font-cinzel">{value}</p>
+              )}
+              <p className="text-[10px] sm:text-xs text-zinc-500 font-bold uppercase tracking-wider">{label}</p>
+            </div>
+          </div>
+        ))}
+
       </div>
 
+
+      {/* Ações Rápidas */}
       <div>
-        <div className="mb-5">
+        <div className="mb-4">
           <h2 className="text-lg font-bold text-white font-cinzel">Ações Rápidas</h2>
           <p className="text-xs text-zinc-500 mt-0.5">Acesso direto a todos os módulos do sistema</p>
         </div>
         <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-3">
           <QuickItem label="Filiais" href="/filiais" icon={Building2} color="brand" />
           <QuickItem label="Atletas" href="/atletas" icon={Users} color="gold" />
+          <QuickItem label="Frequência" href="/frequencia" icon={Activity} color="green" />
           <QuickItem label="Eventos" href="/eventos-dash" icon={CalendarDays} color="blue" />
           <QuickItem label="Notícias" href="/noticias" icon={Star} color="green" />
           <QuickItem label="Graduações" href="/exames" icon={Trophy} color="brand" />
           <QuickItem label="Financeiro" href="/financeiro" icon={CreditCard} color="gold" />
-          <QuickItem label="Ranking" href="/ranking" icon={Medal} color="blue" />
+        </div>
+      </div>
+
+      {/* Gráficos Analíticos */}
+      <div>
+        <div className="flex items-center gap-2 mb-5">
+          <BarChart3 className="w-4 h-4 text-primary" />
+          <h2 className="text-lg font-bold text-white font-cinzel">Analytics</h2>
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider border border-zinc-800 rounded-full px-2 py-0.5">Últimos 6 meses</span>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Matrículas por Mês */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-bold text-white">Novas Matrículas</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Crescimento mensal de atletas</p>
+              </div>
+              <TrendingUp className="w-4 h-4 text-gold" />
+            </div>
+            <GraficoMatriculas data={analytics?.matriculas_por_mes ?? []} loading={loadingAnalytics} />
+          </div>
+
+          {/* Receita vs Pendente */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-bold text-white">Receita vs. Inadimplência</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Comparativo financeiro mensal</p>
+              </div>
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+            </div>
+            <GraficoReceita data={analytics?.receita_por_mes ?? []} loading={loadingAnalytics} />
+          </div>
+
+          {/* Distribuição por Faixa */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-bold text-white">Atletas por Faixa</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Distribuição atual de graduações</p>
+              </div>
+              <Award className="w-4 h-4 text-gold" />
+            </div>
+            <GraficoFaixas data={analytics?.distribuicao_faixas ?? []} loading={loadingAnalytics} />
+          </div>
+
+          {/* Frequência por Filial */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-xs font-bold text-white">Frequência por Filial</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Presenças registradas no mês atual</p>
+              </div>
+              <ClipboardCheck className="w-4 h-4 text-cobalt-400" />
+            </div>
+            <GraficoFrequencia data={analytics?.frequencia_por_filial ?? []} loading={loadingAnalytics} />
+          </div>
         </div>
       </div>
     </main>
@@ -324,6 +459,8 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
   const faixaIdx = FAIXAS.indexOf(faixa);
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loadingAvisos, setLoadingAvisos] = useState(true);
+  const [presencas, setPresencas] = useState<any[]>([]);
+  const [loadingPresencas, setLoadingPresencas] = useState(true);
 
   useEffect(() => {
     async function loadAvisos() {
@@ -339,8 +476,44 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
         setLoadingAvisos(false);
       }
     }
+
+    async function loadPresencas() {
+      try {
+        const res = await fetch(`${API_URL}/api/presencas`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setPresencas(data.presencas || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar presenças:", err);
+      } finally {
+        setLoadingPresencas(false);
+      }
+    }
+
     loadAvisos();
+    loadPresencas();
   }, []);
+
+  const metasTreinos: Record<string, number> = {
+    'Branca': 24,
+    'Branca/Amarela': 24,
+    'Amarela': 32,
+    'Amarela/Laranja': 32,
+    'Laranja': 32,
+    'Laranja/Verde': 32,
+    'Verde': 48,
+    'Verde/Azul': 48,
+    'Azul': 56,
+    'Azul/Vermelha': 64,
+    'Vermelha': 72,
+    'Marrom': 80,
+    'Marrom I': 88,
+    'Marrom II': 96,
+  };
+  const metaAtual = metasTreinos[faixa] || 24;
+  const treinosRealizados = presencas.filter((p: any) => p.status === 'presente').length;
+  const progresso = Math.min(100, Math.round((treinosRealizados / metaAtual) * 100));
 
   return (
     <main className="p-6 lg:p-10 space-y-8 w-full">
@@ -442,6 +615,43 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
                 {faixaIdx < FAIXAS.length - 1 ? `Próxima graduação: ${FAIXAS[faixaIdx + 1]}` : 'Graduação máxima'}
               </p>
             </div>
+          </div>
+
+          {/* Frequência de Treinos */}
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-primary/30 transition-all duration-300">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-4 flex items-center justify-between">
+              <span className="flex items-center gap-1.5">
+                <ClipboardCheck size={11} className="text-primary" /> Frequência de Treinos
+              </span>
+              <span className="text-[9px] text-zinc-400 font-mono">{treinosRealizados}/{metaAtual} treinos</span>
+            </p>
+            
+            {loadingPresencas ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-4 h-4 text-primary animate-spin" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-zinc-400">Progresso para Exame</span>
+                  <span className="font-mono font-bold text-white">{progresso}%</span>
+                </div>
+                
+                {/* Barra de Progresso */}
+                <div className="w-full h-2.5 bg-zinc-950 border border-zinc-850 rounded-full overflow-hidden relative">
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-gold rounded-full transition-all duration-500"
+                    style={{ width: `${progresso}%` }}
+                  />
+                </div>
+                
+                <p className="text-[10px] text-zinc-500 leading-normal">
+                  {progresso >= 100 
+                    ? "🎉 Frequência mínima atingida! Você cumpre a carência de treinos para exame."
+                    : `Faltam mais ${Math.max(0, metaAtual - treinosRealizados)} presenças para estar apto técnica e estatisticamente.`}
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

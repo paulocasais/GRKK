@@ -5,7 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import { 
   User, Mail, Phone, Calendar, ShieldAlert, 
   Activity, HeartPulse, Stethoscope, FileHeart,
-  Save, Loader2, CheckCircle2, AlertCircle, HeartHandshake
+  Save, Loader2, CheckCircle2, AlertCircle, HeartHandshake,
+  Send, Smartphone
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -46,7 +47,7 @@ function calcularIdade(dataNasc: string): number {
 }
 
 export default function ConfiguracoesPage() {
-  const { usuario, recarregarSessao } = useAuth();
+  const { usuario, recarregarSessao, isAdmin } = useAuth();
   
   const [form, setForm] = useState({
     nome: '',
@@ -444,6 +445,150 @@ export default function ConfiguracoesPage() {
 
       </form>
 
+      {isAdmin && (
+        <div className="mt-10">
+          <AdminIntegracoes />
+        </div>
+      )}
+
     </main>
+  );
+}
+
+function AdminIntegracoes() {
+  const [status, setStatus] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [telefoneTeste, setTelefoneTeste] = useState('');
+  const [testando, setTestando] = useState(false);
+  const [feedback, setFeedback] = useState<{ success: boolean; msg: string } | null>(null);
+
+  const carregarStatus = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/whatsapp/status`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setStatus(data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    carregarStatus();
+  }, []);
+
+  const handleTestar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!telefoneTeste) return;
+    setTestando(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`${API_URL}/api/whatsapp/testar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ telefone: telefoneTeste.replace(/\D/g, '') })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({ success: true, msg: 'Mensagem de teste enviada com sucesso!' });
+      } else {
+        setFeedback({ success: false, msg: data.error || 'Falha ao enviar mensagem.' });
+      }
+    } catch (err: any) {
+      setFeedback({ success: false, msg: 'Erro de conexão.' });
+    } finally {
+      setTestando(false);
+    }
+  };
+
+  return (
+    <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-6">
+      <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+        <Smartphone className="text-primary" size={16} /> INTEGRAÇÕES DO SISTEMA (WhatsApp & Pagamentos)
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Bloco WhatsApp */}
+        <div className="bg-zinc-950/60 border border-zinc-850 p-5 rounded-xl space-y-4">
+          <div className="flex justify-between items-center">
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">WhatsApp (Evolution API)</h4>
+            {loading ? (
+              <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+            ) : status?.modo_mock ? (
+              <span className="text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Modo Simulado (Mock)
+              </span>
+            ) : status?.connected ? (
+              <span className="text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Conectado
+              </span>
+            ) : (
+              <span className="text-[9px] font-bold bg-red-500/10 border border-red-500/20 text-red-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Desconectado
+              </span>
+            )}
+          </div>
+
+          <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+            Permite o envio automático de alertas para faturas a vencer, resultados de exames e avisos da diretoria diretamente no WhatsApp.
+          </p>
+
+          <form onSubmit={handleTestar} className="space-y-2 font-sans">
+            <label className="block text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Enviar mensagem de teste</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="(DDD) 99999-9999"
+                value={telefoneTeste}
+                onChange={(e) => setTelefoneTeste(formatarTelefone(e.target.value))}
+                className="flex-1 bg-zinc-900 border border-zinc-800 text-white px-3 py-2 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={testando || !telefoneTeste}
+                className="px-4 bg-gold hover:bg-gold-dark text-white rounded-xl text-xs font-bold uppercase transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {testando ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+              </button>
+            </div>
+            {feedback && (
+              <p className={`text-[10px] font-semibold ${feedback.success ? 'text-emerald-400' : 'text-red-400'}`}>
+                {feedback.msg}
+              </p>
+            )}
+          </form>
+        </div>
+
+        {/* Bloco Asaas */}
+        <div className="bg-zinc-950/60 border border-zinc-850 p-5 rounded-xl space-y-4 flex flex-col justify-between font-sans">
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Gateway de Pagamento (Asaas)</h4>
+              <span className="text-[9px] font-bold bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Sandbox (Testes)
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">
+              Gera automaticamente cobranças e QR Codes PIX / boletos bancários integrados na tela financeira dos atletas, atualizando o status após a compensação.
+            </p>
+          </div>
+          <div className="bg-zinc-900 p-3 rounded-lg border border-zinc-800 text-[10px] text-zinc-400 space-y-1">
+            <p className="font-bold text-white uppercase tracking-widest text-[9px] mb-1">Status do Webhook</p>
+            <p className="font-mono flex justify-between">
+              <span>URL:</span>
+              <span className="text-zinc-500">/api/financeiro/webhook/asaas</span>
+            </p>
+            <p className="font-mono flex justify-between">
+              <span>Integrado:</span>
+              <span className="text-emerald-400">Ativo</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

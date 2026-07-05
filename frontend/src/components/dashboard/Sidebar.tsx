@@ -8,13 +8,15 @@ import {
   LayoutDashboard, Trophy, CalendarDays,
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
-  Medal, CreditCard, MessageSquare, BookOpen, Package, BarChart3
+  Medal, CreditCard, MessageSquare, BookOpen, Package, BarChart3,
+  CalendarCheck
 } from 'lucide-react';
 
 const NAV_ADMIN = [
   { href: '/home', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/filiais', label: 'Filiais', icon: Building2 },
   { href: '/atletas', label: 'Atletas', icon: UserCheck },
+  { href: '/frequencia', label: 'Frequência', icon: CalendarCheck },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/noticias', label: 'Notícias', icon: Newspaper },
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
@@ -32,6 +34,7 @@ const NAV_FILIAL = [
   { href: '/home', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/filial', label: 'Minha Filial', icon: Building2 },
   { href: '/atletas', label: 'Atletas', icon: UserCheck },
+  { href: '/frequencia', label: 'Frequência', icon: CalendarCheck },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },

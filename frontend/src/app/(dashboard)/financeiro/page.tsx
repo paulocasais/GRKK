@@ -4,8 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import {
   CreditCard, DollarSign, Clock, Plus, Search,
-  Loader2, QrCode, CheckCircle2, AlertTriangle, ArrowUpRight, X
+  Loader2, QrCode, CheckCircle2, AlertTriangle, ArrowUpRight, X, TrendingUp, Calendar, Trash2
 } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line
+} from 'recharts';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -17,6 +20,23 @@ interface Pagamento {
   valor: number;
   data_vencimento: string;
   status: 'pendente' | 'pago' | 'atrasado' | 'cancelado';
+}
+
+interface Despesa {
+  id: string;
+  filial_id?: string;
+  filial_nome: string;
+  categoria: string;
+  descricao?: string;
+  valor: number;
+  data_pagamento: string;
+}
+
+interface FluxoCaixaItem {
+  mes: string;
+  receita: number;
+  despesa: number;
+  saldo: number;
 }
 
 interface AtletaSelect {
@@ -49,10 +69,15 @@ export default function FinanceiroPage() {
   const { usuario, tipo, isAdmin } = useAuth();
   const isAtleta = tipo === 'atleta';
 
+  const [activeTab, setActiveTab] = useState<'faturas' | 'despesas' | 'fluxo'>('faturas');
+
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
+  const [despesas, setDespesas] = useState<Despesa[]>([]);
   const [atletas, setAtletas] = useState<AtletaSelect[]>([]);
   const [filiais, setFiliais] = useState<FilialSelect[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingDespesas, setLoadingDespesas] = useState(false);
+  const [loadingFluxo, setLoadingFluxo] = useState(false);
 
   // Filtros
   const [busca, setBusca] = useState('');
@@ -60,8 +85,20 @@ export default function FinanceiroPage() {
 
   // Modais
   const [showNovaCobrancaModal, setShowNovaCobrancaModal] = useState(false);
+  const [showNovaDespesaModal, setShowNovaDespesaModal] = useState(false);
   const [showPagarModal, setShowPagarModal] = useState(false);
   const [selectedPagamento, setSelectedPagamento] = useState<Pagamento | null>(null);
+
+  const [submittingDespesa, setSubmittingDespesa] = useState(false);
+  const [novaDespesaForm, setNovaDespesaForm] = useState({
+    categoria: 'Aluguel',
+    valor: '',
+    data_pagamento: new Date().toISOString().split('T')[0],
+    descricao: '',
+    filial_id: ''
+  });
+
+  const [fluxoCaixaDados, setFluxoCaixaDados] = useState<FluxoCaixaItem[]>([]);
 
   // Form Lançamento (Admin)
   const [novaCobrancaForm, setNovaCobrancaForm] = useState({
@@ -73,9 +110,72 @@ export default function FinanceiroPage() {
     data_vencimento: new Date(Date.now() + 86400000 * 10).toISOString().split('T')[0],
   });
 
-  const [metodoPagamento, setMetodoPagamento] = useState<'pix' | 'cartao'>('pix');
+  const [metodoPagamento, setMetodoPagamento] = useState<'pix' | 'boleto'>('pix');
   const [processandoPagamento, setProcessandoPagamento] = useState(false);
   const [copiouChave, setCopiouChave] = useState(false);
+  const [cobrancaGerada, setCobrancaGerada] = useState<{
+    id_cobranca?: string;
+    pix_copia_cola?: string;
+    qr_code_base64?: string;
+    url_boleto?: string;
+    linha_digitavel?: string;
+    mock?: boolean;
+  } | null>(null);
+  const [carregandoMetodo, setCarregandoMetodo] = useState(false);
+
+  const obterCobranca = async (metodo: 'pix' | 'boleto', pagamentoId: string | number) => {
+    setCarregandoMetodo(true);
+    setCobrancaGerada(null);
+    try {
+      const endpoint = metodo === 'pix' ? 'gerar-pix' : 'gerar-boleto';
+      const res = await fetch(`${API_URL}/api/financeiro/${pagamentoId}/${endpoint}`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCobrancaGerada(data);
+      }
+    } catch (err) {
+      console.error("Erro ao gerar cobranca:", err);
+    } finally {
+      setCarregandoMetodo(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showPagarModal && selectedPagamento) {
+      obterCobranca(metodoPagamento, selectedPagamento.id);
+    } else {
+      setCobrancaGerada(null);
+    }
+  }, [showPagarModal, metodoPagamento, selectedPagamento?.id]);
+
+  useEffect(() => {
+    let intervalId: any;
+    if (showPagarModal && selectedPagamento && cobrancaGerada?.id_cobranca) {
+      intervalId = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_URL}/api/financeiro/${selectedPagamento.id}/status-pagamento`, {
+            credentials: 'include'
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.fatura_status === 'pago') {
+              setShowPagarModal(false);
+              carregarDados();
+              clearInterval(intervalId);
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao verificar status:", err);
+        }
+      }, 5000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [showPagarModal, selectedPagamento, cobrancaGerada]);
 
   const carregarDados = async () => {
     try {
@@ -117,6 +217,118 @@ export default function FinanceiroPage() {
       console.error("Erro ao carregar destinatários:", err);
     }
   };
+
+  const carregarDespesas = async () => {
+    setLoadingDespesas(true);
+    try {
+      const res = await fetch(`${API_URL}/api/despesas`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setDespesas(data.despesas || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar despesas, usando mock:", err);
+      setDespesas([
+        { id: "desp-1", filial_nome: "Dojo Central", categoria: "Aluguel", descricao: "Aluguel da sala comercial do Dojo Central", valor: 1200.00, data_pagamento: "2026-07-01" },
+        { id: "desp-2", filial_nome: "Dojo Central", categoria: "Energia/Água", descricao: "Fatura de Energia Elétrica - Dojo Central", valor: 280.50, data_pagamento: "2026-07-03" },
+        { id: "desp-3", filial_nome: "Matriz / Associação", categoria: "Marketing", descricao: "Panfletos de divulgação da GRKK", valor: 450.00, data_pagamento: "2026-07-04" }
+      ]);
+    } finally {
+      setLoadingDespesas(false);
+    }
+  };
+
+  const carregarFluxoCaixa = async () => {
+    setLoadingFluxo(true);
+    try {
+      const res = await fetch(`${API_URL}/api/relatorios/analytics`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setFluxoCaixaDados(data.fluxo_caixa || []);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar fluxo de caixa, usando mock:", err);
+      setFluxoCaixaDados([
+        { mes: "Fev/26", receita: 4500.00, despesa: 1900.00, saldo: 2600.00 },
+        { mes: "Mar/26", receita: 5200.00, despesa: 2100.00, saldo: 3100.00 },
+        { mes: "Abr/26", receita: 4900.00, despesa: 2200.00, saldo: 2700.00 },
+        { mes: "Mai/26", receita: 5800.00, despesa: 1800.00, saldo: 4000.00 },
+        { mes: "Jun/26", receita: 6100.00, despesa: 2400.00, saldo: 3700.00 },
+        { mes: "Jul/26", receita: 6500.00, despesa: 1930.50, saldo: 4569.50 }
+      ]);
+    } finally {
+      setLoadingFluxo(false);
+    }
+  };
+
+  const handleSalvarDespesa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!novaDespesaForm.categoria || !novaDespesaForm.valor || !novaDespesaForm.data_pagamento) {
+      alert("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+    setSubmittingDespesa(true);
+    try {
+      const res = await fetch(`${API_URL}/api/despesas`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(novaDespesaForm)
+      });
+      if (res.ok) {
+        setShowNovaDespesaModal(false);
+        setNovaDespesaForm({
+          categoria: 'Aluguel',
+          valor: '',
+          data_pagamento: new Date().toISOString().split('T')[0],
+          descricao: '',
+          filial_id: ''
+        });
+        carregarDespesas();
+      } else {
+        const errData = await res.json();
+        throw new Error(errData.error || "Erro ao salvar despesa.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Erro de conexão.");
+      // Fallback local
+      const mockDesp: Despesa = {
+        id: String(Date.now()),
+        filial_nome: filiais.find(f => f.id === novaDespesaForm.filial_id)?.nome || "Matriz / Associação",
+        categoria: novaDespesaForm.categoria,
+        descricao: novaDespesaForm.descricao,
+        valor: parseFloat(novaDespesaForm.valor),
+        data_pagamento: novaDespesaForm.data_pagamento
+      };
+      setDespesas([mockDesp, ...despesas]);
+      setShowNovaDespesaModal(false);
+    } finally {
+      setSubmittingDespesa(false);
+    }
+  };
+
+  const handleExcluirDespesa = async (id: string) => {
+    if (!confirm("Tem certeza que deseja remover esta despesa?")) return;
+    try {
+      const res = await fetch(`${API_URL}/api/despesas/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (res.ok) {
+        carregarDespesas();
+      }
+    } catch (err) {
+      setDespesas(despesas.filter(d => d.id !== id));
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'despesas') {
+      carregarDespesas();
+    } else if (activeTab === 'fluxo') {
+      carregarFluxoCaixa();
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     carregarDados();
@@ -251,160 +463,446 @@ export default function FinanceiroPage() {
           <p className="text-xs text-zinc-500 mt-0.5 uppercase tracking-widest font-semibold">Mensalidades, anuidades e taxas da associação</p>
         </div>
         {isAdmin && (
+          <div className="flex gap-2">
+            {activeTab === 'faturas' ? (
+              <button
+                onClick={() => setShowNovaCobrancaModal(true)}
+                className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer font-cinzel"
+              >
+                Lançar Cobrança
+              </button>
+            ) : activeTab === 'despesas' ? (
+              <button
+                onClick={() => setShowNovaDespesaModal(true)}
+                className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer font-cinzel"
+              >
+                Lançar Despesa
+              </button>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      {/* Abas */}
+      {!isAtleta && (
+        <div className="flex gap-6 border-b border-zinc-800 pb-px font-cinzel">
           <button
-            onClick={() => setShowNovaCobrancaModal(true)}
-            className="px-5 py-2.5 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hover:scale-105 cursor-pointer"
+            onClick={() => setActiveTab('faturas')}
+            className={`pb-3 text-xs font-bold uppercase tracking-wider transition relative cursor-pointer ${
+              activeTab === 'faturas' ? 'text-white' : 'text-zinc-500 hover:text-zinc-350'
+            }`}
           >
-            Lançar Cobrança
+            Mensalidades & Taxas
+            {activeTab === 'faturas' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+            )}
           </button>
-        )}
-      </div>
-
-      {/* Pódio Financeiro */}
-      <div className={`grid grid-cols-1 ${isAtleta ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-5`}>
-        {!isAtleta && (
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
-              <CheckCircle2 size={22} />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-white font-cinzel">R$ {totalPago.toFixed(2)}</p>
-              <p className="text-xs text-zinc-500">Total Pago</p>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
-            <Clock size={22} />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-white font-cinzel">R$ {totalPendente.toFixed(2)}</p>
-            <p className="text-xs text-zinc-500">Pendente</p>
-          </div>
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
-            <AlertTriangle size={22} />
-          </div>
-          <div>
-            <p className="text-2xl font-black text-white font-cinzel">R$ {totalAtrasado.toFixed(2)}</p>
-            <p className="text-xs text-zinc-500">Atrasado / Vencido</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">Minhas Faturas</h2>
-        <div className="flex gap-3 w-full sm:w-auto">
-          <input
-            type="text"
-            placeholder="Buscar..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            className="px-4 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none w-full"
-          />
-          <select
-            value={filtroStatus}
-            onChange={(e) => setFiltroStatus(e.target.value)}
-            className="px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-300 outline-none"
+          <button
+            onClick={() => setActiveTab('despesas')}
+            className={`pb-3 text-xs font-bold uppercase tracking-wider transition relative cursor-pointer ${
+              activeTab === 'despesas' ? 'text-white' : 'text-zinc-500 hover:text-zinc-350'
+            }`}
           >
-            <option value="todos">Todos Status</option>
-            <option value="pendente">Pendente</option>
-            <option value="pago">Pago</option>
-            <option value="atrasado">Atrasado</option>
-          </select>
+            Despesas do Dojo
+            {activeTab === 'despesas' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('fluxo')}
+            className={`pb-3 text-xs font-bold uppercase tracking-wider transition relative cursor-pointer ${
+              activeTab === 'fluxo' ? 'text-white' : 'text-zinc-500 hover:text-zinc-350'
+            }`}
+          >
+            Fluxo de Caixa
+            {activeTab === 'fluxo' && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-gold" />
+            )}
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Tabela de Cobranças */}
-      <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider text-[10px] bg-zinc-950/20">
-                <th className="p-4">Fatura</th>
-                <th className="p-4">Tipo</th>
-                <th className="p-4">Vencimento</th>
-                <th className="p-4 text-right">Valor</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 text-right">Ação</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pagamentosFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-10 text-center text-zinc-600 italic">
-                    Nenhuma fatura localizada.
-                  </td>
-                </tr>
-              ) : (
-                pagamentosFiltrados.map((item) => {
-                  const statusConfig = STATUS_COBRANCA[item.status] || STATUS_COBRANCA.pendente;
-                  const vencido = item.status === 'pendente' && item.data_vencimento < hoje;
-                  return (
-                    <tr key={item.id} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
-                      <td className="p-4 font-bold text-white">
-                        {item.atleta_nome || item.filial_nome || 'Cobrança Geral'}
-                      </td>
-                      <td className="p-4">
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${TIPO_COBRANCA[item.tipo]?.cor || 'bg-zinc-950 text-zinc-400'}`}>
-                          {TIPO_COBRANCA[item.tipo]?.label || item.tipo}
-                        </span>
-                      </td>
-                      <td className="p-4 font-semibold text-zinc-350">
-                        {new Date(item.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}
-                      </td>
-                      <td className="p-4 text-right font-mono font-black text-white">
-                        R$ {item.valor.toFixed(2)}
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                          vencido ? STATUS_COBRANCA.atrasado.cls : statusConfig.cls
-                        }`}>
-                          {vencido ? 'Atrasado' : statusConfig.label}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        {item.status === 'pendente' && (isAtleta || !isAdmin) && (
-                          <button
-                            onClick={() => {
-                              setSelectedPagamento(item);
-                              setShowPagarModal(true);
-                            }}
-                            className="px-3 py-1.5 bg-gold/10 hover:bg-gold text-gold hover:text-white border border-gold/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ml-auto"
-                          >
-                            Pagar <ArrowUpRight size={12} />
-                          </button>
-                        )}
+      {activeTab === 'faturas' && (
+        <>
+          {/* Pódio Financeiro */}
+          <div className={`grid grid-cols-1 ${isAtleta ? 'sm:grid-cols-2' : 'sm:grid-cols-3'} gap-5`}>
+            {!isAtleta && (
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                  <CheckCircle2 size={22} />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-white font-cinzel">R$ {totalPago.toFixed(2)}</p>
+                  <p className="text-xs text-zinc-500">Total Pago</p>
+                </div>
+              </div>
+            )}
 
-                        {isAdmin && item.status === 'pendente' && (
-                          <div className="flex gap-1.5 justify-end">
-                            <button
-                              onClick={() => handleAlterarStatus(item.id, 'pago')}
-                              className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg hover:bg-emerald-500 hover:text-white transition cursor-pointer"
-                            >
-                              Compensar
-                            </button>
-                            <button
-                              onClick={() => handleAlterarStatus(item.id, 'cancelado')}
-                              className="px-2 py-1 bg-zinc-800 border border-zinc-850 text-zinc-500 text-[10px] font-bold rounded-lg hover:bg-red-500/10 hover:text-red-400 transition cursor-pointer"
-                            >
-                              Cancelar
-                            </button>
-                          </div>
-                        )}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                <Clock size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">R$ {totalPendente.toFixed(2)}</p>
+                <p className="text-xs text-zinc-500">Pendente</p>
+              </div>
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+                <AlertTriangle size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">R$ {totalAtrasado.toFixed(2)}</p>
+                <p className="text-xs text-zinc-500">Atrasado / Vencido</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">Minhas Faturas</h2>
+            <div className="flex gap-3 w-full sm:w-auto">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="px-4 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none w-full"
+              />
+              <select
+                value={filtroStatus}
+                onChange={(e) => setFiltroStatus(e.target.value)}
+                className="px-3 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-300 outline-none"
+              >
+                <option value="todos">Todos Status</option>
+                <option value="pendente">Pendente</option>
+                <option value="pago">Pago</option>
+                <option value="atrasado">Atrasado</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tabela de Cobranças */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider text-[10px] bg-zinc-950/20">
+                    <th className="p-4">Fatura</th>
+                    <th className="p-4">Tipo</th>
+                    <th className="p-4">Vencimento</th>
+                    <th className="p-4 text-right">Valor</th>
+                    <th className="p-4 text-center">Status</th>
+                    <th className="p-4 text-right">Ação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagamentosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="p-10 text-center text-zinc-600 italic">
+                        Nenhuma fatura localizada.
                       </td>
                     </tr>
-                  );
-                })
+                  ) : (
+                    pagamentosFiltrados.map((item) => {
+                      const statusConfig = STATUS_COBRANCA[item.status] || STATUS_COBRANCA.pendente;
+                      const vencido = item.status === 'pendente' && item.data_vencimento < hoje;
+                      return (
+                        <tr key={item.id} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
+                          <td className="p-4 font-bold text-white">
+                            {item.atleta_nome || item.filial_nome || 'Cobrança Geral'}
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${TIPO_COBRANCA[item.tipo]?.cor || 'bg-zinc-950 text-zinc-400'}`}>
+                              {TIPO_COBRANCA[item.tipo]?.label || item.tipo}
+                            </span>
+                          </td>
+                          <td className="p-4 font-semibold text-zinc-350">
+                            {new Date(item.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR')}
+                          </td>
+                          <td className="p-4 text-right font-mono font-black text-white">
+                            R$ {item.valor.toFixed(2)}
+                          </td>
+                          <td className="p-4 text-center">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                              vencido ? STATUS_COBRANCA.atrasado.cls : statusConfig.cls
+                            }`}>
+                              {vencido ? 'Atrasado' : statusConfig.label}
+                            </span>
+                          </td>
+                          <td className="p-4 text-right">
+                            {item.status === 'pendente' && (isAtleta || !isAdmin) && (
+                              <button
+                                onClick={() => {
+                                  setSelectedPagamento(item);
+                                  setShowPagarModal(true);
+                                }}
+                                className="px-3 py-1.5 bg-gold/10 hover:bg-gold text-gold hover:text-white border border-gold/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer ml-auto font-cinzel"
+                              >
+                                Pagar <ArrowUpRight size={12} />
+                              </button>
+                            )}
+
+                            {isAdmin && item.status === 'pendente' && (
+                              <div className="flex gap-1.5 justify-end">
+                                <button
+                                  onClick={() => handleAlterarStatus(item.id, 'pago')}
+                                  className="px-2 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg hover:bg-emerald-500 hover:text-white transition cursor-pointer font-cinzel"
+                                >
+                                  Compensar
+                                </button>
+                                <button
+                                  onClick={() => handleAlterarStatus(item.id, 'cancelado')}
+                                  className="px-2 py-1 bg-zinc-800 border border-zinc-850 text-zinc-500 text-[10px] font-bold rounded-lg hover:bg-red-500/10 hover:text-red-400 transition cursor-pointer font-cinzel"
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'despesas' && (
+        <>
+          {/* Pódio Despesas */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+                <DollarSign size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">
+                  R$ {despesas.reduce((acc, curr) => acc + curr.valor, 0).toFixed(2)}
+                </p>
+                <p className="text-xs text-zinc-500">Total de Saídas / Despesas</p>
+              </div>
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                <TrendingUp size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">{despesas.length}</p>
+                <p className="text-xs text-zinc-500">Despesas Registradas</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtros de Despesas */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 className="text-lg font-bold text-white font-cinzel tracking-wide">Saídas & Despesas Operacionais</h2>
+            <input
+              type="text"
+              placeholder="Filtrar por categoria ou filial..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="px-4 py-2 text-xs bg-zinc-900 border border-zinc-800 rounded-xl text-white outline-none w-full sm:w-80"
+            />
+          </div>
+
+          {/* Tabela de Despesas */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
+            {loadingDespesas ? (
+              <div className="p-10 text-center text-zinc-500 flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-gold" /> Carregando despesas...
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider text-[10px] bg-zinc-950/20">
+                      <th className="p-4">Filial/Destino</th>
+                      <th className="p-4">Categoria</th>
+                      <th className="p-4">Descrição</th>
+                      <th className="p-4">Data Pagamento</th>
+                      <th className="p-4 text-right">Valor</th>
+                      {isAdmin && <th className="p-4 text-center">Ações</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {despesas.filter(d => {
+                      const text = `${d.categoria} ${d.filial_nome} ${d.descricao || ''}`.toLowerCase();
+                      return text.includes(busca.toLowerCase());
+                    }).length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-10 text-center text-zinc-600 italic">
+                          Nenhuma despesa registrada.
+                        </td>
+                      </tr>
+                    ) : (
+                      despesas.filter(d => {
+                        const text = `${d.categoria} ${d.filial_nome} ${d.descricao || ''}`.toLowerCase();
+                        return text.includes(busca.toLowerCase());
+                      }).map((item) => (
+                        <tr key={item.id} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
+                          <td className="p-4 font-bold text-white">{item.filial_nome}</td>
+                          <td className="p-4">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-red-500/10 text-red-400">
+                              {item.categoria}
+                            </span>
+                          </td>
+                          <td className="p-4 text-zinc-400 italic max-w-xs truncate">{item.descricao || 'Sem descrição'}</td>
+                          <td className="p-4 font-semibold text-zinc-350">
+                            {new Date(item.data_pagamento + 'T12:00:00').toLocaleDateString('pt-BR')}
+                          </td>
+                          <td className="p-4 text-right font-mono font-black text-red-400">
+                            - R$ {item.valor.toFixed(2)}
+                          </td>
+                          {isAdmin && (
+                            <td className="p-4 text-center">
+                              <button
+                                onClick={() => handleExcluirDespesa(item.id)}
+                                className="p-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 rounded-lg transition cursor-pointer"
+                                title="Excluir despesa"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {activeTab === 'fluxo' && (
+        <>
+          {/* Resumo do Fluxo de Caixa */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <CheckCircle2 size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">
+                  R$ {fluxoCaixaDados.reduce((acc, curr) => acc + curr.receita, 0).toFixed(2)}
+                </p>
+                <p className="text-xs text-zinc-500">Total Recebido (Período)</p>
+              </div>
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-400">
+                <DollarSign size={22} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-white font-cinzel">
+                  R$ {fluxoCaixaDados.reduce((acc, curr) => acc + curr.despesa, 0).toFixed(2)}
+                </p>
+                <p className="text-xs text-zinc-500">Total Despendido (Período)</p>
+              </div>
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex items-center gap-4 cursor-default">
+              {(() => {
+                const totalReceitas = fluxoCaixaDados.reduce((acc, curr) => acc + curr.receita, 0);
+                const totalDespesas = fluxoCaixaDados.reduce((acc, curr) => acc + curr.despesa, 0);
+                const saldoLiquido = totalReceitas - totalDespesas;
+                return (
+                  <>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      saldoLiquido >= 0 ? 'bg-blue-500/10 text-blue-400' : 'bg-orange-500/10 text-orange-400'
+                    }`}>
+                      <TrendingUp size={22} />
+                    </div>
+                    <div>
+                      <p className={`text-2xl font-black font-cinzel ${saldoLiquido >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
+                        R$ {saldoLiquido.toFixed(2)}
+                      </p>
+                      <p className="text-xs text-zinc-500">Saldo Líquido Acumulado</p>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* Gráfico Recharts */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 md:p-6 space-y-4">
+            <div>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider font-cinzel">Entradas vs Saídas Mensais</h3>
+              <p className="text-[10px] text-zinc-500">Comparativo consolidado do fluxo financeiro do dojo (últimos 6 meses)</p>
+            </div>
+            <div className="h-80 w-full text-xs">
+              {loadingFluxo ? (
+                <div className="h-full flex items-center justify-center text-zinc-500">
+                  <Loader2 className="w-5 h-5 animate-spin text-gold mr-2" /> Carregando gráfico...
+                </div>
+              ) : fluxoCaixaDados.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-zinc-600 italic">
+                  Sem dados suficientes para gerar o gráfico.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={fluxoCaixaDados} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                    <XAxis dataKey="mes" stroke="#71717a" />
+                    <YAxis stroke="#71717a" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px' }}
+                      labelStyle={{ color: '#fff', fontWeight: 'bold' }}
+                    />
+                    <Legend />
+                    <Bar name="Receitas (+)" dataKey="receita" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar name="Despesas (-)" dataKey="despesa" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </div>
+          </div>
+
+          {/* Tabela Resumo Mensal */}
+          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-800 text-zinc-500 font-bold uppercase tracking-wider text-[10px] bg-zinc-950/20">
+                    <th className="p-4">Mês/Ano</th>
+                    <th className="p-4 text-right">Receitas Total (+)</th>
+                    <th className="p-4 text-right">Despesas Total (-)</th>
+                    <th className="p-4 text-right">Saldo Líquido</th>
+                    <th className="p-4 text-center">Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fluxoCaixaDados.map((item, idx) => (
+                    <tr key={idx} className="border-b border-zinc-800/40 hover:bg-white/[0.01] transition-all">
+                      <td className="p-4 font-bold text-white font-cinzel">{item.mes}</td>
+                      <td className="p-4 text-right font-mono font-black text-emerald-400">R$ {item.receita.toFixed(2)}</td>
+                      <td className="p-4 text-right font-mono font-black text-red-400">R$ {item.despesa.toFixed(2)}</td>
+                      <td className={`p-4 text-right font-mono font-black ${item.saldo >= 0 ? 'text-blue-400' : 'text-orange-400'}`}>
+                        R$ {item.saldo.toFixed(2)}
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                          item.saldo >= 0
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-red-500/10 text-red-400 border-red-500/20'
+                        }`}>
+                          {item.saldo >= 0 ? 'Superavitário' : 'Deficitário'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* MODAL PAGAMENTO */}
       {showPagarModal && selectedPagamento && (
@@ -414,7 +912,7 @@ export default function FinanceiroPage() {
               <X size={16} />
             </button>
             <h3 className="text-base font-bold text-white font-cinzel mb-2">Efetuar Pagamento</h3>
-            <p className="text-[10px] text-zinc-450 uppercase tracking-widest mb-4">Selecione e confirme para compensação simulada</p>
+            <p className="text-[10px] text-zinc-450 uppercase tracking-widest mb-4">Escolha a forma de pagamento oficial da associação</p>
 
             <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl mb-4 space-y-2 text-xs">
               <div className="flex justify-between">
@@ -439,70 +937,112 @@ export default function FinanceiroPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setMetodoPagamento('cartao')}
+                onClick={() => setMetodoPagamento('boleto')}
                 className={`py-2 rounded-lg text-xs font-bold uppercase transition cursor-pointer ${
-                  metodoPagamento === 'cartao' ? 'bg-gold text-white shadow-md' : 'text-zinc-500 hover:text-white'
+                  metodoPagamento === 'boleto' ? 'bg-gold text-white shadow-md' : 'text-zinc-500 hover:text-white'
                 }`}
               >
-                Cartão
+                Boleto
               </button>
             </div>
 
-            {metodoPagamento === 'pix' ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="bg-white p-1.5 rounded-xl flex items-center justify-center">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=09090b&margin=0&data=${encodeURIComponent(
-                      `00020101021226830014br.gov.bcb.pix2561pix.grkk.com.br/pagamento/cobranca5204000053039865406${selectedPagamento.valor.toFixed(2)}5802BR5915Goju Ryu Karate6008Salvador62070503***63041A2B`
-                    )}`}
-                    alt="QR Code Pix"
-                    className="w-28 h-28 object-contain"
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    const valorFormatado = selectedPagamento.valor.toFixed(2);
-                    const chavePix = `00020101021226830014br.gov.bcb.pix2561pix.grkk.com.br/pagamento/cobranca5204000053039865406${valorFormatado}5802BR5915Goju Ryu Karate6008Salvador62070503***63041A2B`;
-                    navigator.clipboard.writeText(chavePix)
-                      .then(() => {
-                        setCopiouChave(true);
-                        setTimeout(() => setCopiouChave(false), 2000);
-                      })
-                      .catch(err => {
-                        console.error("Falha ao copiar a chave Pix: ", err);
-                      });
-                  }}
-                  className="px-4 py-2 border border-zinc-800 hover:border-gold text-zinc-350 hover:text-gold text-xs rounded-xl transition cursor-pointer"
-                >
-                  {copiouChave ? 'Chave Copiada! ✅' : 'Copiar Chave Pix Copia e Cola'}
-                </button>
+            {carregandoMetodo ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-3">
+                <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                <p className="text-xs text-zinc-500 uppercase tracking-widest font-semibold">Gerando cobrança...</p>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <input
-                  type="text" placeholder="Número do Cartão"
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <input
-                    type="text" placeholder="MM/AA"
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
-                  />
-                  <input
-                    type="text" placeholder="CVV"
-                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
-                  />
+            ) : cobrancaGerada ? (
+              metodoPagamento === 'pix' ? (
+                <div className="flex flex-col items-center gap-4">
+                  {cobrancaGerada.qr_code_base64 ? (
+                    <div className="bg-white p-2 rounded-xl flex items-center justify-center shadow-lg">
+                      <img
+                        src={cobrancaGerada.qr_code_base64.startsWith('data:') 
+                          ? cobrancaGerada.qr_code_base64 
+                          : `data:image/png;base64,${cobrancaGerada.qr_code_base64}`}
+                        alt="QR Code Pix"
+                        className="w-36 h-36 object-contain"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-36 h-36 bg-zinc-950 border border-zinc-850 rounded-xl flex items-center justify-center text-zinc-650 text-xs">
+                      QR Code Indisponível
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      if (cobrancaGerada.pix_copia_cola) {
+                        navigator.clipboard.writeText(cobrancaGerada.pix_copia_cola)
+                          .then(() => {
+                            setCopiouChave(true);
+                            setTimeout(() => setCopiouChave(false), 2000);
+                          });
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 border border-zinc-800 hover:border-gold text-zinc-350 hover:text-gold text-xs rounded-xl transition cursor-pointer font-semibold truncate text-center"
+                  >
+                    {copiouChave ? 'Chave Copiada! ✅' : 'Copiar código Pix Copia e Cola'}
+                  </button>
+
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-zinc-450 uppercase tracking-widest font-bold">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    Aguardando confirmação do pagamento...
+                  </div>
                 </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-xl space-y-1.5">
+                    <p className="text-[10px] font-bold text-zinc-500 uppercase">Linha Digitável</p>
+                    <p className="text-xs font-mono font-bold text-white break-all leading-relaxed bg-zinc-900 p-2 rounded border border-zinc-800">
+                      {cobrancaGerada.linha_digitavel || 'Linha digitável indisponível'}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (cobrancaGerada.linha_digitavel) {
+                          navigator.clipboard.writeText(cobrancaGerada.linha_digitavel)
+                            .then(() => {
+                              setCopiouChave(true);
+                              setTimeout(() => setCopiouChave(false), 2000);
+                            });
+                        }
+                      }}
+                      className="flex-1 py-2.5 border border-zinc-800 hover:border-gold text-zinc-350 hover:text-gold text-xs font-semibold rounded-xl transition cursor-pointer text-center"
+                    >
+                      {copiouChave ? 'Copiado! ✅' : 'Copiar Código'}
+                    </button>
+
+                    {cobrancaGerada.url_boleto && (
+                      <a
+                        href={cobrancaGerada.url_boleto}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex-1 py-2.5 bg-gold hover:bg-gold-dark text-white text-xs font-bold uppercase tracking-wider rounded-xl transition cursor-pointer text-center flex items-center justify-center gap-1.5"
+                      >
+                        Abrir Boleto <ArrowUpRight size={14} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="text-center text-xs text-zinc-500 py-6">
+                Erro ao gerar cobrança. Tente novamente.
               </div>
             )}
 
-            <button
-              onClick={handleEfetuarPagamento}
-              disabled={processandoPagamento}
-              className="w-full mt-6 py-3 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {processandoPagamento ? <Loader2 size={12} className="animate-spin" /> : 'Confirmar Pagamento'}
-            </button>
+            <div className="border-t border-zinc-800/60 mt-6 pt-4">
+              <button
+                onClick={handleEfetuarPagamento}
+                disabled={processandoPagamento}
+                className="w-full py-2.5 bg-zinc-950 border border-zinc-850 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {processandoPagamento ? <Loader2 size={12} className="animate-spin" /> : 'Confirmar Simulação (Offline)'}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -617,6 +1157,93 @@ export default function FinanceiroPage() {
                 className="w-full py-3 bg-gradient-to-r from-gold to-gold-dark text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer"
               >
                 Lançar Fatura
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL NOVA DESPESA */}
+      {showNovaDespesaModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl w-full max-w-md p-6 relative">
+            <button onClick={() => setShowNovaDespesaModal(false)} className="absolute right-4 top-4 text-zinc-500 hover:text-white cursor-pointer">
+              <X size={16} />
+            </button>
+            <h3 className="text-lg font-bold text-white font-cinzel mb-4">Lançar Nova Despesa</h3>
+            
+            <form onSubmit={handleSalvarDespesa} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Dojo / Filial da Despesa *</label>
+                <select
+                  value={novaDespesaForm.filial_id}
+                  onChange={(e) => setNovaDespesaForm({ ...novaDespesaForm, filial_id: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                >
+                  <option value="">Matriz / Associação Geral</option>
+                  {filiais.map((fil) => (
+                    <option key={fil.id} value={fil.id}>
+                      {fil.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Categoria *</label>
+                <select
+                  value={novaDespesaForm.categoria}
+                  onChange={(e) => setNovaDespesaForm({ ...novaDespesaForm, categoria: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                >
+                  <option value="Aluguel">Aluguel</option>
+                  <option value="Energia/Água">Energia/Água</option>
+                  <option value="Salários/Instrutores">Salários/Instrutores</option>
+                  <option value="Equipamentos/Estoque">Equipamentos/Estoque</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Impostos/Taxas">Impostos/Taxas</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                <textarea
+                  placeholder="Ex: Fatura de energia elétrica Ref Julho"
+                  value={novaDespesaForm.descricao}
+                  onChange={(e) => setNovaDespesaForm({ ...novaDespesaForm, descricao: e.target.value })}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none h-20 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Valor (R$) *</label>
+                  <input
+                    type="number" required placeholder="0.00" step="0.01" min="0.01"
+                    value={novaDespesaForm.valor}
+                    onChange={(e) => setNovaDespesaForm({ ...novaDespesaForm, valor: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Data Pagamento *</label>
+                  <input
+                    type="date" required
+                    value={novaDespesaForm.data_pagamento}
+                    onChange={(e) => setNovaDespesaForm({ ...novaDespesaForm, data_pagamento: e.target.value })}
+                    className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingDespesa}
+                className="w-full py-3 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:scale-[1.02] transition cursor-pointer flex items-center justify-center gap-2"
+              >
+                {submittingDespesa ? <Loader2 size={12} className="animate-spin" /> : 'Lançar Despesa'}
               </button>
             </form>
           </div>

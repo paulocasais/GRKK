@@ -70,6 +70,32 @@ def create_aviso_routes(app: Flask):
         if error:
             return jsonify({"error": error}), 500
 
+        # Disparar notificações de WhatsApp para os destinatários correspondentes
+        try:
+            from services import whatsapp_service
+            msg = whatsapp_service.msg_novo_aviso(titulo, conteudo)
+            profiles, _ = SupabaseService.get_all("profiles")
+            
+            # Filtra os destinatários
+            alvos = []
+            for p in (profiles or []):
+                tipo = p.get("tipo")
+                tel = p.get("telefone") or p.get("celular") or ""
+                if not tel:
+                    continue
+                
+                if destinatario == "todos":
+                    alvos.append((p.get("nome"), tel))
+                elif destinatario == "filial" and tipo in ["admin", "filial"]:
+                    alvos.append((p.get("nome"), tel))
+                elif destinatario == "atleta" and tipo == "atleta":
+                    alvos.append((p.get("nome"), tel))
+            
+            for nome_alvo, tel_alvo in alvos:
+                whatsapp_service.enviar_mensagem(tel_alvo, msg)
+        except Exception as e:
+            print(f"Erro ao disparar whatsapp de avisos: {e}")
+
         return jsonify(res), 201
 
     @app.route("/api/avisos/<id>", methods=["DELETE"])

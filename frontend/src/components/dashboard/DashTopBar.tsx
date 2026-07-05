@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Menu, Bell, ArrowUpRight, Check, AlertCircle, Clock } from 'lucide-react';
+import { 
+  Menu, Bell, ArrowUpRight, Check, AlertCircle, Clock, 
+  CreditCard, Award, UserCheck, Building2, Sparkles, ChevronRight 
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { obterIniciais } from './Sidebar';
 
@@ -19,6 +22,113 @@ interface Notificacao {
 
 interface DashTopBarProps {
   onMenuOpen: () => void;
+}
+
+interface ResolvedNotif {
+  icon: React.ReactNode;
+  colorClass: string;
+  bgClass: string;
+  tagLabel: string;
+  route: string | null;
+  actionLabel: string | null;
+}
+
+function resolveNotificationDetails(n: Notificacao, userType: string | null): ResolvedNotif {
+  const text = `${n.titulo} ${n.mensagem}`.toLowerCase();
+  
+  // 1. Financeiro
+  if (text.includes('fatura') || text.includes('pagamento') || text.includes('cobrança') || text.includes('mensalidade')) {
+    return {
+      icon: <CreditCard size={12} className="text-amber-400" />,
+      colorClass: 'text-amber-400 border-amber-500/20 bg-amber-500/10',
+      bgClass: 'bg-amber-500/[0.02] hover:bg-amber-500/[0.05]',
+      tagLabel: 'Financeiro',
+      route: '/financeiro',
+      actionLabel: 'Ver Faturas'
+    };
+  }
+  
+  // 2. Exames de Faixa
+  if (text.includes('exame') || text.includes('banca') || text.includes('graduação') || text.includes('faixa') || text.includes('candidato')) {
+    return {
+      icon: <Award size={12} className="text-emerald-400" />,
+      colorClass: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
+      bgClass: 'bg-emerald-500/[0.02] hover:bg-emerald-500/[0.05]',
+      tagLabel: 'Exame',
+      route: '/exames',
+      actionLabel: 'Ver Exames'
+    };
+  }
+
+  // 3. Filiais
+  if (text.includes('filial') || text.includes('dojo') || text.includes('credenciamento')) {
+    const route = userType === 'admin' ? '/filiais' : '/home';
+    return {
+      icon: <Building2 size={12} className="text-blue-400" />,
+      colorClass: 'text-blue-400 border-blue-500/20 bg-blue-500/10',
+      bgClass: 'bg-blue-500/[0.02] hover:bg-blue-500/[0.05]',
+      tagLabel: 'Filial',
+      route,
+      actionLabel: userType === 'admin' ? 'Ver Filiais' : 'Ver Painel'
+    };
+  }
+
+  // 4. Atletas
+  if (text.includes('atleta') || text.includes('homologado') || text.includes('cadastro')) {
+    const route = userType === 'admin' ? '/atletas' : '/home';
+    return {
+      icon: <UserCheck size={12} className="text-indigo-400" />,
+      colorClass: 'text-indigo-400 border-indigo-500/20 bg-indigo-500/10',
+      bgClass: 'bg-indigo-500/[0.02] hover:bg-indigo-500/[0.05]',
+      tagLabel: 'Atleta',
+      route,
+      actionLabel: userType === 'admin' ? 'Gerenciar Atletas' : 'Ver Carteirinha'
+    };
+  }
+
+  // 5. Sensei IA
+  if (text.includes('sensei') || text.includes('ia') || text.includes('chat') || text.includes('pergunta')) {
+    return {
+      icon: <Sparkles size={12} className="text-purple-400 animate-pulse" />,
+      colorClass: 'text-purple-400 border-purple-500/20 bg-purple-500/10',
+      bgClass: 'bg-purple-500/[0.02] hover:bg-purple-500/[0.05]',
+      tagLabel: 'Sensei IA',
+      route: '/sensei-ia',
+      actionLabel: 'Falar com IA'
+    };
+  }
+
+  // Fallbacks baseados no n.tipo original
+  if (n.tipo === 'sucesso') {
+    return {
+      icon: <Check size={12} className="text-emerald-400" />,
+      colorClass: 'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
+      bgClass: 'hover:bg-white/[0.01]',
+      tagLabel: 'Sucesso',
+      route: null,
+      actionLabel: null
+    };
+  }
+
+  if (n.tipo === 'alerta') {
+    return {
+      icon: <AlertCircle size={12} className="text-red-400" />,
+      colorClass: 'text-red-400 border-red-500/20 bg-red-500/10',
+      bgClass: 'hover:bg-white/[0.01]',
+      tagLabel: 'Alerta',
+      route: null,
+      actionLabel: null
+    };
+  }
+
+  return {
+    icon: <Bell size={12} className="text-zinc-400" />,
+    colorClass: 'text-zinc-400 border-zinc-500/20 bg-zinc-500/10',
+    bgClass: 'hover:bg-white/[0.01]',
+    tagLabel: 'Geral',
+    route: null,
+    actionLabel: null
+  };
 }
 
 export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
@@ -41,24 +151,55 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
     } catch (err) {
       console.error("Erro ao carregar notificações:", err);
       // Fallback de notificações mock se a requisição falhar (modo offline)
-      setNotifs([
+      const mockData = [
         {
-          id: 1,
-          titulo: "Mensagem do Sensei",
-          mensagem: "Lembre-se de treinar o Kata Sanchin diariamente.",
-          tipo: "info",
+          id: 'mock-1',
+          titulo: "Fatura de Mensalidade Pendente",
+          mensagem: "Sua taxa de anuidade da GRKK está em aberto. Regularize seu status financeiro.",
+          tipo: "alerta" as const,
           lida: false,
-          created_at: new Date().toISOString()
+          created_at: new Date(Date.now() - 600000).toISOString()
         },
         {
-          id: 2,
-          titulo: "Cadastro Aprovado",
-          mensagem: "Seu perfil de atleta foi homologado pela Associação.",
-          tipo: "sucesso",
-          lida: true,
+          id: 'mock-2',
+          titulo: "Exame de Faixa Agendado",
+          mensagem: "Próxima graduação oficial agendada. Certifique-se de cumprir a carência de treinos.",
+          tipo: "info" as const,
+          lida: false,
           created_at: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 'mock-3',
+          titulo: "Conselho do Sensei IA",
+          mensagem: "Dicas de treino para o Kata Sanchin: concentre-se na base e na respiração Ibuki.",
+          tipo: "sucesso" as const,
+          lida: true,
+          created_at: new Date(Date.now() - 86400000).toISOString()
         }
-      ]);
+      ];
+
+      // Adiciona notificações específicas por perfil
+      if (usuario?.tipo === 'admin') {
+        mockData.unshift({
+          id: 'mock-admin-1',
+          titulo: "Nova Solicitação de Filial",
+          mensagem: "A filial 'Dojo Salvador Centro' solicitou homologação de credenciamento.",
+          tipo: "info" as const,
+          lida: false,
+          created_at: new Date().toISOString()
+        });
+      } else if (usuario?.tipo === 'atleta') {
+        mockData.unshift({
+          id: 'mock-atleta-1',
+          titulo: "Cadastro de Atleta Homologado",
+          mensagem: "Sua ficha cadastral e filiação da GRKK foram aprovadas com sucesso.",
+          tipo: "sucesso" as const,
+          lida: false,
+          created_at: new Date().toISOString()
+        });
+      }
+
+      setNotifs(mockData);
     }
   };
 
@@ -66,7 +207,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
     carregarNotificacoes();
     const interval = setInterval(carregarNotificacoes, 20000);
     return () => clearInterval(interval);
-  }, []);
+  }, [usuario]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -100,6 +241,17 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
       setNotifs((prev) =>
         prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
       );
+    }
+  };
+
+  const handleNotifClick = async (n: Notificacao) => {
+    if (!n.lida) {
+      await marcarComoLida(n.id);
+    }
+    const details = resolveNotificationDetails(n, usuario?.tipo || null);
+    if (details.route) {
+      router.push(details.route);
+      setIsOpen(false);
     }
   };
 
@@ -149,12 +301,31 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
         >
           <Bell size={16} />
           {totalNaoLidas > 0 && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] font-black min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full border border-zinc-950 shadow-md select-none pointer-events-none animate-pulse">
+              {totalNaoLidas}
+            </span>
           )}
         </button>
 
         {isOpen && (
           <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
+            {/* Estilo para Scrollbar Premium */}
+            <style dangerouslySetInnerHTML={{__html: `
+              .notifs-scrollbar::-webkit-scrollbar {
+                width: 4px;
+              }
+              .notifs-scrollbar::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              .notifs-scrollbar::-webkit-scrollbar-thumb {
+                background: #27272a;
+                border-radius: 2px;
+              }
+              .notifs-scrollbar::-webkit-scrollbar-thumb:hover {
+                background: #3f3f46;
+              }
+            `}} />
+
             {/* Header Dropdown */}
             <div className="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-950/20">
               <div>
@@ -172,7 +343,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
             </div>
 
             {/* List */}
-            <div className="max-h-80 overflow-y-auto divide-y divide-zinc-800/50">
+            <div className="max-h-80 overflow-y-auto divide-y divide-zinc-800/50 notifs-scrollbar">
               {notifs.length === 0 ? (
                 <div className="p-8 text-center flex flex-col items-center justify-center">
                   <div className="w-10 h-10 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center text-zinc-650 mb-3">
@@ -182,44 +353,75 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
                   <p className="text-[10px] text-zinc-500 mt-0.5">Você está atualizado com o sistema.</p>
                 </div>
               ) : (
-                notifs.map((n) => (
-                  <div
-                    key={n.id}
-                    onClick={() => !n.lida && marcarComoLida(n.id)}
-                    className={`p-4 flex gap-3 cursor-pointer transition ${
-                      n.lida ? "opacity-60 bg-transparent hover:bg-white/[0.01]" : "bg-gold/5 hover:bg-gold/10"
-                    }`}
-                  >
-                    <div className="mt-0.5">
-                      {n.tipo === "sucesso" ? (
-                        <div className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center border border-emerald-500/20 text-emerald-400">
-                          <Check size={11} />
+                notifs.map((n) => {
+                  const details = resolveNotificationDetails(n, usuario?.tipo || null);
+                  return (
+                    <div
+                      key={n.id}
+                      onClick={() => handleNotifClick(n)}
+                      className={`p-4 flex gap-3 cursor-pointer transition relative group ${
+                        n.lida 
+                          ? "bg-transparent hover:bg-white/[0.02] opacity-60" 
+                          : `${details.bgClass} border-l-2 border-primary`
+                      }`}
+                    >
+                      <div className="mt-0.5">
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center border ${details.colorClass}`}>
+                          {details.icon}
                         </div>
-                      ) : n.tipo === "alerta" ? (
-                        <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center border border-amber-500/20 text-amber-400">
-                          <AlertCircle size={11} />
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-cobalt-500/15 flex items-center justify-center border border-cobalt-500/20 text-cobalt-400">
-                          <Clock size={11} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start gap-2">
-                        <p className={`text-xs font-bold ${n.lida ? "text-zinc-350" : "text-white"}`}>{n.titulo}</p>
-                        <span className="text-[9px] font-mono text-zinc-500 shrink-0">
-                          {new Date(n.created_at).toLocaleTimeString("pt-BR", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
                       </div>
-                      <p className="text-[10px] text-zinc-450 mt-0.5 leading-relaxed">{n.mensagem}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <p className={`text-xs font-bold leading-tight ${n.lida ? "text-zinc-400" : "text-white"}`}>{n.titulo}</p>
+                          <span className="text-[9px] font-mono text-zinc-500 shrink-0">
+                            {new Date(n.created_at).toLocaleTimeString("pt-BR", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-zinc-450 mt-1 leading-relaxed line-clamp-2">{n.mensagem}</p>
+                        
+                        {/* Tag de Categoria e Botão de Ação */}
+                        <div className="mt-2 flex items-center justify-between">
+                          <span className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded border ${details.colorClass}`}>
+                            {details.tagLabel}
+                          </span>
+                          {details.actionLabel && (
+                            <span className="text-[8px] font-bold text-gold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {details.actionLabel} <ChevronRight size={10} />
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
+            </div>
+
+            {/* Rodapé com atalhos rápidos */}
+            <div className="p-3 border-t border-zinc-800 bg-zinc-950/40 flex items-center justify-around text-[10px] text-zinc-500">
+              <button 
+                onClick={() => { router.push('/financeiro'); setIsOpen(false); }}
+                className="hover:text-white transition cursor-pointer flex items-center gap-1 font-semibold"
+              >
+                <CreditCard size={10} /> Financeiro
+              </button>
+              <span className="w-1 h-1 bg-zinc-850 rounded-full" />
+              <button 
+                onClick={() => { router.push('/exames'); setIsOpen(false); }}
+                className="hover:text-white transition cursor-pointer flex items-center gap-1 font-semibold"
+              >
+                <Award size={10} /> Exames
+              </button>
+              <span className="w-1 h-1 bg-zinc-850 rounded-full" />
+              <button 
+                onClick={() => { router.push('/sensei-ia'); setIsOpen(false); }}
+                className="hover:text-white transition cursor-pointer flex items-center gap-1 font-semibold"
+              >
+                <Sparkles size={10} /> Sensei IA
+              </button>
             </div>
           </div>
         )}

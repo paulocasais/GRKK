@@ -278,7 +278,13 @@ export default function CadastroFilialPage() {
               />
               <label htmlFor="aceitaTermosFilial" className="text-gray-400 text-xs font-cinzel tracking-wider cursor-pointer leading-relaxed">
                 Li e aceito os{' '}
-                <span className="text-primary underline underline-offset-2">Termos de Serviço e Aviso de Privacidade</span>
+                <Link href="/transparencia/termos" target="_blank" className="text-primary underline hover:text-primary-light transition-colors">
+                  Termos de Serviço
+                </Link>
+                {' '}e o{' '}
+                <Link href="/transparencia/privacidade" target="_blank" className="text-primary underline hover:text-primary-light transition-colors">
+                  Aviso de Privacidade
+                </Link>
                 {' '}do Portal GRKK *
               </label>
             </div>

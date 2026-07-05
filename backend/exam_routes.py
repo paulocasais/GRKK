@@ -141,17 +141,38 @@ def create_exam_routes(app: Flask):
         else:
             carencia_exigida = REGRAS_ADULTO.get(grad_pretendida)
 
+        # Contar treinos presenciais na faixa atual
+        presencas, _ = SupabaseService.get_all("presencas", filter_dict={"atleta_id": atleta_id})
+        treinos_realizados = 0
+        if presencas:
+            for p in presencas:
+                p_data = p.get("data")
+                p_status = p.get("status")
+                if p_status == "presente" and p_data and data_inicio_faixa:
+                    if p_data >= data_inicio_faixa.split("T")[0]:
+                        treinos_realizados += 1
+
+        treinos_requeridos = (carencia_exigida * 8) if carencia_exigida is not None else 0
+
         apto = True
+        motivos = []
         if carencia_exigida is not None:
             if diferenca_meses < carencia_exigida:
                 apto = False
+                motivos.append(f"Carência de tempo insuficiente (requer {carencia_exigida} meses, tem {diferenca_meses}).")
+            if treinos_realizados < treinos_requeridos:
+                apto = False
+                motivos.append(f"Frequência de treinos insuficiente (requer {treinos_requeridos} presenças, tem {treinos_realizados}).")
 
         return jsonify({
             "apto": apto,
             "idade": idade,
             "diferenca_meses": diferenca_meses if diferenca_meses != 999 else 0,
             "carencia_exigida": carencia_exigida,
-            "data_inicio_faixa": data_inicio_faixa
+            "data_inicio_faixa": data_inicio_faixa,
+            "treinos_realizados": treinos_realizados,
+            "treinos_requeridos": treinos_requeridos,
+            "motivos": motivos
         }), 200
 
     # Rotas fixas DEVEM vir antes das rotas com <id> para evitar shadowing
@@ -267,6 +288,19 @@ def create_exam_routes(app: Flask):
             else:
                 carencia_exigida = REGRAS_ADULTO.get(grad_pretendida)
                 
+            # Contar treinos presenciais na faixa atual
+            presencas, _ = SupabaseService.get_all("presencas", filter_dict={"atleta_id": atleta_id})
+            treinos_realizados = 0
+            if presencas:
+                for p in presencas:
+                    p_data = p.get("data")
+                    p_status = p.get("status")
+                    if p_status == "presente" and p_data and data_inicio_faixa:
+                        if p_data >= data_inicio_faixa.split("T")[0]:
+                            treinos_realizados += 1
+
+            treinos_requeridos = (carencia_exigida * 8) if carencia_exigida is not None else 0
+
             if carencia_exigida is not None:
                 if diferenca_meses < carencia_exigida:
                     return jsonify({
@@ -274,6 +308,14 @@ def create_exam_routes(app: Flask):
                             f"Período de carência não cumprido. Para a graduação a {grad_pretendida}, "
                             f"são exigidos no mínimo {carencia_exigida} meses na faixa atual. "
                             f"Você possui apenas {diferenca_meses} meses de permanência."
+                        )
+                    }), 400
+                if treinos_realizados < treinos_requeridos:
+                    return jsonify({
+                        "error": (
+                            f"Frequência mínima de treinos não cumprida. Para a graduação a {grad_pretendida}, "
+                            f"são exigidos no mínimo {treinos_requeridos} treinos na faixa atual. "
+                            f"Você realizou apenas {treinos_realizados} treinos."
                         )
                     }), 400
 
@@ -359,6 +401,26 @@ def create_exam_routes(app: Flask):
                 SupabaseService.update("profiles", res.get("atleta_id"), {
                     "faixa": res.get("graduacao_pretendida", "Amarela")
                 })
+
+            # Enviar notificação de WhatsApp para aprovados e reprovados
+            if data.get("status") in ["aprovado", "reprovado"]:
+                try:
+                    from services import whatsapp_service
+                    profiles, _ = SupabaseService.get_all("profiles")
+                    atleta_perfil = next((p for p in (profiles or []) if str(p.get("id")) == str(res.get("atleta_id"))), None)
+                    if atleta_perfil:
+                        tel = atleta_perfil.get("telefone") or atleta_perfil.get("celular") or ""
+                        nome = atleta_perfil.get("nome", "Atleta")
+                        faixa_pretendida = res.get("graduacao_pretendida", "Amarela")
+                        if data.get("status") == "aprovado":
+                            msg = whatsapp_service.msg_exame_aprovado(nome, faixa_pretendida)
+                        else:
+                            msg = whatsapp_service.msg_exame_reprovado(nome, faixa_pretendida)
+                        
+                        if tel:
+                            whatsapp_service.enviar_mensagem(tel, msg)
+                except Exception as e:
+                    print(f"Erro ao disparar whatsapp de exame: {e}")
 
             # Redistribuir fila sempre que status mudar para inscrito, aprovado, reprovado
             # ou quando avaliado_por for alterado

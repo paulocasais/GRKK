@@ -334,10 +334,42 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
+-- 25. Tabela PRESENCAS (Frequência de treinos)
+CREATE TABLE IF NOT EXISTS presencas (
+    id TEXT PRIMARY KEY,
+    atleta_id TEXT REFERENCES profiles(id) ON DELETE CASCADE,
+    filial_id TEXT REFERENCES filiais(id) ON DELETE CASCADE,
+    data DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'presente' CHECK (status IN ('presente', 'falta', 'justificado')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);
+
 -- Modificações nas tabelas existentes para estoque
 ALTER TABLE produtos_estoque ADD COLUMN IF NOT EXISTS fornecedor_id TEXT REFERENCES fornecedores(id) ON DELETE SET NULL;
 ALTER TABLE produtos_estoque ADD COLUMN IF NOT EXISTS tamanho VARCHAR(50) DEFAULT 'Único';
 
+-- 26. Tabela DOCUMENTOS_ASSINADOS (Assinatura digital via Gov.br)
+CREATE TABLE IF NOT EXISTS documentos_assinados (
+    id TEXT PRIMARY KEY,
+    atleta_id TEXT NOT NULL,
+    atleta_nome TEXT NOT NULL,
+    titulo TEXT NOT NULL,
+    tipo_documento TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('pendente', 'assinado')),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
+    signed_at TIMESTAMP WITH TIME ZONE,
+    assinatura_hash TEXT,
+    arquivo_url TEXT
+);
 
-
-
+-- 27. Tabela DESPESAS (Fluxo de Caixa - Saídas)
+CREATE TABLE IF NOT EXISTS despesas (
+    id TEXT PRIMARY KEY,
+    filial_id TEXT REFERENCES profiles(id) ON DELETE SET NULL,
+    filial_nome VARCHAR(255),
+    categoria VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    valor NUMERIC(10, 2) NOT NULL,
+    data_pagamento DATE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
+);

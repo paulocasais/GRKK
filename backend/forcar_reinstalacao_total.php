@@ -43,7 +43,19 @@ foreach ($cmds_criar as $cmd) {
     $output = shell_exec($cmd);
     echo $output ? "   Saída: " . trim($output) . "\n" : "   Sucesso (sem saída).\n";
     
+    $py_exec = "";
     if (file_exists($venv_dir . "/bin/python")) {
+        $py_exec = $venv_dir . "/bin/python";
+    } elseif (file_exists($venv_dir . "/bin/python3")) {
+        $py_exec = $venv_dir . "/bin/python3";
+        // Cria link simbólico ou copia para 'python'
+        @symlink("python3", $venv_dir . "/bin/python");
+        if (!file_exists($venv_dir . "/bin/python")) {
+            @copy($venv_dir . "/bin/python3", $venv_dir . "/bin/python");
+        }
+    }
+
+    if ($py_exec !== "") {
         echo "   -> Virtualenv criada com sucesso usando este comando!\n";
         $criado = true;
         break;
@@ -58,7 +70,9 @@ if (!$criado) {
 
 // Garante permissões de execução dos executáveis recém-criados
 @chmod($venv_dir . "/bin/python", 0755);
+@chmod($venv_dir . "/bin/python3", 0755);
 @chmod($venv_dir . "/bin/pip", 0755);
+@chmod($venv_dir . "/bin/pip3", 0755);
 
 // 3. Instala as dependências limpas do requirements.txt
 echo "\n3. Instalando dependências estáveis a partir do 'requirements.txt'...\n";
