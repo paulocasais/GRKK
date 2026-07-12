@@ -73,7 +73,7 @@ with zipfile.ZipFile(ZIP_PATH, 'w', zipfile.ZIP_DEFLATED) as zipf:
             zipf.writestr(f_info, content)
             file_count += 1
 
-print(f"\n✅ backend_clean.zip criado com sucesso!")
+print(f"\n[OK] backend_clean.zip criado com sucesso!")
 print(f"   {file_count} arquivos incluídos")
 print(f"   Tamanho: {os.path.getsize(ZIP_PATH) / 1024:.1f} KB")
 print(f"   Caminho: {ZIP_PATH}")

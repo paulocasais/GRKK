@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: str = "pendente", signed_at: str = None, assinatura_hash: str = None) -> str:
@@ -94,35 +94,52 @@ def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: st
     story = []
 
     # ── Cabeçalho Oficial da Associação ──────────────────────────────────────
-    story.append(Paragraph("ASSOCIAÇÃO GOJU-RYU KARATÊ-KAI", title_style))
-    story.append(Paragraph("IOGKF Brasil International Okinawan Goju-Ryu Karate-do Federation | FKBA Federação de Karatê da Bahia", header_style))
+    logo_grkk_path = os.path.join(app_dir, "static", "images", "logo_grkk.png")
+
+    col_center = []
+    if os.path.exists(logo_grkk_path):
+        col_center.append(Image(logo_grkk_path, width=45, height=45))
+    col_center.append(Paragraph("ASSOCIAÇÃO GOJU-RYU KARATÊ-KAI", ParagraphStyle('CenterTitle', parent=title_style, fontSize=14, leading=18, spaceAfter=2, alignment=1)))
+    col_center.append(Paragraph("IOGKF Brasil International Okinawan Goju-Ryu Karate Federation | Federação de Karatê da Bahia (FKBA)", ParagraphStyle('CenterHeader', parent=header_style, fontSize=8, leading=11, spaceAfter=0, alignment=1)))
+
+    t_header = Table([[col_center]], colWidths=[520])
+    t_header.setStyle(TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5),
+    ]))
+    story.append(t_header)
     story.append(Spacer(1, 10))
 
     # ── Título do Documento ──────────────────────────────────────────────────
     story.append(Paragraph(doc_titulo.upper(), ParagraphStyle('Sub', parent=title_style, fontSize=13, textColor=colors.HexColor('#111827'))))
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10))
 
     # ── Dados do Atleta ──────────────────────────────────────────────────────
     story.append(Paragraph("DADOS CADASTRAIS DO ATLETA", section_style))
     
     dados_cadastrais = [
         [Paragraph("Nome Completo:", bold_label_style), Paragraph(atleta.get("nome", "Não informado"), body_style)],
+        [Paragraph("Registro Federativo / Cadastro:", bold_label_style), Paragraph(atleta.get("registro_federacao") or "Pendente", body_style)],
         [Paragraph("E-mail:", bold_label_style), Paragraph(atleta.get("email", "Não informado"), body_style)],
         [Paragraph("Telefone/Celular:", bold_label_style), Paragraph(atleta.get("telefone", "Não informado"), body_style)],
         [Paragraph("CPF:", bold_label_style), Paragraph(atleta.get("cpf", "Não informado"), body_style)],
         [Paragraph("Data Nascimento:", bold_label_style), Paragraph(atleta.get("data_nascimento", "Não informado"), body_style)],
         [Paragraph("Faixa Atual:", bold_label_style), Paragraph(atleta.get("faixa", "Branca"), body_style)],
+        [Paragraph("Arte Marcial / Estilo:", bold_label_style), Paragraph(f"{atleta.get('arte_marcial', 'Karate')} / {atleta.get('estilo', 'Goju-Ryu')}", body_style)],
+        [Paragraph("Academia / Clube / Dojo:", bold_label_style), Paragraph(atleta.get("academia_clube", "Associação Goju-Ryu Karate Kai"), body_style)],
+        [Paragraph("Dados Físicos (Peso / Altura):", bold_label_style), Paragraph(f"{atleta.get('fisico_peso') or '—'} kg / {atleta.get('fisico_altura') or '—'} m", body_style)],
     ]
     
-    t_cadastro = Table(dados_cadastrais, colWidths=[120, 400])
+    t_cadastro = Table(dados_cadastrais, colWidths=[160, 360])
     t_cadastro.setStyle(TableStyle([
         ('VALIGN', (0,0), (-1,-1), 'TOP'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('TOPPADDING', (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ('TOPPADDING', (0,0), (-1,-1), 4),
         ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor('#e5e7eb')),
     ]))
     story.append(t_cadastro)
-    story.append(Spacer(1, 15))
+    story.append(Spacer(1, 10))
 
     # ── Conteúdo conforme o tipo do documento ────────────────────────────────
     if doc_tipo == "ficha_filiacao":
@@ -133,7 +150,14 @@ def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: st
             "regulamentos internos e preceitos ético-filosóficos do Karatê-Do Goju-Ryu (Dojo Kun). "
             "Declaro estar em perfeitas condições físicas e mentais para a prática de artes marciais, "
             "isentando a associação e seus respectivos instrutores de responsabilidade por acidentes "
-            "decorrentes da prática regular da modalidade esportiva."
+            "decorrentes da prática regular da modalidade esportiva.<br/><br/>"
+            "<b>AUTORIZAÇÃO DE USO DE IMAGEM:</b> " + ("AUTORIZO o uso da imagem do atleta para fins promocionais e institucionais da GRKK." if atleta.get("autoriza_uso_imagem") is not False else "NÃO AUTORIZO o uso da imagem do atleta.") + "<br/><br/>"
+            "<b>REGRAS E COMPROMISSOS (COMODATO/PROJETO SOCIAL):</b><br/>"
+            "• Cada aluno deverá ter seu Karate-Gi (Kimono);<br/>"
+            "• O exame de faixa só será permitido com Karate-Gi (Kimono) e frequência mínima de 75% nos treinos e presença escolar;<br/>"
+            "• O aluno não poderá ter média escolar inferior a 5,00;<br/>"
+            "• Qualquer ato de agressão física ou violência resultará em suspensão e/ou exclusão do projeto;<br/>"
+            "• Em caso de desistência, o aluno deverá devolver imediatamente o uniforme e material fornecido sob comodato."
         )
         story.append(Paragraph(termo_txt, body_style))
         story.append(Spacer(1, 15))
@@ -142,17 +166,22 @@ def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: st
         story.append(Paragraph("QUESTIONÁRIO DE ANAMNESE MÉDICA", section_style))
         
         anamnese_dados = [
-            [Paragraph("Alergias/Reações:", bold_label_style), Paragraph(atleta.get("medico_alergias") or "Nenhuma informada", body_style)],
+            [Paragraph("Tipo Sanguíneo & Fator Rh:", bold_label_style), Paragraph(f"{atleta.get('medico_tipo_sanguineo') or '—'} {atleta.get('medico_fator_rh') or ''}", body_style)],
+            [Paragraph("Cartão do SUS:", bold_label_style), Paragraph(atleta.get("medico_sus") or "Não informado", body_style)],
             [Paragraph("Plano de Saúde:", bold_label_style), Paragraph(atleta.get("medico_plano") or "Não informado", body_style)],
+            [Paragraph("Contato Emergência:", bold_label_style), Paragraph(f"{atleta.get('medico_emergencia_nome') or '—'} {atleta.get('medico_emergencia_telefone') or ''}", body_style)],
+            [Paragraph("Alergias Gerais:", bold_label_style), Paragraph(atleta.get("medico_alergias") or "Nenhuma informada", body_style)],
+            [Paragraph("Alergia a Medicamentos:", bold_label_style), Paragraph(atleta.get("medico_alergia_medicamento") or "Nenhuma informada", body_style)],
+            [Paragraph("Uso de Medicamento:", bold_label_style), Paragraph(f"Usa medicação? {atleta.get('medico_medicacao_uso') or 'Não'}. " + (f"Qual: {atleta.get('medico_medicacao_lista')}" if atleta.get('medico_medicacao_uso') == 'Sim' else ""), body_style)],
             [Paragraph("Restrições Físicas:", bold_label_style), Paragraph(atleta.get("medico_restricoes") or "Nenhuma informada", body_style)],
             [Paragraph("Diagnósticos Médicos:", bold_label_style), Paragraph(atleta.get("medico_diagnosticos") or "Nenhum informado", body_style)],
         ]
         
-        t_medico = Table(anamnese_dados, colWidths=[140, 380])
+        t_medico = Table(anamnese_dados, colWidths=[160, 360])
         t_medico.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-            ('TOPPADDING', (0,0), (-1,-1), 6),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+            ('TOPPADDING', (0,0), (-1,-1), 4),
             ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor('#e5e7eb')),
         ]))
         story.append(t_medico)
@@ -167,7 +196,14 @@ def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: st
             "regulamentos internos e preceitos ético-filosóficos do Karatê-Do Goju-Ryu (Dojo Kun). "
             "Declaro estar em perfeitas condições físicas e mentais para a prática de artes marciais, "
             "isentando a associação e seus respectivos instrutores de responsabilidade por acidentes "
-            "decorrentes da prática regular da modalidade esportiva."
+            "decorrentes da prática regular da modalidade esportiva.<br/><br/>"
+            "<b>AUTORIZAÇÃO DE USO DE IMAGEM:</b> " + ("AUTORIZO o uso da imagem do atleta para fins promocionais e institucionais da GRKK." if atleta.get("autoriza_uso_imagem") is not False else "NÃO AUTORIZO o uso da imagem do atleta.") + "<br/><br/>"
+            "<b>REGRAS E COMPROMISSOS (COMODATO/PROJETO SOCIAL):</b><br/>"
+            "• Cada aluno deverá ter seu Karate-Gi (Kimono);<br/>"
+            "• O exame de faixa só será permitido com Karate-Gi (Kimono) e frequência mínima de 75% nos treinos e presença escolar;<br/>"
+            "• O aluno não poderá ter média escolar inferior a 5,00;<br/>"
+            "• Qualquer ato de agressão física ou violência resultará em suspensão e/ou exclusão do projeto;<br/>"
+            "• Em caso de desistência, o aluno deverá devolver imediatamente o uniforme e material fornecido sob comodato."
         )
         story.append(Paragraph(termo_txt, body_style))
         story.append(Spacer(1, 15))
@@ -180,17 +216,22 @@ def gerar_pdf_documento(atleta: dict, doc_tipo: str, doc_titulo: str, status: st
         story.append(Paragraph("ANEXO I — QUESTIONÁRIO DE ANAMNESE MÉDICA", ParagraphStyle('P2Sub', parent=title_style, fontSize=10, spaceAfter=15, textColor=colors.HexColor('#1f2937'))))
         
         anamnese_dados = [
-            [Paragraph("Alergias/Reações:", bold_label_style), Paragraph(atleta.get("medico_alergias") or "Nenhuma informada", body_style)],
+            [Paragraph("Tipo Sanguíneo & Fator Rh:", bold_label_style), Paragraph(f"{atleta.get('medico_tipo_sanguineo') or '—'} {atleta.get('medico_fator_rh') or ''}", body_style)],
+            [Paragraph("Cartão do SUS:", bold_label_style), Paragraph(atleta.get("medico_sus") or "Não informado", body_style)],
             [Paragraph("Plano de Saúde:", bold_label_style), Paragraph(atleta.get("medico_plano") or "Não informado", body_style)],
+            [Paragraph("Contato Emergência:", bold_label_style), Paragraph(f"{atleta.get('medico_emergencia_nome') or '—'} {atleta.get('medico_emergencia_telefone') or ''}", body_style)],
+            [Paragraph("Alergias Gerais:", bold_label_style), Paragraph(atleta.get("medico_alergias") or "Nenhuma informada", body_style)],
+            [Paragraph("Alergia a Medicamentos:", bold_label_style), Paragraph(atleta.get("medico_alergia_medicamento") or "Nenhuma informada", body_style)],
+            [Paragraph("Uso de Medicamento:", bold_label_style), Paragraph(f"Usa medicação? {atleta.get('medico_medicacao_uso') or 'Não'}. " + (f"Qual: {atleta.get('medico_medicacao_lista')}" if atleta.get('medico_medicacao_uso') == 'Sim' else ""), body_style)],
             [Paragraph("Restrições Físicas:", bold_label_style), Paragraph(atleta.get("medico_restricoes") or "Nenhuma informada", body_style)],
             [Paragraph("Diagnósticos Médicos:", bold_label_style), Paragraph(atleta.get("medico_diagnosticos") or "Nenhum informado", body_style)],
         ]
         
-        t_medico = Table(anamnese_dados, colWidths=[140, 380])
+        t_medico = Table(anamnese_dados, colWidths=[160, 340])
         t_medico.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'TOP'),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-            ('TOPPADDING', (0,0), (-1,-1), 8),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('TOPPADDING', (0,0), (-1,-1), 6),
             ('LINEBELOW', (0,0), (-1,-1), 0.5, colors.HexColor('#e5e7eb')),
         ]))
         story.append(t_medico)

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { GraficoMatriculas, GraficoReceita, GraficoFaixas, GraficoFrequencia } from '@/components/dashboard/charts/AdminCharts';
 import {
   CalendarDays, Users, Trophy, TrendingUp,
   Clock, ArrowUpRight, Zap, Loader2,
@@ -11,7 +10,8 @@ import {
   Star, Lock, Newspaper, ChevronRight,
   Activity, BarChart3, Award, QrCode, Medal,
   FileWarning, DollarSign, CreditCard, History,
-  GraduationCap, CheckCircle2, MapPin, Flame, ClipboardCheck
+  GraduationCap, CheckCircle2, MapPin, Flame, ClipboardCheck,
+  AlertTriangle, Download
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -101,17 +101,19 @@ function QuickItem({ label, href, icon: Icon, color }: QuickItemProps) {
 }
 
 /* --- Empty Module --- */
-function EmptySection({ icon: Icon, text }: { icon: React.ComponentType<any>; text: string }) {
+function EmptySection({ icon: Icon, text, emBreve = false }: { icon: React.ComponentType<any>; text: string; emBreve?: boolean }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6">
+    <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-6">
       <div className="flex flex-col items-center justify-center gap-3 text-center py-4">
         <div className="w-12 h-12 rounded-xl bg-zinc-950 border border-zinc-850 flex items-center justify-center">
           <Icon className="w-5 h-5 text-zinc-600" />
         </div>
         <p className="text-xs text-zinc-400 font-medium">{text}</p>
-        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2.5 py-0.5">
-          <Lock size={9} /> Em breve
-        </span>
+        {emBreve && (
+          <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-zinc-500 border border-zinc-800 rounded-full px-2.5 py-0.5">
+            <Lock size={9} /> Em breve
+          </span>
+        )}
       </div>
     </div>
   );
@@ -143,13 +145,9 @@ function VariacaoBadge({ pct }: { pct: number }) {
       {positivo ? '▲' : '▼'} {Math.abs(pct)}%
     </span>
   );
-}
-
-function AdminDashboard({ usuario }: { usuario: any }) {
+}function AdminDashboard({ usuario }: { usuario: any }) {
   const [stats, setStats] = useState({ activeAthletes: 0, openEvents: 0, pendingExams: 0, totalFiliais: 0 });
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
   useEffect(() => {
     async function loadStats() {
@@ -161,10 +159,10 @@ function AdminDashboard({ usuario }: { usuario: any }) {
           fetch(`${API_URL}/api/filiais`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
         ]);
         setStats({
-          activeAthletes: resAtletas?.atletas?.filter((a: any) => a.status === 'ativo').length || 0,
-          openEvents: resEventos?.eventos?.length || 0,
-          pendingExams: resExames?.exames?.filter((e: any) => e.status === 'publicado' || e.status === 'em_andamento').length || 0,
-          totalFiliais: resFiliais?.filiais?.length || 0,
+          activeAthletes: (resAtletas?.atletas || []).filter((a: any) => a.status === 'ativo').length,
+          openEvents: (resEventos?.eventos || []).length,
+          pendingExams: (resExames?.exames || []).filter((e: any) => e.status === 'publicado' || e.status === 'em_andamento').length,
+          totalFiliais: (resFiliais?.filiais || []).length,
         });
       } catch (err) {
         console.error('Erro ao carregar stats:', err);
@@ -173,34 +171,14 @@ function AdminDashboard({ usuario }: { usuario: any }) {
       }
     }
 
-    async function loadAnalytics() {
-      try {
-        const res = await fetch(`${API_URL}/api/relatorios/analytics`, { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          setAnalytics(data);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar analytics:', err);
-      } finally {
-        setLoadingAnalytics(false);
-      }
-    }
-
     loadStats();
-    loadAnalytics();
   }, []);
-
-  const varAtleta = analytics?.kpis.variacao_atletas_pct ?? 0;
-  const varReceita = analytics?.kpis.variacao_receita_pct ?? 0;
-  const taxaAdimpl = analytics?.kpis.taxa_adimplencia ?? 100;
-  const taxaAprov = analytics?.kpis.taxa_aprovacao_exames ?? 100;
 
   return (
     <main className="p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8 w-full">
       {/* Header */}
       <div className="relative overflow-hidden bg-gradient-to-br from-red-950/20 via-zinc-900 to-zinc-900 border border-red-900/20 rounded-3xl p-5 sm:p-8">
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-red-600/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-red-650/5 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
           <div className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-5">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-red-500/20 to-red-700/10 rounded-2xl flex items-center justify-center border border-red-500/25 shrink-0">
@@ -227,7 +205,7 @@ function AdminDashboard({ usuario }: { usuario: any }) {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {[
-          { label: 'Atletas Ativos', value: stats.activeAthletes, icon: Users, color: 'brand' as const, badge: <VariacaoBadge pct={varAtleta} /> },
+          { label: 'Atletas Ativos', value: stats.activeAthletes, icon: Users, color: 'brand' as const, badge: null },
           { label: 'Eventos em Aberto', value: stats.openEvents, icon: CalendarDays, color: 'gold' as const, badge: null },
           { label: 'Exames Ativos', value: stats.pendingExams, icon: Trophy, color: 'blue' as const, badge: null },
           { label: 'Filiais Credenciadas', value: stats.totalFiliais, icon: Building2, color: 'green' as const, badge: null },
@@ -272,63 +250,7 @@ function AdminDashboard({ usuario }: { usuario: any }) {
         </div>
       </div>
 
-      {/* Gráficos Analíticos */}
-      <div>
-        <div className="flex items-center gap-2 mb-5">
-          <BarChart3 className="w-4 h-4 text-primary" />
-          <h2 className="text-lg font-bold text-white font-cinzel">Analytics</h2>
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider border border-zinc-800 rounded-full px-2 py-0.5">Últimos 6 meses</span>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {/* Matrículas por Mês */}
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-bold text-white">Novas Matrículas</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Crescimento mensal de atletas</p>
-              </div>
-              <TrendingUp className="w-4 h-4 text-gold" />
-            </div>
-            <GraficoMatriculas data={analytics?.matriculas_por_mes ?? []} loading={loadingAnalytics} />
-          </div>
 
-          {/* Receita vs Pendente */}
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-bold text-white">Receita vs. Inadimplência</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Comparativo financeiro mensal</p>
-              </div>
-              <DollarSign className="w-4 h-4 text-emerald-400" />
-            </div>
-            <GraficoReceita data={analytics?.receita_por_mes ?? []} loading={loadingAnalytics} />
-          </div>
-
-          {/* Distribuição por Faixa */}
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-bold text-white">Atletas por Faixa</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Distribuição atual de graduações</p>
-              </div>
-              <Award className="w-4 h-4 text-gold" />
-            </div>
-            <GraficoFaixas data={analytics?.distribuicao_faixas ?? []} loading={loadingAnalytics} />
-          </div>
-
-          {/* Frequência por Filial */}
-          <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-xs font-bold text-white">Frequência por Filial</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Presenças registradas no mês atual</p>
-              </div>
-              <ClipboardCheck className="w-4 h-4 text-cobalt-400" />
-            </div>
-            <GraficoFrequencia data={analytics?.frequencia_por_filial ?? []} loading={loadingAnalytics} />
-          </div>
-        </div>
-      </div>
     </main>
   );
 }
@@ -461,6 +383,12 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
   const [loadingAvisos, setLoadingAvisos] = useState(true);
   const [presencas, setPresencas] = useState<any[]>([]);
   const [loadingPresencas, setLoadingPresencas] = useState(true);
+  const [candidaturas, setCandidaturas] = useState<any[]>([]);
+  const [loadingCandidaturas, setLoadingCandidaturas] = useState(true);
+  const [inscricoesEventos, setInscricoesEventos] = useState<any[]>([]);
+  const [loadingInscricoes, setLoadingInscricoes] = useState(true);
+  const [certificados, setCertificados] = useState<any[]>([]);
+  const [loadingCertificados, setLoadingCertificados] = useState(true);
 
   useEffect(() => {
     async function loadAvisos() {
@@ -491,8 +419,63 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
       }
     }
 
+    async function loadCandidaturas() {
+      try {
+        const res = await fetch(`${API_URL}/api/exames/candidatos`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.candidatos || [];
+          const filtered = list.filter((cand: any) => {
+            if (cand.status === 'aprovado' || cand.status === 'reprovado') {
+              const dataResultado = cand.updated_at ? new Date(cand.updated_at) : (cand.created_at ? new Date(cand.created_at) : new Date());
+              const diffHoras = (new Date().getTime() - dataResultado.getTime()) / (1000 * 60 * 60);
+              return diffHoras <= 72;
+            }
+            return true;
+          });
+          setCandidaturas(filtered);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar exames:", err);
+      } finally {
+        setLoadingCandidaturas(false);
+      }
+    }
+
+    async function loadInscricoes() {
+      try {
+        const res = await fetch(`${API_URL}/api/eventos/inscricoes`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setInscricoesEventos(data.inscricoes || []);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar eventos:", err);
+      } finally {
+        setLoadingInscricoes(false);
+      }
+    }
+
+    async function loadCertificados() {
+      try {
+        const res = await fetch(`${API_URL}/api/documentos-assinados`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          const signed = (data.documentos || []).filter((d: any) => d.status === 'assinado');
+          setCertificados(signed);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar certificados:", err);
+      } finally {
+        setLoadingCertificados(false);
+      }
+    }
+
     loadAvisos();
     loadPresencas();
+    loadCandidaturas();
+    loadInscricoes();
+    loadCertificados();
   }, []);
 
   const metasTreinos: Record<string, number> = {
@@ -667,61 +650,186 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
         </div>
       </div>
 
-      {/* Avisos da Diretoria */}
-      <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6">
-        <h3 className="text-sm font-bold text-white font-cinzel mb-4">Avisos da Diretoria</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {loadingAvisos ? (
-            <div className="col-span-full flex items-center justify-center py-8">
-              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-emerald-500/20 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-8 h-8 rounded-xl ${usuario?.documentos_entregues ? 'bg-emerald-500/10' : 'bg-red-500/10'} flex items-center justify-center`}>
+              <FileWarning className={`w-4 h-4 ${usuario?.documentos_entregues ? 'text-emerald-400' : 'text-red-400'}`} />
             </div>
-          ) : avisos.length > 0 ? (
-            avisos.map(aviso => (
-              <div key={aviso.id} className="p-4 bg-zinc-950/60 border border-zinc-850 rounded-xl space-y-1.5 transition hover:border-zinc-800">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/20">
-                    {aviso.categoria}
-                  </span>
-                  {aviso.created_at && (
-                    <span className="text-[9px] text-zinc-500 font-mono">
-                      {new Date(aviso.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs font-bold text-white font-cinzel">{aviso.titulo}</p>
-                <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{aviso.conteudo}</p>
-              </div>
-            ))
-          ) : (
-            <p className="text-xs text-zinc-500 italic py-4 col-span-full">Nenhum aviso no momento.</p>
-          )}
+            <p className="text-sm font-bold text-white font-cinzel">Pendências Documentais</p>
+          </div>
+          <p className={`text-xs ${usuario?.documentos_entregues ? 'text-emerald-400' : 'text-red-400'} flex items-center gap-1.5`}>
+            {usuario?.documentos_entregues ? <CheckCircle2 size={13} /> : <AlertTriangle size={13} />} 
+            {usuario?.documentos_entregues ? 'Sua documentação está em dia!' : 'Documentos obrigatórios pendentes de homologação!'}
+          </p>
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-emerald-500/20 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+            </div>
+            <p className="text-sm font-bold text-white font-cinzel">Situação Financeira</p>
+          </div>
+          <p className="text-xs text-emerald-400 flex items-center gap-1.5">
+            <CheckCircle2 size={13} /> Mensalidades em dia!
+          </p>
         </div>
       </div>
 
+      {/* Grid: Avisos & Exame de Graduação (Lado a Lado se houver exame agendado na mesma proporção) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {[
-          { icon: FileWarning, title: 'Pendências Documentais', msg: 'Sua documentação está em dia!' },
-          { icon: DollarSign, title: 'Situação Financeira', msg: 'Mensalidades em dia!' }
-        ].map(({ icon: Icon, title, msg }) => (
-          <div key={title} className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-emerald-500/20 transition-all duration-300">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <Icon className="w-4 h-4 text-emerald-400" />
+        {/* Coluna de Avisos: Ocupa 1 coluna se houver Exame, ou 2 colunas se não houver */}
+        <div className={`bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 ${candidaturas.length > 0 ? 'md:col-span-1' : 'md:col-span-2'}`}>
+          <h3 className="text-sm font-bold text-white font-cinzel mb-4">Avisos da Diretoria</h3>
+          <div className={`grid grid-cols-1 ${candidaturas.length > 0 ? '' : 'md:grid-cols-2'} gap-4`}>
+            {loadingAvisos ? (
+              <div className="col-span-full flex items-center justify-center py-8">
+                <Loader2 className="w-5 h-5 text-primary animate-spin" />
               </div>
-              <p className="text-sm font-bold text-white font-cinzel">{title}</p>
-            </div>
-            <p className="text-xs text-emerald-400 flex items-center gap-1.5">
-              <CheckCircle2 size={13} /> {msg}
-            </p>
+            ) : avisos.length > 0 ? (
+              avisos.map(aviso => (
+                <div key={aviso.id} className="p-4 bg-zinc-950/60 border border-zinc-850 rounded-xl space-y-1.5 transition hover:border-zinc-800">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-gold bg-gold/10 px-2 py-0.5 rounded border border-gold/20">
+                      {aviso.categoria}
+                    </span>
+                    {aviso.created_at && (
+                      <span className="text-[9px] text-zinc-500 font-mono">
+                        {new Date(aviso.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-bold text-white font-cinzel">{aviso.titulo}</p>
+                  <p className="text-xs text-zinc-400 leading-relaxed whitespace-pre-wrap">{aviso.conteudo}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-zinc-500 italic py-4 col-span-full">Nenhum aviso no momento.</p>
+            )}
           </div>
-        ))}
+        </div>
+
+        {/* Card 1: Exame de Graduação (Ocupa 1 coluna ao lado dos Avisos) */}
+        {candidaturas.length > 0 && (
+          <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-gold/20 transition-all duration-300 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-xl bg-gold/10 flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-gold" />
+                </div>
+                <p className="text-sm font-bold text-white font-cinzel">Exame de Graduação</p>
+              </div>
+              
+              {loadingCandidaturas ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="w-5 h-5 text-gold animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {candidaturas.map((cand, idx) => (
+                    <div key={cand.id || idx} className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-850 space-y-1">
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Inscrição em Exame</p>
+                      <p className="text-xs font-bold text-white font-cinzel">{cand.exame_titulo || 'Exame de Faixa'}</p>
+                      <div className="flex justify-between items-center text-[10px] text-zinc-400 pt-1">
+                        <span>Faixa: <strong className="text-gold">{cand.faixa || '—'}</strong></span>
+                        <span className={`px-1.5 py-0.5 rounded font-bold uppercase tracking-wider text-[8px] ${
+                          cand.status === 'aprovado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                          cand.status === 'reprovado' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                          cand.status === 'em_andamento' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
+                          'bg-gold/10 text-gold border border-gold/20'
+                        }`}>
+                          {cand.status === 'pendente' || cand.status === 'inscrito' ? 'Inscrito' : 
+                           cand.status === 'aprovado' ? 'Aprovado' : 
+                           cand.status === 'reprovado' ? 'Reprovado' : 
+                           'Em andamento'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <EmptySection icon={GraduationCap} text="Nenhuma graduação de faixa agendada." />
-        <EmptySection icon={CalendarDays} text="Você não está inscrito em eventos." />
-        <EmptySection icon={Award} text="Nenhum certificado emitido para este perfil." />
-      </div>
+      {/* Grid: Eventos e Certificados (Grid secundário abaixo) */}
+      {((inscricoesEventos.length > 0) || (certificados.length > 0)) && (
+        <div className={`grid grid-cols-1 md:grid-cols-${
+          (inscricoesEventos.length > 0 ? 1 : 0) + 
+          (certificados.length > 0 ? 1 : 0)
+        } gap-5`}>
+          {/* Card 2: Eventos */}
+          {inscricoesEventos.length > 0 && (
+            <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-primary/20 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <CalendarDays className="w-4 h-4 text-primary" />
+                  </div>
+                  <p className="text-sm font-bold text-white font-cinzel">Inscrições em Eventos</p>
+                </div>
+                
+                {loadingInscricoes ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {inscricoesEventos.map((ins, idx) => (
+                      <div key={ins.id || idx} className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-850 space-y-1">
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Inscrito no Evento</p>
+                        <p className="text-xs font-bold text-white truncate font-cinzel">{ins.evento_titulo || 'Evento GRKK'}</p>
+                        <div className="flex justify-between items-center text-[10px] text-zinc-400 pt-1">
+                          <span>Categoria: <strong className="text-white">{ins.categoria || 'Geral'}</strong></span>
+                          <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider">Confirmado</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Card 3: Certificados */}
+          {certificados.length > 0 && (
+            <div className="bg-zinc-900 border border-zinc-850 rounded-2xl p-5 hover:border-emerald-500/20 transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <Award className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <p className="text-sm font-bold text-white font-cinzel">Diplomas & Certificados</p>
+                </div>
+                
+                {loadingCertificados ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {certificados.map((cert, idx) => (
+                      <div key={cert.id || idx} className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-850 space-y-1.5 flex flex-col justify-between">
+                        <div>
+                          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{cert.tipo_documento === 'certificado' ? 'Certificado Oficial' : 'Documento Homologado'}</p>
+                          <p className="text-xs font-bold text-white truncate font-cinzel">{cert.titulo}</p>
+                        </div>
+                        {cert.arquivo_url && (
+                          <a href={cert.arquivo_url} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-[9px] font-bold text-gold hover:text-white uppercase tracking-wider transition-colors self-start">
+                            <Download size={10} /> Baixar Arquivo
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </main>
   );
 }

@@ -121,6 +121,21 @@ export default function DefesaMarcaPage() {
                 <h2 className="font-cinzel text-xl text-white font-bold mb-3">{content.s8_titulo}</h2>
                 <p>{content.s8_texto}</p>
               </section>
+
+              {/* Seções Extras Adicionadas Dinamicamente pelo CMS */}
+              {(content as any).secoes_extras?.map((sec: any, idx: number) => (
+                <section key={sec.id || idx}>
+                  <h2 className="font-cinzel text-xl text-white font-bold mb-3">{sec.titulo}</h2>
+                  <p className="whitespace-pre-line text-zinc-400">{sec.texto}</p>
+                  {sec.lista && (
+                    <ul className="list-disc list-inside mt-2 space-y-1 text-gray-500">
+                      {sec.lista.split('\n').map((item: string, j: number) => (
+                        <li key={j}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              ))}
             </div>
           </div>
         </section>

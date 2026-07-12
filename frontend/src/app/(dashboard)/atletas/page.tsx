@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { UserCheck, ShieldAlert, Loader2, Search, CheckCircle2, User, Trophy, Mail, Phone, Printer } from 'lucide-react';
+import { UserCheck, ShieldAlert, Loader2, Search, CheckCircle2, User, Trophy, Mail, Phone, Printer, FileText } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -19,6 +19,7 @@ interface Atleta {
   sexo?: string;
   data_nascimento?: string;
   nome_professor?: string;
+  cep?: string;
   endereco?: string;
   uf?: string;
   responsavel_nome?: string;
@@ -29,6 +30,22 @@ interface Atleta {
   medico_plano?: string;
   medico_restricoes?: string;
   medico_diagnosticos?: string;
+  arte_marcial?: string;
+  estilo?: string;
+  academia_clube?: string;
+  medico_tipo_sanguineo?: string;
+  medico_fator_rh?: string;
+  medico_sus?: string;
+  medico_emergencia_nome?: string;
+  medico_emergencia_telefone?: string;
+  medico_medicacao_uso?: string;
+  medico_medicacao_lista?: string;
+  medico_alergia_medicamento?: string;
+  fisico_peso?: string;
+  fisico_altura?: string;
+  autoriza_uso_imagem?: boolean;
+  registro_federacao?: string;
+  documentos_entregues?: boolean;
 }
 
 import { FAIXAS, FAIXAS_INFANTIL, FAIXAS_ADULTO, CORES_FAIXAS } from '@/constants/faixas';
@@ -117,6 +134,21 @@ export default function AtletasPage() {
     }
   };
 
+  const handleToggleDocumentos = async (atletaId: string, entregues: boolean) => {
+    try {
+      const res = await fetch(`${API_URL}/api/atletas/${atletaId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ documentos_entregues: entregues })
+      });
+      if (!res.ok) throw new Error('Erro ao atualizar status dos documentos do atleta');
+      setAtletas(atletas.map(a => a.id === atletaId ? { ...a, documentos_entregues: entregues } : a));
+    } catch (err: any) {
+      alert(err.message || 'Erro ao atualizar documentos');
+    }
+  };
+
   const handleImprimirFicha = (atleta: Atleta) => {
     const dataNasc = atleta.data_nascimento 
       ? atleta.data_nascimento.split('-').reverse().join('/') 
@@ -145,46 +177,58 @@ export default function AtletasPage() {
             font-family: 'Inter', sans-serif;
             color: #111;
             background-color: #fff;
-            padding: 30px;
-            font-size: 11px;
-            line-height: 1.4;
+            padding: 20px;
+            font-size: 10px;
+            line-height: 1.35;
           }
-          .header {
-            text-align: center;
+          .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 2px solid #000;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
           }
-          .header h1 {
+          .header-logo {
+            height: 55px;
+            object-fit: contain;
+          }
+          .header-text {
+            text-align: center;
+            flex: 1;
+            margin: 0 15px;
+          }
+          .header-text h1 {
             font-family: 'Cinzel', serif;
-            font-size: 18px;
-            margin: 0 0 4px 0;
-            letter-spacing: 2px;
+            font-size: 16px;
+            margin: 0 0 3px 0;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
+            font-weight: 800;
           }
-          .header p {
-            font-size: 9px;
+          .header-text p {
+            font-size: 8.5px;
             margin: 0;
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
-            color: #555;
+            color: #444;
           }
           .section-title {
             font-family: 'Cinzel', serif;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             border-bottom: 1px solid #111;
-            padding-bottom: 3px;
-            margin-top: 20px;
-            margin-bottom: 10px;
+            padding-bottom: 2px;
+            margin-top: 15px;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
           }
           .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
           }
           .grid-3 {
             grid-template-columns: repeat(3, 1fr);
@@ -200,30 +244,30 @@ export default function AtletasPage() {
             flex-direction: column;
           }
           .label {
-            font-size: 8px;
+            font-size: 7.5px;
             font-weight: 800;
             text-transform: uppercase;
-            color: #666;
-            margin-bottom: 3px;
+            color: #555;
+            margin-bottom: 2px;
           }
           .value {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             color: #000;
-            padding: 6px 10px;
+            padding: 5px 8px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            min-height: 14px;
+            border-radius: 5px;
+            min-height: 12px;
           }
           .value-large {
-            min-height: 40px;
+            min-height: 32px;
           }
           .signature-area {
-            margin-top: 40px;
+            margin-top: 25px;
             display: flex;
             justify-content: space-between;
-            gap: 30px;
+            gap: 25px;
           }
           .signature-box {
             flex: 1;
@@ -231,18 +275,33 @@ export default function AtletasPage() {
           }
           .signature-line {
             border-top: 1px solid #111;
-            margin-top: 35px;
-            padding-top: 5px;
-            font-size: 8px;
+            margin-top: 25px;
+            padding-top: 4px;
+            font-size: 7.5px;
             font-weight: 600;
             text-transform: uppercase;
+          }
+          .list-rules {
+            margin: 0;
+            padding-left: 12px;
+          }
+          .list-rules li {
+            margin-bottom: 2px;
+          }
+          @media print {
+            body { padding: 10px; }
+            .section-title { margin-top: 10px; }
+            .signature-area { margin-top: 20px; }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>Associação Goju-Ryu Karate Kai</h1>
-          <p>Ficha de Matrícula & Ficha Médica de Emergência</p>
+        <div class="header-container" style="justify-content: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+          <div class="header-text" style="text-align: center;">
+            <img src="${window.location.origin}/logo.png" alt="GRKK" style="height: 55px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;" />
+            <h1>Associação Goju-Ryu Karate Kai</h1>
+            <p>Ficha de Matrícula & Ficha Médica de Emergência</p>
+          </div>
         </div>
 
         <div class="section-title">Dados Gerais e Técnicos</div>
@@ -252,16 +311,36 @@ export default function AtletasPage() {
             <span class="value">${atleta.nome}</span>
           </div>
           <div class="field">
-            <span class="label">Graduação Atual</span>
+            <span class="label">Nº de Registro da Federação</span>
+            <span class="value">${atleta.registro_federacao || 'Pendente de homologação'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Graduação Atual (Faixa/Nível)</span>
             <span class="value">${atleta.faixa}</span>
           </div>
           <div class="field">
-            <span class="label">Dojo / Filial</span>
+            <span class="label">Academia / Dojo / Filial</span>
             <span class="value">${atleta.filial_nome || 'Dojo Central'}</span>
           </div>
           <div class="field">
             <span class="label">Professor Responsável</span>
             <span class="value">${atleta.nome_professor || 'Não informado'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Arte Marcial</span>
+            <span class="value">${atleta.arte_marcial || 'Karate'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Estilo</span>
+            <span class="value">${atleta.estilo || 'Goju-Ryu'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Entidade de Prática</span>
+            <span class="value">${atleta.academia_clube || 'Associação Goju-Ryu Karate Kai'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Peso / Altura</span>
+            <span class="value">${atleta.fisico_peso ? `${atleta.fisico_peso} kg` : '—'} / ${atleta.fisico_altura ? `${atleta.fisico_altura} m` : '—'}</span>
           </div>
         </div>
 
@@ -315,15 +394,38 @@ export default function AtletasPage() {
         </div>
         ` : ''}
 
-        <div class="section-title">Ficha Médica & Restrições</div>
+        <div class="section-title">Ficha Médica & Dados de Saúde</div>
         <div class="grid">
-          <div class="field grid-full">
-            <span class="label">Alergias Alimentares / Medicamentosas</span>
-            <span class="value value-large">${atleta.medico_alergias || 'Nenhuma alergia relatada.'}</span>
+          <div class="field">
+            <span class="label">Tipo Sanguíneo & Fator Rh</span>
+            <span class="value">${atleta.medico_tipo_sanguineo || '—'} ${atleta.medico_fator_rh || ''}</span>
           </div>
-          <div class="field grid-full">
+          <div class="field">
+            <span class="label">Cartão do SUS</span>
+            <span class="value">${atleta.medico_sus || 'Não informado'}</span>
+          </div>
+          <div class="field">
             <span class="label">Plano de Saúde / Convênio</span>
             <span class="value">${atleta.medico_plano || 'Sem informações de convênio médico.'}</span>
+          </div>
+          <div class="field">
+            <span class="label">Contato de Emergência</span>
+            <span class="value">${atleta.medico_emergencia_nome || '—'} ${atleta.medico_emergencia_telefone ? `(${atleta.medico_emergencia_telefone})` : ''}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Alergias Gerais & Alimentares</span>
+            <span class="value">${atleta.medico_alergias || 'Nenhuma alergia relatada.'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label font-bold text-red-700">Alergia a Medicamentos</span>
+            <span class="value">${atleta.medico_alergia_medicamento || 'Nenhuma alergia a medicamentos relatada.'}</span>
+          </div>
+          <div class="field grid-full">
+            <span class="label">Medicamentos de Uso Contínuo</span>
+            <span class="value">
+              <strong>Usa medicamentos?</strong> ${atleta.medico_medicacao_uso || 'Não'}<br/>
+              ${atleta.medico_medicacao_uso === 'Sim' ? `<strong>Lista:</strong> ${atleta.medico_medicacao_lista}` : ''}
+            </span>
           </div>
           <div class="field grid-full">
             <span class="label">Restrições Físicas / Recomendações Médicas</span>
@@ -335,9 +437,47 @@ export default function AtletasPage() {
           </div>
         </div>
 
+        <div class="section-title">Checklist de Documentos Exigidos (Controle Administrativo)</div>
+        <div style="display: flex; justify-content: space-between; font-size: 8px; font-weight: bold; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 5px; padding: 8px 12px; margin-bottom: 10px;">
+          <label style="display: flex; align-items: center; gap: 4px;"><input type="checkbox" style="transform: scale(0.85);" /> Cópia do RG</label>
+          <label style="display: flex; align-items: center; gap: 4px;"><input type="checkbox" style="transform: scale(0.85);" /> Cópia RG do Responsável (se menor)</label>
+          <label style="display: flex; align-items: center; gap: 4px;"><input type="checkbox" style="transform: scale(0.85);" /> Cópia do Cartão SUS</label>
+          <label style="display: flex; align-items: center; gap: 4px;"><input type="checkbox" style="transform: scale(0.85);" /> Cópia Cartão do Plano</label>
+          <label style="display: flex; align-items: center; gap: 4px;"><input type="checkbox" style="transform: scale(0.85);" /> Cópia Comprovante de Residência</label>
+        </div>
+
+        <div class="section-title">Regras Gerais e Compromisso do Aluno (GRKK / Projeto Social)</div>
+        <div style="font-size: 8px; line-height: 1.4; color: #222; background: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 8px 12px; margin-bottom: 10px;">
+          <ol class="list-rules">
+            <li>Cada aluno deverá ter seu Karate-Gi (Kimono).</li>
+            <li>O exame de faixa só será permitido ao aluno com Karate-Gi (Kimono).</li>
+            <li>Para realizar o exame de faixa o aluno deverá ter no mínimo 75% de presença nos treinos.</li>
+            <li>Para realizar o exame de faixa o aluno deverá ter no mínimo 75% de presença Escolar.</li>
+            <li>Para realizar o exame de faixa o aluno não poderá ter média escolar inferior a 5,00.</li>
+            <li>O aluno que for pego ou denunciado por agressão, violência ou outro fator que venha a afetar a GRKK será suspenso e, se reincidente, será excluído do projeto.</li>
+            <li>Todos os custos administrativos como exames de faixa, campeonatos ou seminários são de inteira responsabilidade do aluno/responsável.</li>
+            <li><strong>Comodato:</strong> Em caso de desistência, o aluno deverá devolver imediatamente todo o material e uniforme fornecido sob regime de comodato para treino pela GRKK, para oportunizar a vaga a outra pessoa.</li>
+          </ol>
+        </div>
+
+        <div class="section-title">Autorização de Uso de Imagem</div>
+        <div style="font-size: 8px; line-height: 1.4; color: #222; background: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 8px 12px; margin-bottom: 10px;">
+          <p style="margin: 0 0 6px 0;">
+            Ao assinar esta ficha, declaro ciência e decisão a respeito do uso de imagem para fins institucionais e de divulgação da GRKK, conforme escolha registrada abaixo:
+          </p>
+          <div style="display: flex; gap: 30px; font-weight: bold; font-size: 8.5px; text-transform: uppercase;">
+            <span style="color: ${atleta.autoriza_uso_imagem !== false ? '#10b981' : '#777'}">
+              [${atleta.autoriza_uso_imagem !== false ? 'X' : ' '}] Autorizo o uso da imagem.
+            </span>
+            <span style="color: ${atleta.autoriza_uso_imagem === false ? '#ef4444' : '#777'}">
+              [${atleta.autoriza_uso_imagem === false ? 'X' : ' '}] Não autorizo o uso da imagem.
+            </span>
+          </div>
+        </div>
+
         <div class="signature-area">
           <div class="signature-box">
-            <div class="signature-line">Assinatura do Atleta (ou Responsável Legal)</div>
+            <div class="signature-line">Assinatura do Atleta (ou Responsável Legal se menor)</div>
           </div>
           <div class="signature-box">
             <div class="signature-line">Assinatura do Sensei Responsável</div>
@@ -508,6 +648,22 @@ export default function AtletasPage() {
                     <Trophy size={11} className="text-zinc-650" /> Graduação:
                   </span>
                   {renderFaixaBadge(atleta.faixa)}
+                </div>
+                <div className="text-[10px] text-zinc-400 flex items-center justify-between gap-1.5 pt-1 border-t border-zinc-800/10">
+                  <span className="flex items-center gap-1.5 font-mono">
+                    <FileText size={11} className="text-zinc-650" /> Documentos:
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={() => handleToggleDocumentos(atleta.id, !atleta.documentos_entregues)}
+                    className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase border transition duration-300 cursor-pointer ${
+                      atleta.documentos_entregues 
+                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' 
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
+                    }`}
+                  >
+                    {atleta.documentos_entregues ? 'Entregues' : 'Pendentes'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -701,10 +857,52 @@ export default function AtletasPage() {
                 {/* Seção Ficha Médica */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold text-emerald-400 font-cinzel tracking-wider uppercase">Ficha Médica do Atleta</h4>
+                  
+                  {/* Informações Rápidas de Saúde */}
+                  <div className="grid grid-cols-3 gap-3.5 bg-zinc-900/40 border border-emerald-500/10 rounded-2xl p-4">
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-0.5">Tipo Sanguíneo / Rh</p>
+                      <p className="text-white font-mono text-xs font-bold">
+                        {viewingAtleta.medico_tipo_sanguineo || '—'} {viewingAtleta.medico_fator_rh || ''}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-0.5">Peso / Altura</p>
+                      <p className="text-white font-mono text-xs font-bold">
+                        {viewingAtleta.fisico_peso ? `${viewingAtleta.fisico_peso} kg` : '—'} / {viewingAtleta.fisico_altura ? `${viewingAtleta.fisico_altura} m` : '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-0.5">Cartão SUS</p>
+                      <p className="text-white font-mono text-xs truncate">
+                        {viewingAtleta.medico_sus || 'Não informado'}
+                      </p>
+                    </div>
+                    <div className="col-span-3 border-t border-zinc-900/80 pt-2.5">
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-0.5">Contato de Emergência</p>
+                      <p className="text-white font-medium text-xs">
+                        {viewingAtleta.medico_emergencia_nome || 'Não informado'}
+                        {viewingAtleta.medico_emergencia_telefone ? ` (${viewingAtleta.medico_emergencia_telefone})` : ''}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="space-y-3.5 text-xs">
                     <div>
-                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Alergias</p>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Alergias Gerais</p>
                       <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_alergias || 'Nenhuma alergia relatada.'}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Alergia a Medicamentos</p>
+                      <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">{viewingAtleta.medico_alergia_medicamento || 'Nenhuma alergia a medicamentos relatada.'}</p>
+                    </div>
+                    <div>
+                      <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Medicamento de Uso Contínuo</p>
+                      <p className="text-white leading-relaxed bg-zinc-950 p-2.5 border border-zinc-900 rounded-xl">
+                        {viewingAtleta.medico_medicacao_uso === 'Sim' 
+                          ? `Sim: ${viewingAtleta.medico_medicacao_lista || 'Não especificado'}` 
+                          : 'Não faz uso de medicamento contínuo.'}
+                      </p>
                     </div>
                     <div>
                       <p className="text-zinc-500 font-bold uppercase text-[9px] mb-1">Plano de Saúde</p>

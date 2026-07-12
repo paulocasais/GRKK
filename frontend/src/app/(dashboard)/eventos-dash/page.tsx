@@ -13,6 +13,7 @@ interface Evento {
   data_inicio: string;
   data_fim: string;
   tipo: 'torneio' | 'seminario' | 'exame' | 'outro';
+  imagem_url?: string;
 }
 
 interface Inscricao {
@@ -51,7 +52,7 @@ export default function EventosDashboardPage() {
   const [selectedModalidade, setSelectedModalidade] = useState<'Kata' | 'Kumite'>('Kata');
 
   // Forms
-  const [novoEventoForm, setNovoEventoForm] = useState({ titulo: '', descricao: '', data_inicio: '', data_fim: '', tipo: 'torneio' as const });
+  const [novoEventoForm, setNovoEventoForm] = useState({ titulo: '', descricao: '', data_inicio: '', data_fim: '', tipo: 'torneio' as const, imagem_url: '' });
   const [inscricaoForm, setInscricaoForm] = useState({ categoria: 'Kata' as const, idade: 18 });
 
   // Bracket state
@@ -62,6 +63,36 @@ export default function EventosDashboardPage() {
   const [showConfirmDeleteModal, setShowConfirmDeleteModal] = useState(false);
   const [eventoToDelete, setEventoToDelete] = useState<Evento | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleUploadImagem = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNovoEventoForm(prev => ({ ...prev, imagem_url: data.url }));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || 'Erro ao enviar imagem');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Erro de conexão ao enviar imagem');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleConfirmarExcluir = (evento: Evento) => {
     setEventoToDelete(evento);
@@ -145,7 +176,7 @@ export default function EventosDashboardPage() {
         const data = await res.json();
         setEventos([data, ...eventos]);
         setShowNovoEventoModal(false);
-        setNovoEventoForm({ titulo: '', descricao: '', data_inicio: '', data_fim: '', tipo: 'torneio' });
+        setNovoEventoForm({ titulo: '', descricao: '', data_inicio: '', data_fim: '', tipo: 'torneio', imagem_url: '' });
       }
     } catch (err) {
       const mockEv: Evento = { id: Date.now(), ...novoEventoForm };
@@ -454,6 +485,45 @@ export default function EventosDashboardPage() {
                   <option value="exame">Graduação de Faixa Geral</option>
                   <option value="outro">Outro</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Imagem / Banner do Evento (Opcional)</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="URL da Imagem ou faça upload ao lado"
+                    value={novoEventoForm.imagem_url}
+                    onChange={(e) => setNovoEventoForm({ ...novoEventoForm, imagem_url: e.target.value })}
+                    className="flex-1 px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
+                  />
+                  <label className="flex-shrink-0 flex items-center justify-center px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white rounded-xl text-xs font-bold transition cursor-pointer relative">
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    ) : (
+                      "Upload"
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploading}
+                      onChange={handleUploadImagem}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </label>
+                </div>
+                {novoEventoForm.imagem_url && (
+                  <div className="mt-2 relative w-full h-24 rounded-lg overflow-hidden border border-zinc-800">
+                    <img src={novoEventoForm.imagem_url} alt="Previsualização" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setNovoEventoForm({ ...novoEventoForm, imagem_url: '' })}
+                      className="absolute top-1.5 right-1.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-full transition cursor-pointer"
+                    >
+                      <X size={10} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2.5 pt-2">

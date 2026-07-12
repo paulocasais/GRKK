@@ -6,7 +6,7 @@ import {
   User, Mail, Phone, Calendar, ShieldAlert, 
   Activity, HeartPulse, Stethoscope, FileHeart,
   Save, Loader2, CheckCircle2, AlertCircle, HeartHandshake,
-  Send, Smartphone
+  Send, Smartphone, ShieldCheck, X
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -18,6 +18,37 @@ function formatarCPF(valor: string) {
     .replace(/(\d{3})(\d)/, '$1.$2')
     .replace(/(\d{3})(\d{1,2})/, '$1-$2')
     .slice(0, 14);
+}
+
+function formatarCEP(valor: string) {
+  return valor
+    .replace(/\D/g, '')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .slice(0, 9);
+}
+
+function validarCPF(cpf: string): boolean {
+  const cpfLimpo = cpf.replace(/\D/g, '');
+  if (cpfLimpo.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpfLimpo)) return false;
+
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(cpfLimpo.charAt(i)) * (10 - i);
+  }
+  let resto = 11 - (soma % 11);
+  let digito1 = resto >= 10 ? 0 : resto;
+  if (digito1 !== parseInt(cpfLimpo.charAt(9))) return false;
+
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(cpfLimpo.charAt(i)) * (11 - i);
+  }
+  resto = 11 - (soma % 11);
+  let digito2 = resto >= 10 ? 0 : resto;
+  if (digito2 !== parseInt(cpfLimpo.charAt(10))) return false;
+
+  return true;
 }
 
 function formatarTelefone(valor: string) {
@@ -57,6 +88,7 @@ export default function ConfiguracoesPage() {
     sexo: '',
     data_nascimento: '',
     nome_professor: '',
+    cep: '',
     endereco: '',
     cidade: '',
     uf: '',
@@ -68,11 +100,43 @@ export default function ConfiguracoesPage() {
     medico_plano: '',
     medico_restricoes: '',
     medico_diagnosticos: '',
+    arte_marcial: 'Karate',
+    estilo: 'Goju-Ryu',
+    academia_clube: 'Associação Goju-Ryu Karate Kai',
+    medico_tipo_sanguineo: '',
+    medico_fator_rh: '',
+    medico_sus: '',
+    medico_emergencia_nome: '',
+    medico_emergencia_telefone: '',
+    medico_medicacao_uso: 'Não',
+    medico_medicacao_lista: '',
+    medico_alergia_medicamento: '',
+    fisico_peso: '',
+    fisico_altura: '',
+    autoriza_uso_imagem: true,
   });
 
   const [loading, setLoading] = useState(false);
   const [notif, setNotif] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: '' });
   const [idade, setIdade] = useState(18);
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [showDocBanner, setShowDocBanner] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const dismissed = localStorage.getItem('dismissed_doc_banner');
+      if (dismissed === 'true') {
+        setShowDocBanner(false);
+      }
+    }
+  }, []);
+
+  const handleDismissBanner = () => {
+    setShowDocBanner(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dismissed_doc_banner', 'true');
+    }
+  };
 
   useEffect(() => {
     if (usuario) {
@@ -84,6 +148,7 @@ export default function ConfiguracoesPage() {
         sexo: usuario.sexo || 'M',
         data_nascimento: usuario.data_nascimento || '',
         nome_professor: usuario.nome_professor || '',
+        cep: usuario.cep ? formatarCEP(usuario.cep) : '',
         endereco: usuario.endereco || '',
         cidade: usuario.cidade || '',
         uf: usuario.uf || '',
@@ -95,6 +160,20 @@ export default function ConfiguracoesPage() {
         medico_plano: usuario.medico_plano || '',
         medico_restricoes: usuario.medico_restricoes || '',
         medico_diagnosticos: usuario.medico_diagnosticos || '',
+        arte_marcial: usuario.arte_marcial || 'Karate',
+        estilo: usuario.estilo || 'Goju-Ryu',
+        academia_clube: usuario.academia_clube || 'Associação Goju-Ryu Karate Kai',
+        medico_tipo_sanguineo: usuario.medico_tipo_sanguineo || '',
+        medico_fator_rh: usuario.medico_fator_rh || '',
+        medico_sus: usuario.medico_sus || '',
+        medico_emergencia_nome: usuario.medico_emergencia_nome || '',
+        medico_emergencia_telefone: usuario.medico_emergencia_telefone ? formatarTelefone(usuario.medico_emergencia_telefone) : '',
+        medico_medicacao_uso: usuario.medico_medicacao_uso || 'Não',
+        medico_medicacao_lista: usuario.medico_medicacao_lista || '',
+        medico_alergia_medicamento: usuario.medico_alergia_medicamento || '',
+        fisico_peso: usuario.fisico_peso || '',
+        fisico_altura: usuario.fisico_altura || '',
+        autoriza_uso_imagem: usuario.autoriza_uso_imagem !== false,
       });
       if (usuario.data_nascimento) {
         setIdade(calcularIdade(usuario.data_nascimento));
@@ -114,6 +193,34 @@ export default function ConfiguracoesPage() {
   const setFormatado = (field: string, formatter: (val: string) => string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((prev) => ({ ...prev, [field]: formatter(e.target.value) }));
 
+  const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const valor = formatarCEP(e.target.value);
+    setForm(prev => ({ ...prev, cep: valor }));
+
+    const cepLimpo = valor.replace(/\D/g, '');
+    if (cepLimpo.length === 8) {
+      setBuscandoCep(true);
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.erro) {
+            setForm(prev => ({
+              ...prev,
+              endereco: data.logradouro ? `${data.logradouro}${data.bairro ? `, ${data.bairro}` : ''}` : prev.endereco,
+              cidade: data.localidade || prev.cidade,
+              uf: data.uf || prev.uf
+            }));
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao buscar CEP:", err);
+      } finally {
+        setBuscandoCep(false);
+      }
+    }
+  };
+
   const isMenor = idade < 18;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,9 +228,20 @@ export default function ConfiguracoesPage() {
     setNotif({ type: null, msg: '' });
     setLoading(true);
 
+    if (form.cpf && !validarCPF(form.cpf)) {
+      setNotif({ type: 'error', msg: 'O CPF digitado é inválido.' });
+      setLoading(false);
+      return;
+    }
+
     if (isMenor) {
       if (!form.responsavel_nome || !form.responsavel_cpf || !form.responsavel_telefone) {
         setNotif({ type: 'error', msg: 'Dados do responsável (nome, CPF, telefone) são obrigatórios para menores de 18 anos.' });
+        setLoading(false);
+        return;
+      }
+      if (form.responsavel_cpf && !validarCPF(form.responsavel_cpf)) {
+        setNotif({ type: 'error', msg: 'O CPF do responsável digitado é inválido.' });
         setLoading(false);
         return;
       }
@@ -132,10 +250,11 @@ export default function ConfiguracoesPage() {
     try {
       const payload = {
         ...form,
-        telefone: form.telefone.replace(/\D/g, ''),
-        cpf: form.cpf.replace(/\D/g, ''),
-        responsavel_cpf: form.responsavel_cpf.replace(/\D/g, ''),
-        responsavel_telefone: form.responsavel_telefone.replace(/\D/g, ''),
+        telefone: (form.telefone || '').replace(/\D/g, ''),
+        cpf: (form.cpf || '').replace(/\D/g, ''),
+        cep: (form.cep || '').replace(/\D/g, ''),
+        responsavel_cpf: (form.responsavel_cpf || '').replace(/\D/g, ''),
+        responsavel_telefone: (form.responsavel_telefone || '').replace(/\D/g, ''),
       };
 
       const res = await fetch(`${API_URL}/api/atletas/${usuario?.id}`, {
@@ -167,6 +286,19 @@ export default function ConfiguracoesPage() {
           Atualize seus dados cadastrais, dados de responsáveis e informações médicas.
         </p>
       </div>
+
+      {/* Banner Documentos Exigidos */}
+      {!usuario?.documentos_entregues && (
+        <div className="bg-red-950/20 border border-red-900/30 rounded-2xl p-4 flex gap-3 text-xs text-red-400">
+          <AlertCircle size={18} className="shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold font-cinzel uppercase tracking-wider mb-1">Documentos Obrigatórios para Homologação</p>
+            <p className="leading-relaxed opacity-85">
+              Apresente ou envie à sua filial cópias físicas ou digitais de: <strong>Cópia do RG; Cópia do RG do responsável (se menor); Cópia do Cartão do SUS; Cópia do Cartão do Plano de Saúde; Cópia do Comprovante de Residência.</strong>
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Notificação */}
       {notif.type && (
@@ -265,11 +397,51 @@ export default function ConfiguracoesPage() {
                   className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
                 />
               </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Arte Marcial</label>
+                <input
+                  value={form.arte_marcial}
+                  onChange={set('arte_marcial')}
+                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Estilo</label>
+                <input
+                  value={form.estilo}
+                  onChange={set('estilo')}
+                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5 col-span-full">
+                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Academia / Clube / Associação</label>
+                <input
+                  value={form.academia_clube}
+                  onChange={set('academia_clube')}
+                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
             </div>
             
             <div className="space-y-4 border-t border-zinc-800/50 pt-4">
               <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Endereço</h4>
               <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col gap-1.5 col-span-full">
+                  <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center justify-between">
+                    <span>CEP</span>
+                    {buscandoCep && <span className="text-[9px] text-gold animate-pulse">Buscando CEP...</span>}
+                  </label>
+                  <input
+                    value={form.cep}
+                    onChange={handleCepChange}
+                    placeholder="00000-000"
+                    className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                  />
+                </div>
                 <div className="flex flex-col gap-1.5 col-span-full">
                   <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Logradouro / Rua e Número</label>
                   <input
@@ -332,6 +504,116 @@ export default function ConfiguracoesPage() {
                     className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
                   />
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Peso (kg)</label>
+                    <input
+                      value={form.fisico_peso}
+                      onChange={set('fisico_peso')}
+                      placeholder="Ex: 72.5"
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Altura (m)</label>
+                    <input
+                      value={form.fisico_altura}
+                      onChange={set('fisico_altura')}
+                      placeholder="Ex: 1.75"
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                </div>
+
+
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Tipo Sanguíneo</label>
+                    <select
+                      value={form.medico_tipo_sanguineo}
+                      onChange={set('medico_tipo_sanguineo')}
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="AB">AB</option>
+                      <option value="O">O</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Fator Rh</label>
+                    <select
+                      value={form.medico_fator_rh}
+                      onChange={set('medico_fator_rh')}
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="+">Positivo (+)</option>
+                      <option value="-">Negativo (-)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Cartão do SUS</label>
+                    <input
+                      value={form.medico_sus}
+                      onChange={set('medico_sus')}
+                      placeholder="Nº do Cartão SUS"
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Contato Emergência (Nome)</label>
+                    <input
+                      value={form.medico_emergencia_nome}
+                      onChange={set('medico_emergencia_nome')}
+                      placeholder="Contato de Emergência"
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Celular Emergência</label>
+                    <input
+                      value={form.medico_emergencia_telefone}
+                      onChange={setFormatado('medico_emergencia_telefone', formatarTelefone)}
+                      placeholder="(11) 99999-9999"
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Faz uso de medicação?</label>
+                    <select
+                      value={form.medico_medicacao_uso}
+                      onChange={set('medico_medicacao_uso')}
+                      className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    >
+                      <option value="Não">Não</option>
+                      <option value="Sim">Sim</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5 col-span-2">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Qual medicação?</label>
+                    <input
+                      value={form.medico_medicacao_lista}
+                      onChange={set('medico_medicacao_lista')}
+                      disabled={form.medico_medicacao_uso !== 'Sim'}
+                      placeholder="Descreva os medicamentos que utiliza"
+                      className="w-full bg-zinc-950 disabled:bg-zinc-950/40 disabled:text-zinc-500 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                </div>
+
+
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
@@ -424,6 +706,56 @@ export default function ConfiguracoesPage() {
                 </div>
               </div>
             ) : null}
+
+            {/* Card 4: Consentimento de Uso de Imagem */}
+            {usuario?.autoriza_uso_imagem === null || usuario?.autoriza_uso_imagem === undefined ? (
+              <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-4">
+                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+                  <HeartPulse className="text-gold" size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
+                </h3>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Ao preencher este formulário, autorizo a Associação Goju-Ryu Karatê-Kai, utilizar a imagem dos atletas para fins institucionais, promocionais e de divulgação das atividades esportivas. A imagem poderá ser usada em materiais impressos, redes sociais, sites ou qualquer outro meio de comunicação da associação. A utilização da imagem será exclusivamente relacionada às atividades promovidas pela associação. A criança não será identificada pessoalmente nas publicações, a menos que expressamente autorizado. A autorização é concedida de forma gratuita, sem qualquer expectativa de compensação financeira. Caso não deseje autorizar o uso de imagem, por favor, marque a opção de não autorização no campo abaixo.
+                </p>
+                <div className="flex gap-6 pt-2">
+                  <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
+                    <input
+                      type="radio"
+                      name="autoriza_uso_imagem"
+                      checked={form.autoriza_uso_imagem === true}
+                      onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: true }))}
+                      className="accent-gold h-4 w-4"
+                    />
+                    <span>Autorizo o uso da imagem.</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
+                    <input
+                      type="radio"
+                      name="autoriza_uso_imagem"
+                      checked={form.autoriza_uso_imagem === false}
+                      onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: false }))}
+                      className="accent-gold h-4 w-4"
+                    />
+                    <span>Não autorizo o uso da imagem.</span>
+                  </label>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-3">
+                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+                  <ShieldCheck className="text-emerald-400" size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
+                </h3>
+                <p className="text-xs text-zinc-400 leading-relaxed pt-1">
+                  Sua opção de consentimento para uso de imagem foi registrada em nosso banco de dados.
+                </p>
+                <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-xl mt-1 select-none pointer-events-none">
+                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" />
+                  {usuario?.autoriza_uso_imagem ? 'TERMO AUTORIZADO' : 'TERMO NÃO AUTORIZADO'}
+                </div>
+                <p className="text-[10px] text-zinc-500 leading-relaxed pt-2.5 border-t border-zinc-800/60">
+                  Para fins de segurança jurídica, a alteração desta preferência após a primeira escolha deve ser solicitada à secretaria do seu Dojo.
+                </p>
+              </div>
+            )}
 
           </div>
 

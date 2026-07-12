@@ -61,10 +61,39 @@ const preceitos = [
   }
 ];
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+
 export default function DojoKunInteractive() {
   const [activeTab, setActiveTab] = useState(0);
   const [subTab, setSubTab] = useState<'filosofia' | 'dojo' | 'vida'>('filosofia');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [preceitosList, setPreceitosList] = useState(preceitos);
+  const [preambulo, setPreambulo] = useState('');
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch(`${API_URL}/api/cms/config`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.config?.dojo_kun?.preambulo) {
+            setPreambulo(data.config.dojo_kun.preambulo);
+          }
+          if (data.config?.dojo_kun?.preceitos && data.config.dojo_kun.preceitos.length === 5) {
+            const iconMap = [Compass, Flame, Shield, BookOpen, Award];
+            const listComIcones = data.config.dojo_kun.preceitos.map((p: any, idx: number) => ({
+              ...p,
+              icon: iconMap[idx] || Award
+            }));
+            setPreceitosList(listComIcones);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar Dojo Kun configurável:", err);
+      }
+    }
+    loadConfig();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -73,6 +102,9 @@ export default function DojoKunInteractive() {
       }
     };
   }, [activeTab]);
+
+  const currentPrecept = preceitosList[activeTab] || preceitos[activeTab];
+  const Icon = currentPrecept.icon || Award;
 
   const handlePlayAudio = () => {
     if (typeof window === 'undefined') return;
@@ -116,9 +148,6 @@ export default function DojoKunInteractive() {
     window.print();
   };
 
-  const currentPrecept = preceitos[activeTab];
-  const Icon = currentPrecept.icon;
-
   return (
     <div className="w-full space-y-8 animate-fade-in print:bg-white print:text-black">
       
@@ -133,6 +162,14 @@ export default function DojoKunInteractive() {
         </button>
       </div>
 
+      {preambulo && (
+        <div className="bg-zinc-900/10 border border-zinc-900 p-5 rounded-2xl print:hidden max-w-4xl">
+          <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-sans">
+            {preambulo}
+          </p>
+        </div>
+      )}
+
       {/* Grid Principal */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
         
@@ -140,7 +177,7 @@ export default function DojoKunInteractive() {
         <div className="lg:col-span-5 flex flex-col gap-4 print:hidden">
           <p className="text-zinc-500 font-cinzel text-[10px] uppercase tracking-widest pl-2">Selecione um Preceito</p>
           <div className="space-y-3">
-            {preceitos.map((p, idx) => {
+            {preceitosList.map((p, idx) => {
               const PIcon = p.icon;
               const isActive = idx === activeTab;
               return (
@@ -372,7 +409,7 @@ export default function DojoKunInteractive() {
         </div>
         
         <div className="space-y-6 pt-6">
-          {preceitos.map((p, idx) => (
+          {preceitosList.map((p, idx) => (
             <div key={idx} className="space-y-1 page-break-inside-avoid">
               <h3 className="text-lg font-bold">
                 {p.numero}. {p.pt}

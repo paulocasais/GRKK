@@ -194,3 +194,24 @@ Identificamos e corrigimos o erro 500 (Internal Server Error) retornado pela rot
   - Atualizamos a lista de colunas válidas no script de migração [migrate_mock_to_supabase.py](file:///c:/Users/CASAIS/GRKK/backend/migrate_mock_to_supabase.py#L58) para permitir a exportação desses novos campos.
 - **Novo Pacote de Deploy**:
   - Geramos uma nova build e reexecutamos o empacotamento, disponibilizando as correções atualizadas no arquivo [backend_clean.zip](file:///c:/Users/CASAIS/GRKK/backend_clean.zip).
+
+---
+
+## 12. Correções Finais e Deploy em Produção (HostGator)
+
+Implementamos uma série de correções fundamentais para normalizar o portal em produção:
+
+1. **Ativação da Área de Documentos para Atletas**:
+   - Adicionamos o link correspondente no menu de atletas em [Sidebar.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/components/dashboard/Sidebar.tsx), permitindo que assinem digitalmente os termos de adesão.
+2. **Correção de Crash de CEP e Campos Vazios**:
+   - Ajustamos a validação de formulários em [configuracoes/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/(dashboard)/configuracoes/page.tsx) com checagem segura de valores (`(form.cep || '').replace(...)`), evitando exceções de nulo ao salvar.
+3. **Blindagem contra Travamento no Emblema de Carregamento**:
+   - Ajustamos a listagem de estatísticas em [home/page.tsx](file:///c:/Users/CASAIS/GRKK/frontend/src/app/(dashboard)/home/page.tsx) para utilizar um fallback seguro de array vazio (`res || []`). Isso evita que instabilidades de rede travem a aplicação em loop infinito na tela do emblema.
+4. **Solução do Erro 500 (Erro de Sintaxe Python 3.9 na HostGator)**:
+   - Identificamos no diagnóstico que o servidor da HostGator roda **Python 3.9**.
+   - Corrigimos o arquivo [pdf_service.py](file:///c:/Users/CASAIS/GRKK/backend/services/pdf_service.py) para remover interpolações de f-strings aninhadas com aspas simples idênticas (sintaxe permitida apenas a partir de Python 3.12+), garantindo retrocompatibilidade total da API com o cPanel da HostGator.
+5. **CORS com subdomínio `www.`**:
+   - Atualizamos a configuração em [app.py](file:///c:/Users/CASAIS/GRKK/backend/app.py) para liberar requisições vindas de `https://www.gojuryukaratekai.com.br`, evitando bloqueios de CORS por navegadores.
+6. **Empacotamento de Produção Finalizado**:
+   - Todos os arquivos zipados (**[backend_clean.zip](file:///c:/Users/CASAIS/GRKK/backend_clean.zip)** e **[frontend_clean.zip](file:///c:/Users/CASAIS/GRKK/frontend_clean.zip)**) foram recompilados e empacotados com sucesso na raiz do projeto.
+

@@ -115,6 +115,7 @@ from presenca_routes import create_presenca_routes
 from notif_whatsapp_routes import create_whatsapp_routes
 from documentos_assinados_routes import create_documentos_assinados_routes
 from despesa_routes import create_despesa_routes
+from upload_routes import create_upload_routes
 
 # Registrar todas as rotas
 create_auth_routes(app)
@@ -139,6 +140,7 @@ create_presenca_routes(app)
 create_whatsapp_routes(app)
 create_documentos_assinados_routes(app)
 create_despesa_routes(app)
+create_upload_routes(app)
 
 @app.route("/api/health", methods=["GET"])
 def health_check():

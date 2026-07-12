@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "cypress": "^15.17.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.6"
   }
 }

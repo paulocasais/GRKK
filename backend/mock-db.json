@@ -173,15 +173,6 @@
       "status": "ativo"
     },
     {
-      "nome": "Test Atleta",
-      "email": "test@example.com",
-      "telefone": "123456789",
-      "tipo": "atleta",
-      "status": "inativo",
-      "id": "b58282e5-0912-4924-a2ac-1a29046d1ed6",
-      "created_at": "2026-06-14T16:16:09.039205"
-    },
-    {
       "nome": "Test Filial",
       "email": "filial@example.com",
       "telefone": "",
@@ -189,15 +180,6 @@
       "status": "pendente",
       "id": "9910e2a2-577e-4fca-88ff-c74a074c925a",
       "created_at": "2026-06-14T16:16:09.181629"
-    },
-    {
-      "nome": "Test Atleta",
-      "email": "test@example.com",
-      "telefone": "123456789",
-      "tipo": "atleta",
-      "status": "pendente",
-      "id": "fabe48c0-76c5-4a4e-84e6-de6051a07da4",
-      "created_at": "2026-06-14T16:18:03.321775"
     },
     {
       "nome": "Test Filial",
@@ -908,6 +890,70 @@
       "tipo": "filial",
       "status": "pendente",
       "created_at": "2026-07-03T00:55:15.268286"
+    },
+    {
+      "id": "9edbd58d-eee5-4c43-8f38-a077674d4344",
+      "nome": "Fulano de Tal",
+      "email": "fulanodetal@yahoo.com",
+      "telefone": "71987414819",
+      "tipo": "atleta",
+      "status": "ativo",
+      "created_at": "2026-07-05T12:07:57.517281",
+      "cidade": "Salvador"
+    },
+    {
+      "id": "48c5d8b0-1afa-43e2-80b6-edd56a29708f",
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "created_at": "2026-07-05T17:48:29.892856"
+    },
+    {
+      "id": "12824abc-4f07-4ba4-8caa-91251be45212",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "created_at": "2026-07-05T17:48:30.096073"
+    },
+    {
+      "id": "10e88fdd-eaa2-419a-a873-fe6bb04162e3",
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "created_at": "2026-07-06T20:40:20.516730"
+    },
+    {
+      "id": "5e1663e5-6658-4de1-8f75-b1ac10e65fc9",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "created_at": "2026-07-06T20:40:20.691580"
+    },
+    {
+      "id": "209345f7-ea45-48ec-925d-482732452da4",
+      "nome": "Test Atleta",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "tipo": "atleta",
+      "status": "pendente",
+      "created_at": "2026-07-12T11:08:01.651556"
+    },
+    {
+      "id": "38f7ea9e-855d-4425-83bd-38163d4b8984",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "tipo": "filial",
+      "status": "pendente",
+      "created_at": "2026-07-12T11:08:02.036577"
     }
   ],
   "documentos": [
@@ -918,14 +964,6 @@
       "arquivo_url": "",
       "id": "9ef14a79-7a1b-483c-b315-2f43885b82cf",
       "created_at": "2026-06-15T17:53:55.956784"
-    },
-    {
-      "titulo": "teste",
-      "tipo": "Institucional",
-      "desc": "teste de envio",
-      "arquivo_url": "file:///C:/Users/CASAIS/Downloads/InformeRendimentos%20(1).pdf",
-      "id": "ef9e34eb-d43b-40bc-a14b-2a397f2f1fe3",
-      "created_at": "2026-06-30T00:32:03.207789"
     }
   ],
   "atletas": [
@@ -953,7 +991,8 @@
       "medico_alergias": "Alergia a poeira e camarao",
       "medico_plano": "Bradesco Saude",
       "medico_restricoes": "Sem restricoes graves",
-      "medico_diagnosticos": "Nenhum"
+      "medico_diagnosticos": "Nenhum",
+      "documentos_entregues": true
     },
     {
       "id": "pending-athlete-id",
@@ -979,7 +1018,8 @@
       "medico_alergias": "Dipirona",
       "medico_plano": "Unimed",
       "medico_restricoes": "Evitar esforço cardíaco excessivo",
-      "medico_diagnosticos": "Sopro cardíaco leve"
+      "medico_diagnosticos": "Sopro cardíaco leve",
+      "documentos_entregues": true
     },
     {
       "id": "atleta-s9rxjaztv1q",
@@ -1008,7 +1048,8 @@
       "medico_plano": "",
       "medico_restricoes": "",
       "medico_diagnosticos": "",
-      "filial_nome": "GRKK CABULA"
+      "filial_nome": "GRKK CABULA",
+      "documentos_entregues": true
     },
     {
       "id": "bp-1",
@@ -1032,7 +1073,8 @@
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "documentos_entregues": true
     },
     {
       "id": "bp-2",
@@ -1056,7 +1098,8 @@
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "documentos_entregues": true
     },
     {
       "id": "bp-3",
@@ -1307,30 +1350,6 @@
       "medico_diagnosticos": ""
     },
     {
-      "id": "b58282e5-0912-4924-a2ac-1a29046d1ed6",
-      "email": "test@example.com",
-      "telefone": "123456789",
-      "status": "inativo",
-      "faixa": "Branca",
-      "created_at": "2026-06-14T16:16:09.111766",
-      "medico_alergias": "",
-      "medico_plano": "",
-      "medico_restricoes": "",
-      "medico_diagnosticos": ""
-    },
-    {
-      "id": "fabe48c0-76c5-4a4e-84e6-de6051a07da4",
-      "email": "test@example.com",
-      "telefone": "123456789",
-      "status": "pendente",
-      "faixa": "Branca",
-      "created_at": "2026-06-14T16:18:03.370578",
-      "medico_alergias": "",
-      "medico_plano": "",
-      "medico_restricoes": "",
-      "medico_diagnosticos": ""
-    },
-    {
       "id": "5fad5607-cd0a-490a-bd3f-de4cdc57e541",
       "email": "test@example.com",
       "telefone": "123456789",
@@ -1340,7 +1359,8 @@
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "documentos_entregues": true
     },
     {
       "id": "3c41973d-b635-40c7-becb-4762da08d5cf",
@@ -1352,7 +1372,8 @@
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "documentos_entregues": true
     },
     {
       "id": "f5b414eb-f0f6-4efe-b064-601fca36b4c7",
@@ -1364,7 +1385,8 @@
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "documentos_entregues": true
     },
     {
       "id": "353afcb0-453e-4fb6-bfb8-72345aaa9227",
@@ -1753,6 +1775,102 @@
       "status": "pendente",
       "faixa": "Branca",
       "created_at": "2026-07-03T00:55:14.942625"
+    },
+    {
+      "id": "9edbd58d-eee5-4c43-8f38-a077674d4344",
+      "email": "fulanodetal@yahoo.com",
+      "telefone": "71987414819",
+      "status": "ativo",
+      "faixa": "Branca",
+      "filial_id": null,
+      "filial_nome": null,
+      "created_at": "2026-07-05T12:07:57.587458",
+      "cpf": "33767795035",
+      "sexo": "M",
+      "data_nascimento": "1976-09-09",
+      "nome_professor": "Paulo Casais",
+      "cep": "41385040",
+      "endereco": "Rua Nossa Senhora do Carmo, Sete de Abril",
+      "cidade": "Salvador",
+      "uf": "BA",
+      "responsavel_nome": "",
+      "responsavel_cpf": "",
+      "responsavel_email": "",
+      "responsavel_telefone": "",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": ""
+    },
+    {
+      "id": "48c5d8b0-1afa-43e2-80b6-edd56a29708f",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "filial_id": null,
+      "filial_nome": null,
+      "created_at": "2026-07-05T17:48:29.962790"
+    },
+    {
+      "id": "10e88fdd-eaa2-419a-a873-fe6bb04162e3",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "filial_id": null,
+      "filial_nome": null,
+      "documentos_entregues": false,
+      "created_at": "2026-07-06T20:40:20.581802"
+    },
+    {
+      "id": "209345f7-ea45-48ec-925d-482732452da4",
+      "email": "test@example.com",
+      "telefone": "123456789",
+      "status": "pendente",
+      "faixa": "Branca",
+      "filial_id": null,
+      "filial_nome": null,
+      "documentos_entregues": false,
+      "created_at": "2026-07-12T11:08:01.780573"
+    },
+    {
+      "id": "atleta-flyf7ymhpad",
+      "email": "paulocasais@hotmail.com",
+      "telefone": "71999999999",
+      "status": "ativo",
+      "faixa": "Branca",
+      "created_at": "2026-07-12T16:45:55.592890",
+      "cpf": "07046622051",
+      "sexo": "M",
+      "data_nascimento": "2015-09-09",
+      "nome_professor": "Paulo Casais",
+      "cep": "41385040",
+      "endereco": "Rua Nossa Senhora do Carmo, Sete de Abril",
+      "cidade": "Salvador",
+      "uf": "BA",
+      "responsavel_nome": "Paulo Robert",
+      "responsavel_cpf": "33767795035",
+      "responsavel_email": "paulocasais@hotmail.com",
+      "responsavel_telefone": "71999999999",
+      "medico_alergias": "nao",
+      "medico_plano": "sus",
+      "medico_restricoes": "",
+      "medico_diagnosticos": "",
+      "arte_marcial": "Karate",
+      "estilo": "Goju-Ryu",
+      "academia_clube": "Associação Goju-Ryu Karate Kai",
+      "medico_tipo_sanguineo": "A",
+      "medico_fator_rh": "+",
+      "medico_sus": "1111111111111111111111111111111111111",
+      "medico_emergencia_nome": "",
+      "medico_emergencia_telefone": "",
+      "medico_medicacao_uso": "Não",
+      "medico_medicacao_lista": "",
+      "medico_alergia_medicamento": "",
+      "fisico_peso": "100",
+      "fisico_altura": "1,79",
+      "autoriza_uso_imagem": true
     }
   ],
   "filiais": [
@@ -2126,6 +2244,33 @@
       "status": "pendente",
       "codigo_interno": "MOCK-FILIAL-03B43",
       "created_at": "2026-07-03T00:55:15.427071"
+    },
+    {
+      "id": "12824abc-4f07-4ba4-8caa-91251be45212",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-12824",
+      "created_at": "2026-07-05T17:48:30.170708"
+    },
+    {
+      "id": "5e1663e5-6658-4de1-8f75-b1ac10e65fc9",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-5E166",
+      "created_at": "2026-07-06T20:40:20.742573"
+    },
+    {
+      "id": "38f7ea9e-855d-4425-83bd-38163d4b8984",
+      "nome": "Test Filial",
+      "email": "filial@example.com",
+      "telefone": "",
+      "status": "pendente",
+      "codigo_interno": "MOCK-FILIAL-38F7E",
+      "created_at": "2026-07-12T11:08:02.156205"
     }
   ],
   "eventos": [
@@ -2857,6 +3002,33 @@
       "read": false,
       "id": "c787fe58-22fa-4f4e-b13e-3178cc48f94c",
       "created_at": "2026-07-03T00:55:15.604781"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "6480afff-55c5-4666-8df3-4d663fa25edd",
+      "created_at": "2026-07-05T17:48:30.290169"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "f7c725cb-a59f-4183-b7c0-eaa8b74347fc",
+      "created_at": "2026-07-06T20:40:20.856646"
+    },
+    {
+      "name": "Test User",
+      "email": "test@example.com",
+      "message": "Test message",
+      "phone": "",
+      "read": false,
+      "id": "2accac06-5631-4413-bf00-8384b221d8fa",
+      "created_at": "2026-07-12T11:08:02.427265"
     }
   ],
   "noticias": [
@@ -8715,6 +8887,78 @@
       "tipo": "alerta",
       "lida": true,
       "created_at": "2026-07-03T00:55:15.540123"
+    },
+    {
+      "id": "4d7d7708-7ccd-449b-8e08-f36595ccf16b",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Cadastro",
+      "mensagem": "O atleta Fulano de Tal se cadastrou e aguarda homologação.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-05T12:07:57.641995"
+    },
+    {
+      "id": "8f5c6f88-d898-414a-8544-bf094549f231",
+      "destinatario_id": "9edbd58d-eee5-4c43-8f38-a077674d4344",
+      "titulo": "Cadastro Homologado",
+      "mensagem": "Seu perfil de atleta foi homologado com sucesso!",
+      "tipo": "sucesso",
+      "lida": false,
+      "created_at": "2026-07-05T12:08:36.031290"
+    },
+    {
+      "id": "beb0c32e-b3cf-4eb5-8d1a-cc82fe91bbdd",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Cadastro",
+      "mensagem": "O atleta Test Atleta se cadastrou e aguarda homologação.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-05T17:48:30.027199"
+    },
+    {
+      "id": "1130a48f-406f-400f-9f92-a0e57b442988",
+      "destinatario_id": null,
+      "titulo": "Nova Filial Cadastrada",
+      "mensagem": "O dojo/filial Test Filial solicitou credenciamento no sistema.",
+      "tipo": "alerta",
+      "lida": true,
+      "created_at": "2026-07-05T17:48:30.232182"
+    },
+    {
+      "id": "d7ef1cdf-1576-41bf-8487-9170c762788e",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Cadastro",
+      "mensagem": "O atleta Test Atleta se cadastrou e aguarda homologação.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-06T20:40:20.638688"
+    },
+    {
+      "id": "58d81439-c3e4-4012-a11a-e1fb9031f4f9",
+      "destinatario_id": null,
+      "titulo": "Nova Filial Cadastrada",
+      "mensagem": "O dojo/filial Test Filial solicitou credenciamento no sistema.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-06T20:40:20.798513"
+    },
+    {
+      "id": "e5f8941e-b353-40a7-bced-4c48854203ba",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Cadastro",
+      "mensagem": "O atleta Test Atleta se cadastrou e aguarda homologação.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-12T11:08:01.907050"
+    },
+    {
+      "id": "dfadd7ac-953a-488a-b5db-c0d003fe7a93",
+      "destinatario_id": null,
+      "titulo": "Nova Filial Cadastrada",
+      "mensagem": "O dojo/filial Test Filial solicitou credenciamento no sistema.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-12T11:08:02.271108"
     }
   ],
   "certificados": [
@@ -13370,6 +13614,816 @@
       "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
       "ip": "127.0.0.1",
       "created_at": "2026-07-04T21:11:58.902514"
+    },
+    {
+      "id": "a3ae2f5e-e1df-4a02-b19e-5bb64320bc99",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Atleta",
+      "detalhes": "Atleta 'Test Atleta' (ID: b58282e5-0912-4924-a2ac-1a29046d1ed6) excluído com sucesso.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T02:46:29.803731"
+    },
+    {
+      "id": "d78baced-b2cf-49d4-95e8-abcdd361cd1a",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Test Atleta (ID: fabe48c0-76c5-4a4e-84e6-de6051a07da4) atualizado. Campos: status",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T02:46:38.386947"
+    },
+    {
+      "id": "3f5e09d7-e407-4fe4-b990-571c6a674a59",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Atleta",
+      "detalhes": "Atleta 'Test Atleta' (ID: fabe48c0-76c5-4a4e-84e6-de6051a07da4) excluído com sucesso.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T02:46:45.455251"
+    },
+    {
+      "id": "b3195566-e5d8-48e5-a306-2c2bc21e6378",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T12:05:40.709084"
+    },
+    {
+      "id": "776f45e5-9ea4-4384-88b8-1ae5f0333bf2",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T12:06:35.362232"
+    },
+    {
+      "id": "b398f1f8-1a25-4459-8fe5-c833d316e0c5",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Fulano de Tal (ID: 9edbd58d-eee5-4c43-8f38-a077674d4344) atualizado. Campos: status",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T12:08:36.089877"
+    },
+    {
+      "id": "2fea0da7-968a-4ec1-b9aa-af216f7484f2",
+      "usuario_id": "9edbd58d-eee5-4c43-8f38-a077674d4344",
+      "usuario_nome": "Fulano de Tal",
+      "acao": "Login",
+      "detalhes": "Usuário fulanodetal@yahoo.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T12:08:48.373710"
+    },
+    {
+      "id": "b3631666-67f5-4164-8cd9-614e2ef89b8d",
+      "usuario_id": "9edbd58d-eee5-4c43-8f38-a077674d4344",
+      "usuario_nome": "Fulano de Tal",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Fulano de Tal (ID: 9edbd58d-eee5-4c43-8f38-a077674d4344) atualizado. Campos: nome_professor, cpf, email, uf, data_nascimento, telefone, responsavel_cpf, cep, responsavel_email, medico_alergias, nome, responsavel_nome, sexo, cidade, medico_plano, medico_restricoes, responsavel_telefone, medico_diagnosticos, endereco",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T12:10:09.340631"
+    },
+    {
+      "id": "9d543a47-46fc-4c7c-8e83-148633becfa5",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.407974"
+    },
+    {
+      "id": "619e1046-51a6-41bc-828f-d9051dc6886c",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.472857"
+    },
+    {
+      "id": "79ef7bfa-d48a-4bd8-a36a-ebf42dfd028e",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.529534"
+    },
+    {
+      "id": "8ed77d9c-0745-45e4-887d-87d42f559275",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Fatura",
+      "detalhes": "Fatura MENSALIDADE de R$ 120.50 criada para Atleta de Teste (Vencimento: 2026-08-15, ID Fatura: e9dcb00d-f2dd-49cb-b006-2de454860569)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.631031"
+    },
+    {
+      "id": "dc930220-d32c-4ac3-bcc9-8179e8032214",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pendente'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.739849"
+    },
+    {
+      "id": "92495d5b-d1c9-4211-a4bf-b1e8dad8fae0",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.806329"
+    },
+    {
+      "id": "ea38564c-034d-41e3-a076-9e84e8430eb2",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@outlook.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:35.876306"
+    },
+    {
+      "id": "b4b622cc-f9d4-4b3f-ae39-6758abf7bc8c",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.021548"
+    },
+    {
+      "id": "16652109-2b89-4583-80a8-2b08fb1890ab",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@outlook.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.120649"
+    },
+    {
+      "id": "d7ca8f9b-72a8-4076-9564-171913aee976",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.286908"
+    },
+    {
+      "id": "1559f551-1a33-4144-beb6-212b68bb060e",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Exame",
+      "detalhes": "Novo exame de faixa criado para data 2026-07-15 (ID: 70bfa811-58c7-46a6-aaa0-b981deebe244)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.454444"
+    },
+    {
+      "id": "4506befa-354c-454e-bc93-21ed0f151f88",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.539493"
+    },
+    {
+      "id": "7206bb6c-5467-404c-8b2a-c874f226acd4",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.607889"
+    },
+    {
+      "id": "34a29017-25fd-4945-99c1-f18c6d7f9120",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.685296"
+    },
+    {
+      "id": "1c3899de-fb00-4f59-b112-2338e1913f02",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.757559"
+    },
+    {
+      "id": "0700f68a-d068-45a3-9cc5-e711646be636",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Exame",
+      "detalhes": "Exame de faixa 'Exame Teste Restrito' (ID: 70bfa811-58c7-46a6-aaa0-b981deebe244) foi permanentemente excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.904437"
+    },
+    {
+      "id": "67dea60f-989f-4a57-a6f1-05fd91b783f9",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T16:46:36.993469"
+    },
+    {
+      "id": "dfa3d93c-f0ee-4d14-a1c0-071ce797b8cc",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:22:10.005625"
+    },
+    {
+      "id": "d272085a-b441-46a2-9e99-83dd759609f0",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:30:01.006188"
+    },
+    {
+      "id": "8af89222-b29f-4e11-8627-6b0e65d0422d",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.382922"
+    },
+    {
+      "id": "98773e2e-5d08-4748-b66d-3b82ca4b2b3e",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.440651"
+    },
+    {
+      "id": "7eb8aa87-45b6-498e-999f-a21a662c5181",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.495650"
+    },
+    {
+      "id": "9ebbfb0a-6aa7-4091-ac0e-24d672c3a4b9",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Fatura",
+      "detalhes": "Fatura MENSALIDADE de R$ 120.50 criada para Atleta de Teste (Vencimento: 2026-08-15, ID Fatura: f74d99b1-f9c3-404d-9773-3712bff9b497)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.649915"
+    },
+    {
+      "id": "d5d4a895-11f6-4903-adf9-f1b3db306429",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pendente'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.813173"
+    },
+    {
+      "id": "ce8e673c-38f1-461e-9aa4-abbe5b7472f8",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.897845"
+    },
+    {
+      "id": "c1a1dee0-d926-47fc-a23e-2247be38641b",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@outlook.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:30.997489"
+    },
+    {
+      "id": "bb66f08c-9d8f-4920-8194-6bd14c9092a8",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.159256"
+    },
+    {
+      "id": "f652cad7-bb15-4d60-9223-f5ffc04eee19",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@outlook.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.230374"
+    },
+    {
+      "id": "74409660-d5f0-44ce-ba2c-ca022308af1d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.313594"
+    },
+    {
+      "id": "0ed83a07-ffb0-492d-94cb-5a700c1f381b",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Exame",
+      "detalhes": "Novo exame de faixa criado para data 2026-07-15 (ID: 18ae2e31-6e00-49fe-bf52-007626ccca41)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.500156"
+    },
+    {
+      "id": "7c369a76-4eb4-484f-a0ff-dbea083018dd",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.606489"
+    },
+    {
+      "id": "7ca68486-7929-4877-bb8d-a95809887bef",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.685716"
+    },
+    {
+      "id": "da00f5a0-e514-4c2f-9f69-b432393680ba",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.769998"
+    },
+    {
+      "id": "0b11de91-29ba-4f8b-a9c0-22be79c8af7f",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.830687"
+    },
+    {
+      "id": "d7d14058-fee9-4344-8c59-db7fb2ea0bde",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Exame",
+      "detalhes": "Exame de faixa 'Exame Teste Restrito' (ID: 18ae2e31-6e00-49fe-bf52-007626ccca41) foi permanentemente excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:31.976119"
+    },
+    {
+      "id": "087ad143-b085-4261-9ab7-5cdb83b14542",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T17:48:32.081035"
+    },
+    {
+      "id": "4e440742-6497-4532-a22c-28748a7f6c1c",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@hotmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T23:14:14.825411"
+    },
+    {
+      "id": "ec98c0a5-3159-4254-9d1b-bdb33c1408f8",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-05T23:15:46.413452"
+    },
+    {
+      "id": "5fa85377-2c1d-4a97-8d52-875f7cfa042e",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Documento",
+      "detalhes": "Documento 'teste' (ID: ef9e34eb-d43b-40bc-a14b-2a397f2f1fe3) excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T18:28:40.243040"
+    },
+    {
+      "id": "95c260ed-3087-42f3-9aa2-7b37ef6835a0",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulo Roberto (ID: atleta-s9rxjaztv1q) atualizado. Campos: documentos_entregues",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T19:24:35.580355"
+    },
+    {
+      "id": "ad775588-2785-4f5a-a76f-ec5cf103cc45",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:20.943259"
+    },
+    {
+      "id": "aedad47a-cf7f-4ea0-b990-333ceb84ef51",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.089279"
+    },
+    {
+      "id": "de74bff5-76a3-4ee5-92e0-6040159a19fe",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.210031"
+    },
+    {
+      "id": "f157e4f7-e6c8-4391-9b2e-d3bfb92986c2",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Fatura",
+      "detalhes": "Fatura MENSALIDADE de R$ 120.50 criada para Atleta de Teste (Vencimento: 2026-08-15, ID Fatura: 0d22ef4b-a0c1-4543-a3cc-2e32ce2f6c77)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.329035"
+    },
+    {
+      "id": "2eaaf4ac-9d84-477e-aedf-189a45ddb033",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pendente'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.521981"
+    },
+    {
+      "id": "a20e22b1-cad5-40f2-a41d-7eec8e464cc9",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.638394"
+    },
+    {
+      "id": "b21f26fa-cfb6-458f-b43d-f90741a2656b",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@outlook.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:21.793702"
+    },
+    {
+      "id": "3cc71004-f1c0-44d4-a405-ed75a15146a7",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.237617"
+    },
+    {
+      "id": "ae46878a-431e-47f5-ba2a-ebe48c4d0321",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@outlook.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.408455"
+    },
+    {
+      "id": "96446c89-ee86-4820-928d-e2bda7fa6c53",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.584390"
+    },
+    {
+      "id": "c1cee987-92cf-4069-8510-a7012a6902a7",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Exame",
+      "detalhes": "Novo exame de faixa criado para data 2026-07-15 (ID: 854671ad-90fc-43a8-986d-e96d1ae77abd)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.736399"
+    },
+    {
+      "id": "bdbdfdcc-9cad-4926-a23e-636f67489fc3",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.795286"
+    },
+    {
+      "id": "b1096ccd-e97f-44e6-b2df-c355930e23e9",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.844054"
+    },
+    {
+      "id": "9ab38416-e53f-482a-a6f7-8e39b48048f1",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.901885"
+    },
+    {
+      "id": "07144d68-b352-4169-8205-a8c6a3390d0e",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:22.955360"
+    },
+    {
+      "id": "b76b0d5d-56f9-44af-941e-48a23c7ea78d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Exame",
+      "detalhes": "Exame de faixa 'Exame Teste Restrito' (ID: 854671ad-90fc-43a8-986d-e96d1ae77abd) foi permanentemente excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:23.080653"
+    },
+    {
+      "id": "0a664fb7-486e-42bd-8d64-0d979f38ec4b",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:40:23.139336"
+    },
+    {
+      "id": "555321a6-60d0-4324-b81e-b13e6ce0f9fd",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:44:57.118983"
+    },
+    {
+      "id": "0f05ad24-ca3c-4b9b-b04f-241009e64668",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Atleta de Teste (ID: 8513aa27-452f-462e-8f5a-b3f2052612f1) atualizado. Campos: documentos_entregues",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T20:44:57.251565"
+    },
+    {
+      "id": "ec5e4245-5786-4a84-a86e-654d45bf044b",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Atleta Pendente de Teste (ID: pending-athlete-id) atualizado. Campos: documentos_entregues",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T21:26:53.418360"
+    },
+    {
+      "id": "e5db641c-3fe1-410a-8e11-b9988572ccc1",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Atleta Pendente de Teste (ID: pending-athlete-id) atualizado. Campos: documentos_entregues",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-06T21:26:55.959701"
+    },
+    {
+      "id": "d5dadad1-f13d-41dd-bb74-a7dae3cc4725",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:02.790072"
+    },
+    {
+      "id": "51c0b4c0-93a3-49bd-9c11-6dddb727c25a",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:02.910361"
+    },
+    {
+      "id": "1762827a-4b42-4456-b75b-b36e7ed12e1d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:03.017894"
+    },
+    {
+      "id": "46345bf0-b822-4793-b567-8a8fdf7a578d",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Fatura",
+      "detalhes": "Fatura MENSALIDADE de R$ 120.50 criada para Atleta de Teste (Vencimento: 2026-08-15, ID Fatura: 50829214-d385-422a-b27a-46d08cc093af)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:03.316112"
+    },
+    {
+      "id": "3ed397fd-bd20-469d-afb6-b75f64377302",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pendente'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:03.588292"
+    },
+    {
+      "id": "730af7c3-ec1b-489e-90af-abe450c371df",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:03.778205"
+    },
+    {
+      "id": "28b44cce-34bc-44c0-ad79-ad9484df871e",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@outlook.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:04.009422"
+    },
+    {
+      "id": "b54d8a75-a124-4b2e-96a3-50f7823e5446",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Compensação de Fatura",
+      "detalhes": "Fatura ID: fat-1 (ANUIDADE) de R$ 150.00 para Paulo Roberto atualizada. Novos dados: {'status': 'pago'}",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:04.285575"
+    },
+    {
+      "id": "27290201-4087-4541-a4d1-e9fced5ddf8f",
+      "usuario_id": "atleta-s9rxjaztv1q",
+      "usuario_nome": "Paulo Roberto",
+      "acao": "Logout",
+      "detalhes": "Usuário paulocasais@outlook.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:04.467950"
+    },
+    {
+      "id": "ab798487-0f31-40d9-ae59-23267e957298",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:04.741888"
+    },
+    {
+      "id": "276b9633-322f-42ef-95e5-9da541f066a5",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Criação de Exame",
+      "detalhes": "Novo exame de faixa criado para data 2026-07-15 (ID: aec779a8-5b1d-4dae-9218-eb50195e3b3d)",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:04.969470"
+    },
+    {
+      "id": "df3cb78f-ef67-446d-8f30-9de8e1400e95",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:05.119445"
+    },
+    {
+      "id": "aa20820a-79b3-4d13-8da4-c625f91e03ee",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Login",
+      "detalhes": "Usuário atleta@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:05.293014"
+    },
+    {
+      "id": "9732546b-0b1b-4829-8aa2-854668e083ce",
+      "usuario_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "usuario_nome": "Atleta de Teste",
+      "acao": "Logout",
+      "detalhes": "Usuário atleta@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:05.416766"
+    },
+    {
+      "id": "e72b554d-d42e-4f01-b075-1440bb1977fb",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:05.531314"
+    },
+    {
+      "id": "5a276892-82e7-476a-a8af-2b3f472b8274",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Exclusão de Exame",
+      "detalhes": "Exame de faixa 'Exame Teste Restrito' (ID: aec779a8-5b1d-4dae-9218-eb50195e3b3d) foi permanentemente excluído.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:05.907239"
+    },
+    {
+      "id": "c3331d13-35db-4f6d-8de2-b5221192ea35",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Logout",
+      "detalhes": "Usuário admin@grkk.com.br realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T11:08:06.083101"
+    },
+    {
+      "id": "3de98855-d92f-4fae-921d-521a494df9ae",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Login",
+      "detalhes": "Usuário paulocasais@hotmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T15:55:46.138425"
+    },
+    {
+      "id": "35ea9bb9-e156-448a-b2d0-29566f32ef85",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "AUTORIZACAO_IMAGEM_ACEITA",
+      "detalhes": "O atleta Paulocasais (atleta-flyf7ymhpad) autorizou o termo de uso de imagem.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T16:45:55.757518"
+    },
+    {
+      "id": "8c65f4f7-b942-4c92-8e2e-ccd626025967",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulocasais (ID: atleta-flyf7ymhpad) atualizado. Campos: medico_emergencia_nome, medico_sus, medico_alergia_medicamento, uf, medico_tipo_sanguineo, medico_emergencia_telefone, fisico_peso, cep, medico_plano, medico_medicacao_lista, nome, fisico_altura, nome_professor, estilo, medico_medicacao_uso, responsavel_email, responsavel_cpf, telefone, email, sexo, data_nascimento, cpf, responsavel_nome, medico_restricoes, academia_clube, responsavel_telefone, medico_fator_rh, medico_alergias, medico_diagnosticos, endereco, cidade, arte_marcial, autoriza_uso_imagem",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T16:45:55.827340"
+    },
+    {
+      "id": "15aa715e-cbb0-478d-a14b-9076f2e49eb6",
+      "usuario_id": "atleta-flyf7ymhpad",
+      "usuario_nome": "Paulocasais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulocasais (ID: atleta-flyf7ymhpad) atualizado. Campos: medico_emergencia_nome, medico_sus, medico_alergia_medicamento, uf, medico_tipo_sanguineo, medico_emergencia_telefone, fisico_peso, cep, medico_plano, medico_medicacao_lista, nome, fisico_altura, nome_professor, estilo, medico_medicacao_uso, responsavel_email, responsavel_cpf, telefone, email, sexo, data_nascimento, cpf, responsavel_nome, medico_restricoes, academia_clube, responsavel_telefone, medico_fator_rh, medico_alergias, medico_diagnosticos, endereco, cidade, arte_marcial, autoriza_uso_imagem",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-12T16:46:19.653911"
     }
   ],
   "cms_config": [
@@ -13847,6 +14901,54 @@
       "status": "pendente",
       "id": "c08f1a46-c76e-44ef-a73a-b7584cb99165",
       "created_at": "2026-07-03T00:55:15.947029"
+    },
+    {
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": null,
+      "filial_nome": null,
+      "tipo": "mensalidade",
+      "valor": 120.5,
+      "data_vencimento": "2026-08-15",
+      "status": "pendente",
+      "id": "e9dcb00d-f2dd-49cb-b006-2de454860569",
+      "created_at": "2026-07-05T16:46:35.580639"
+    },
+    {
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": null,
+      "filial_nome": null,
+      "tipo": "mensalidade",
+      "valor": 120.5,
+      "data_vencimento": "2026-08-15",
+      "status": "pendente",
+      "id": "f74d99b1-f9c3-404d-9773-3712bff9b497",
+      "created_at": "2026-07-05T17:48:30.569226"
+    },
+    {
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": null,
+      "filial_nome": null,
+      "tipo": "mensalidade",
+      "valor": 120.5,
+      "data_vencimento": "2026-08-15",
+      "status": "pendente",
+      "id": "0d22ef4b-a0c1-4543-a3cc-2e32ce2f6c77",
+      "created_at": "2026-07-06T20:40:21.269256"
+    },
+    {
+      "atleta_id": "8513aa27-452f-462e-8f5a-b3f2052612f1",
+      "atleta_nome": "Atleta de Teste",
+      "filial_id": null,
+      "filial_nome": null,
+      "tipo": "mensalidade",
+      "valor": 120.5,
+      "data_vencimento": "2026-08-15",
+      "status": "pendente",
+      "id": "50829214-d385-422a-b27a-46d08cc093af",
+      "created_at": "2026-07-12T11:08:03.129438"
     }
   ],
   "avisos_diretoria": [],
@@ -13984,6 +15086,18 @@
       "created_at": "2026-07-05T01:48:59.899810",
       "signed_at": "2026-07-05T02:18:24.050546Z",
       "assinatura_hash": "3FC59B8005C9657217781E5F246F8C4C1FD665F5F6F2B32D81A06009F28EA59A",
+      "arquivo_url": "/static/documentos/termo_unificado_atleta-s9rxjaztv1q.pdf"
+    },
+    {
+      "id": "45d34af6-96c8-493f-9cc6-4fbc7f0d9909",
+      "atleta_id": "atleta-s9rxjaztv1q",
+      "atleta_nome": "Paulo Roberto",
+      "titulo": "Termo Unificado de Matrícula e Prestação de Serviços",
+      "tipo_documento": "termo_unificado",
+      "status": "pendente",
+      "created_at": "2026-07-06T01:09:01.232169",
+      "signed_at": null,
+      "assinatura_hash": null,
       "arquivo_url": "/static/documentos/termo_unificado_atleta-s9rxjaztv1q.pdf"
     }
   ],

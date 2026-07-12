@@ -1,14 +1,32 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DojoKunInteractive from '@/components/DojoKunInteractive';
 
-export const metadata = {
-  title: 'Dojo Kun - Goju-Ryu Karate Kai',
-  description: 'Os cinco preceitos fundamentais de conduta e filosofia do Karate Goju-Ryu.',
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
 export default function DojoKunPublicPage() {
+  const [preambulo, setPreambulo] = useState('Os cinco preceitos que regem a mente e o corpo dos praticantes de Karatê Tradicional. Mais do que regras de comportamento dentro do Dojo, são diretrizes morais para a vida.');
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const res = await fetch(`${API_URL}/api/cms/config`, { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.config?.dojo_kun?.preambulo) {
+            setPreambulo(data.config.dojo_kun.preambulo);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao carregar preambulo do Dojo Kun:", err);
+      }
+    }
+    loadConfig();
+  }, []);
+
   return (
     <>
       <Navbar />
@@ -35,9 +53,8 @@ export default function DojoKunPublicPage() {
             </h2>
             <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent mx-auto mt-4" />
             
-            <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-sans pt-4">
-              Os cinco preceitos que regem a mente e o corpo dos praticantes de Karatê Tradicional. 
-              Mais do que regras de comportamento dentro do Dojo, são diretrizes morais para a vida.
+            <p className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed font-sans pt-4 whitespace-pre-line">
+              {preambulo}
             </p>
           </div>
         </section>

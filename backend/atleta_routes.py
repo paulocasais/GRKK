@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from services.supabase_service import SupabaseService
-from services.audit_service import registrar_log_auditoria
 
 def create_atleta_routes(app: Flask):
     """Cria e registra as rotas de atletas"""
@@ -62,7 +61,8 @@ def create_atleta_routes(app: Flask):
             "status": "pendente",
             "faixa": "Branca",
             "filial_id": data.get("filial_id"),
-            "filial_nome": data.get("filial_nome")
+            "filial_nome": data.get("filial_nome"),
+            "documentos_entregues": False
         }
         atleta, error2 = SupabaseService.insert("atletas", atleta_item)
         if error2:
@@ -110,6 +110,7 @@ def create_atleta_routes(app: Flask):
     @app.route("/api/atletas/<id>", methods=["PATCH"])
     def patch_atleta(id):
         from app import get_current_user
+        from services.audit_service import registrar_log_auditoria
 
         user = get_current_user()
         print(f"DEBUG: patch_atleta called with id={id}, type={type(id)}")
@@ -126,7 +127,11 @@ def create_atleta_routes(app: Flask):
 
         # Validação de menor de idade
         data_nasc = data.get("data_nascimento") or (existing_atleta.get("data_nascimento") if existing_atleta else None)
-        if data_nasc:
+        # Só valida se estiver alterando dados cadastrais importantes, ativando o perfil ou editando o responsável
+        campos_cadastrais = ["nome", "data_nascimento", "responsavel_nome", "responsavel_cpf", "responsavel_telefone", "status"]
+        necessita_validar = any(c in data for c in campos_cadastrais) or (data.get("status") == "ativo")
+        
+        if data_nasc and necessita_validar:
             try:
                 from datetime import datetime, date
                 birth_date = datetime.strptime(data_nasc, "%Y-%m-%d").date()
@@ -153,12 +158,29 @@ def create_atleta_routes(app: Flask):
         if update_prof:
             SupabaseService.update("profiles", id, update_prof)
 
+        # Garante que o registro correspondente na tabela atletas existe
+        if existing_atleta and existing_atleta.get("tipo") == "atleta":
+            atletas_db, _ = SupabaseService.get_all("atletas", filter_dict={"id": id})
+            if not atletas_db:
+                atleta_item = {
+                    "id": id,
+                    "email": existing_atleta.get("email") or "",
+                    "telefone": existing_atleta.get("telefone") or "",
+                    "status": existing_atleta.get("status") or "pendente",
+                    "faixa": "Branca"
+                }
+                SupabaseService.insert("atletas", atleta_item)
+
         update_atl = {}
         fields_to_update = [
             "status", "faixa", "filial_id", "filial_nome", "cpf", "sexo", "data_nascimento", 
-            "nome_professor", "endereco", "cidade", "uf", 
+            "nome_professor", "cep", "endereco", "cidade", "uf", 
             "responsavel_nome", "responsavel_cpf", "responsavel_email", "responsavel_telefone",
-            "medico_alergias", "medico_plano", "medico_restricoes", "medico_diagnosticos"
+            "medico_alergias", "medico_plano", "medico_restricoes", "medico_diagnosticos",
+            "arte_marcial", "estilo", "academia_clube", "medico_tipo_sanguineo", "medico_fator_rh",
+            "medico_sus", "medico_emergencia_nome", "medico_emergencia_telefone", "medico_medicacao_uso",
+            "medico_medicacao_lista", "medico_alergia_medicamento", "fisico_peso", "fisico_altura",
+            "autoriza_uso_imagem", "registro_federacao", "documentos_entregues"
         ]
         for field in fields_to_update:
             if field in data:
@@ -169,9 +191,26 @@ def create_atleta_routes(app: Flask):
             update_atl.pop("status", None)
             update_atl.pop("faixa", None)
 
+        # Se foi homologado (status alterado para ativo), gera o registro_federacao se não houver
+        if (update_prof.get("status") == "ativo" or update_atl.get("status") == "ativo") and existing_atleta and existing_atleta.get("status") != "ativo":
+            if not existing_atleta.get("registro_federacao") and not update_atl.get("registro_federacao"):
+                from datetime import datetime
+                ano_atual = datetime.now().year
+                codigo_gerado = f"GRKK-A-{ano_atual}-{str(id)[:5].upper()}"
+                update_atl["registro_federacao"] = codigo_gerado
+
         res, error = SupabaseService.update("atletas", id, update_atl)
         if error:
             return jsonify({"error": error}), 500
+
+        # Registrar histórico de auditoria do termo de uso de imagem
+        if "autoriza_uso_imagem" in update_atl:
+            novo_status = update_atl["autoriza_uso_imagem"]
+            status_anterior = existing_atleta.get("autoriza_uso_imagem") if existing_atleta else None
+            if status_anterior != novo_status:
+                acao_audit = "AUTORIZACAO_IMAGEM_ACEITA" if novo_status else "AUTORIZACAO_IMAGEM_REJEITADA"
+                detalhes_audit = f"O atleta {update_prof.get('nome') or (existing_atleta.get('nome') if existing_atleta else 'sem nome')} ({id}) {'autorizou' if novo_status else 'rejeitou/não autorizou'} o termo de uso de imagem."
+                registrar_log_auditoria(user, acao_audit, detalhes_audit)
 
         # Se foi homologado (status alterado para ativo)
         if (update_prof.get("status") == "ativo" or update_atl.get("status") == "ativo") and existing_atleta and existing_atleta.get("status") != "ativo":
@@ -200,6 +239,8 @@ def create_atleta_routes(app: Flask):
     @app.route("/api/atletas/<id>", methods=["DELETE"])
     def delete_atleta(id):
         from app import get_current_user
+        from services.audit_service import registrar_log_auditoria
+
         user = get_current_user()
         if not user or user.get("tipo") not in ["admin", "filial"]:
             return jsonify({"error": "Acesso não autorizado"}), 403

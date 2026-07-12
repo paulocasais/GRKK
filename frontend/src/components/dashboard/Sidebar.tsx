@@ -51,6 +51,7 @@ const NAV_ATLETA = [
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
+  { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ];

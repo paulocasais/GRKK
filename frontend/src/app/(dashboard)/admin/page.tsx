@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone, Shield, FileText, BookOpen, Bell, AlertTriangle } from 'lucide-react';
+import { Layout, Settings, Image, Users, Plus, Trash2, ShieldAlert, Loader2, Save, X, MessageSquare, Send, Mail, Phone, Shield, FileText, BookOpen, Bell, AlertTriangle, Minus } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
@@ -73,28 +73,134 @@ export default function AdminCMSPage() {
 
   // Formulários de documentos de transparência (persistidos via CMS config)
   const [docTermosForm, setDocTermosForm] = useState({
-    titulo: 'Termos de Serviço', s1_titulo: '1. Aceitação dos Termos',
-    s1_texto: 'Ao acessar e utilizar o Portal GRKK, você declara estar de acordo com estes Termos de Serviço.',
+    titulo: 'Termos de Serviço',
+    desc: 'Condições de uso do Portal GRKK.',
+    s1_titulo: '1. Aceitação dos Termos',
+    s1_texto: 'Ao acessar e utilizar o Portal GRKK, você declara estar de acordo com estes Termos de Serviço. Caso não concorde com qualquer disposição, você não deve utilizar nossos serviços.',
+    s2_titulo: '2. Definições',
+    s2_def_portal: 'Plataforma digital da Associação Goju-Ryu Karate Kai, incluindo todas as suas funcionalidades, conteúdos e serviços.',
+    s2_def_usuario: 'Qualquer pessoa física que acesse ou utilize o Portal, incluindo atletas, filiados, visitantes e administradores.',
+    s2_def_atleta: 'Usuário cadastrado que solicita ou possui vínculo com a associação para atividades esportivas.',
+    s3_titulo: '3. Cadastro e Conta',
+    s3_texto: 'Para acessar determinadas funcionalidades, é necessário realizar cadastro. Você se compromete a fornecer informações verdadeiras, atualizadas e completas. É de sua exclusiva responsabilidade manter a confidencialidade de sua senha.',
+    s3_texto2: 'O cadastro de atleta está sujeito a homologação pela administração da GRKK, que pode aprová-lo ou rejeitá-lo a seu critério.',
+    s4_titulo: '4. Uso do Portal',
+    s4_texto: 'O usuário concorda em utilizar o Portal de acordo com a lei, a moral, os bons costumes e a ordem pública. É vedado:',
+    s4_lista: 'Utilizar o Portal para fins ilícitos ou não autorizados\nFornecer informações falsas ou fraudulentas\nTentar acessar áreas restritas sem autorização\nInterferir no funcionamento do sistema',
+    s5_titulo: '5. Propriedade Intelectual',
+    s5_texto: 'Todo o conteúdo do Portal, incluindo textos, imagens, logotipos e marcas, é propriedade da GRKK ou utilizado sob licença, sendo proibida a reprodução sem autorização prévia.',
+    s6_titulo: '6. Homologação de Atletas',
+    s6_texto: 'O cadastro de atleta é submetido à análise da administração, que poderá solicitar documentos complementares. A GRKK reserva-se o direito de recusar ou cancelar cadastros que não estejam em conformidade com seus regulamentos internos.',
+    s7_titulo: '7. Limitação de Responsabilidade',
+    s7_texto: 'A GRKK não se responsabiliza por danos diretos ou indiretos decorrentes do uso indevido do Portal, interrupções temporárias do serviço ou conduta de terceiros.',
     s8_titulo: '8. Disposições Gerais',
-    s8_texto: 'Estes Termos podem ser alterados a qualquer momento. O uso continuado do Portal após alterações constitui aceitação dos novos termos.'
+    s8_texto: 'Estes Termos podem ser alterados a qualquer momento. O uso continuado do Portal após alterações constitui aceitação dos novos termos. A inação frente a descumprimento não constitui renúncia a direitos.',
+    secoes_extras: [] as Array<{ id: string; titulo: string; texto: string; lista?: string }>
   });
   const [docPrivacidadeForm, setDocPrivacidadeForm] = useState({
-    titulo: 'Política de Privacidade',
-    s1_titulo: '1. Informações Coletadas',
-    s1_texto: 'Coletamos informações fornecidas diretamente por você no momento do cadastro.',
-    s5_titulo: '5. Contato',
-    s5_texto: 'Para dúvidas sobre privacidade, entre em contato: contato@gojuryukaratekai.com.br'
+    titulo: 'Aviso de Privacidade',
+    desc: 'Política de tratamento de dados pessoais.',
+    s1_titulo: '1. Dados Coletados',
+    s1_texto: 'Podemos coletar as seguintes informações pessoais:',
+    s1_lista: 'Nome completo, e-mail e telefone\nDados de cadastro (CPF, data de nascimento, endereço)\nInformações sobre saúde (alergias, restrições) fornecidas voluntariamente\nDados de navegação (cookies, IP, páginas acessadas)',
+    s2_titulo: '2. Finalidade do Tratamento',
+    s2_texto: 'Seus dados são utilizados para:',
+    s2_lista: 'Gerenciar sua conta e cadastro na associação\nViabilizar a participação em exames, eventos e atividades\nEnviar comunicados institucionais e administrativos\nCumprir obrigações legais e regulatórias\nMelhorar a experiência no Portal',
+    s3_titulo: '3. Compartilhamento de Dados',
+    s3_texto: 'Seus dados não serão comercializados. Podemos compartilhar informações com:',
+    s3_lista: 'Entidades esportivas oficiais (federações, confederações)\nAutoridades judiciais ou governamentais, quando exigido por lei\nPrestadores de serviço que atuam em nome da GRKK',
+    s4_titulo: '4. Segurança dos Dados',
+    s4_texto: 'Adotamos medidas técnicas e organizacionais para proteger seus dados contra acesso não autorizado, perda ou destruição, incluindo criptografia e controles de acesso.',
+    s5_titulo: '5. Seus Direitos (LGPD)',
+    s5_texto: 'Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você possui os seguintes direitos:',
+    s5_lista: 'Confirmar a existência de tratamento de seus dados\nAcessar seus dados pessoais\nCorrigir dados incompletos, inexatos ou desatualizados\nSolicitar a anonimização, bloqueio ou eliminação de dados desnecessários\nRevogar o consentimento a qualquer momento\nSolicitar a portabilidade dos dados',
+    s6_titulo: '6. Cookies',
+    s6_texto: 'Utilizamos cookies essenciais para o funcionamento do Portal e cookies analíticos para melhorar sua experiência. Você pode configurar seu navegador para recusar cookies, mas algumas funcionalidades podem ser afetadas.',
+    s7_titulo: '7. Contato do Encarregado (DPO)',
+    s7_texto: 'Para exercer seus direitos ou esclarecer dúvidas sobre esta política, entre em contato pelo e-mail: privacidade@gojuryukaratekai.com.br.',
+    s8_titulo: '8. Alterações',
+    s8_texto: 'Este Aviso de Privacidade pode ser atualizado periodicamente. Recomendamos a consulta regular desta página para conhecimento de eventuais alterações.',
+    secoes_extras: [] as Array<{ id: string; titulo: string; texto: string; lista?: string }>
   });
   const [docDefesaMarcaForm, setDocDefesaMarcaForm] = useState({
     titulo: 'Defesa de Marca – Goju-Ryu Karate-Kai',
+    desc: 'Apresentação desenvolvida sob a perspectiva de branding.',
     s1_titulo: '1. O que é Defesa de Marca?',
-    s1_texto: 'Defesa de Marca é o conjunto de estratégias jurídicas e de branding adotadas para proteger a identidade da marca Goju-Ryu Karate-Kai.',
+    s1_texto: 'Defesa de Marca é o conjunto de estratégias jurídicas e de branding adotadas para proteger a identidade, reputação e ativos intangíveis da marca Goju-Ryu Karate-Kai no mercado.',
+    s2_titulo: '2. Identidade da Marca',
+    s2_texto: 'A marca Goju-Ryu Karate-Kai representa:',
+    s2_lista: 'Tradição do Karatê Okinawano\nQualidade técnica reconhecida\nCompromisso com a cultura e disciplina\nExcelência no ensino marcial',
+    s3_titulo: '3. Registro e Propriedade',
+    s3_texto: 'O nome, logotipo e símbolos associados à Goju-Ryu Karate-Kai são protegidos como marca registrada, garantindo à associação o direito exclusivo de uso em todo o território nacional.',
+    s3_lista: 'Registro junto ao INPI\nDireitos de uso exclusivo\nProteção contra uso indevido\nAção legal contra infratores',
+    s4_titulo: '4. Uso Autorizado',
+    s4_texto: 'O uso da marca Goju-Ryu Karate-Kai por terceiros é permitido apenas mediante autorização expressa da associação, respeitando as diretrizes estabelecidas.',
+    s5_titulo: '5. Diretrizes de Branding',
+    s5_texto: 'Toda comunicação visual da marca deve seguir as diretrizes de branding estabelecidas:',
+    s5_lista: 'Cores institucionais: vermelho, dourado e preto\nTipografia oficial: Cinzel (títulos) e sans-serif (corpo)\nLogotipo: uso exclusivo em fundo que garanta legibilidade\nTom de voz: formal, respeitoso e acolhedor',
+    s6_titulo: '6. Monitoramento e Fiscalização',
+    s6_texto: 'A GRKK realiza monitoramento contínuo do mercado para identificar usos não autorizados da marca, adotando medidas administrativas e judiciais quando necessário.',
+    s7_titulo: '7. Penalidades',
+    s7_texto: 'O uso não autorizado da marca sujeita o infrator às penalidades previstas em lei, incluindo:',
+    s7_lista: 'Notificação extrajudicial\nPedido de indenização por danos morais e materiais\nRepresentação criminal por violação de direito de marca\nPerda de vínculo com a associação',
     s8_titulo: '8. Contato para Autorização',
-    s8_texto: 'Para solicitar autorização de uso da marca ou reportar uso indevido, entre em contato: contato@gojuryukaratekai.com.br'
+    s8_texto: 'Para solicitar autorização de uso da marca ou reportar uso indevido, entre em contato pelo e-mail: contato@gojuryukaratekai.com.br.',
+    secoes_extras: [] as Array<{ id: string; titulo: string; texto: string; lista?: string }>
   });
   const [docDojoKunForm, setDocDojoKunForm] = useState({
     preambulo: 'O Dojo Kun é o código de ética do karatê Goju-Ryu. Deve ser recitado ao início e término de cada treino como compromisso pessoal e coletivo.',
-    mandamentos: 'Ser fiel ao verdadeiro significado do Caminho do Karatê\nTreinar com sinceridade\nSer esforçado\nSer cortês\nAbster-se de violência impulsiva'
+    preceitos: [
+      {
+        numero: 'I',
+        kanji: '礼儀を重んずること',
+        jp: 'Hitotsu — Reigi o omonzuru koto',
+        pt: 'Respeitar a etiqueta e a cortesia acima de tudo',
+        phonetic: 'Hee-toh-tsoo — Ray-ghee oh oh-mohn-zoo-roo koh-toh',
+        philosophy: 'O Karatê começa e termina com respeito (Rei). Este princípio nos ensina que a cortesia e a humildade não são fraquezas, mas sim as maiores forças de um praticante. A etiqueta no Dojo serve para polir o nosso ego e nos conectar com a linhagem espiritual dos mestres.',
+        dojo: 'Cumprimentar (Rei) ao entrar e sair do dojo, respeitar todos os parceiros de treino (independentemente da graduação), ouvir atentamente as correções dos instrutores e manter o dogi (uniforme) sempre limpo e alinhado.',
+        life: 'Tratar todas as pessoas com empatia, cortesia e dignidade no ambiente de trabalho, familiar e social. Agir com integridade e retidão ética mesmo quando não houver ninguém observando.'
+      },
+      {
+        numero: 'II',
+        kanji: '勇気を養うこと',
+        jp: 'Hitotsu — Yuki o yashinau koto',
+        pt: 'Cultivar a coragem e a força interior',
+        phonetic: 'Hee-toh-tsoo — Yoo-kee oh yah-shee-nah-oo koh-toh',
+        philosophy: 'A verdadeira coragem (Yuki) não reside na ausência de medo, mas na determinação inabalável de agir corretamente apesar dele. Ela se desenvolve ao enfrentarmos nossos limites físicos e mentais no tatame, expandindo nossos horizontes pessoais.',
+        dojo: 'Não recuar perante treinos intensivos, aceitar os desafios de kumite (combate livre) com oponentes mais graduados e manter a postura focada mesmo diante de fadiga extrema.',
+        life: 'Tomar decisões difíceis porém éticas, defender causas justas e os mais vulneráveis, admitir honestamente os próprios erros e ter a audácia de persistir em seus projetos contra a correnteza das dificuldades.'
+      },
+      {
+        numero: 'III',
+        kanji: '伝統空手を守り日々の鍛錬を怠らざること',
+        jp: 'Hitotsu — Dento karate o mamori hibi no tanren o okotarazu koto',
+        pt: 'Proteger o Karatê tradicional e praticar diariamente sem falhar',
+        phonetic: 'Hee-toh-tsoo — Den-toh kah-rah-teh oh mah-moh-ree hee-bee noh tahn-ren oh oh-koh-tah-rah-zoo koh-toh',
+        philosophy: 'O treinamento cotidiano e rigoroso (Tanren) é o fogo lento que purifica e forja o caráter do praticante. O Karatê tradicional não é um esporte de resultados efêmeros, mas uma arte de aprimoramento contínuo. Preservar a tradição significa treinar com máxima intenção e respeito às técnicas fundamentais.',
+        dojo: 'Executar cada repetição de kihon ou kata como se fosse única, buscar a precisão milimétrica dos ângulos e posturas, e enxergar na repetição a chave secreta para a excelência motora e mental.',
+        life: 'Aplicar consistência e paciência na busca de metas pessoais e profissionais de longo prazo, entendendo que grandes conquistas são construídas através de pequenos esforços diários contínuos.'
+      },
+      {
+        numero: 'IV',
+        kanji: '心身uを練磨し剛柔流空手の真髄を極めること',
+        jp: 'Hitotsu — Shinshin o renma shi Goju-Ryu Karate no shinzui o kiwameru koto',
+        pt: 'Treinar o corpo e a mente para alcançar a essência do Goju-Ryu',
+        phonetic: 'Hee-toh-tsoo — Sheen-sheen oh ren-mah shee goh-joo ryoo kah-rah-teh noh sheen-zoo-ee oh kee-wah-meh-roo koh-toh',
+        philosophy: 'Goju-Ryu traduz-se como o caminho do "Forte e Suave". A sua essência (Shinzui) repousa em harmonizar o impacto firme e estruturado (Go) com a esquiva fluida e adaptável (Ju). A unificação do desenvolvimento físico e mental (Shinshin) nos ensina a fluir entre essas forças sem perder o eixo.',
+        dojo: 'Dominar a técnica de contração muscular no Sanchin com a respiração profunda (Ibuki) e a flexibilidade circular do Tensho. Saber dosar a força de impacto com a suavidade na defesa.',
+        life: 'Desenvolver resiliência para ser firme e assertivo nos momentos que exigem firmeza, mas mantendo-se flexível, paciente e acolhedor nas relações humanas. Equilibrar mente racional e intuição diante de crises.'
+      },
+      {
+        numero: 'V',
+        kanji: '不撓不屈の精神を養うこと',
+        jp: 'Hitotsu — Futo fukutsu no seishin o yashinau koto',
+        pt: 'Nutrir um espírito indomável e de perseverança eterna',
+        phonetic: 'Hee-toh-tsoo — Foo-toh foo-koo-tsoo noh say-sheen oh yah-shee-nah-oo koh-toh',
+        philosophy: 'Futo Fukutsu simboliza o princípio oriental da resiliência máxima: cair sete vezes, levantar-se oito. O espírito indomável garante que nenhuma adversidade material, cansaço ou dúvida possa desviar o karateca de sua busca pelo autoaperfeiçoamento (Do).',
+        dojo: 'Persistir no treino mesmo quando os movimentos parecem difíceis de dominar, aceitar com humildade a necessidade de repetir exames de faixa e aprender com as derrotas.',
+        life: 'Encarar crises de saúde, perdas emocionais e revezes financeiros com paciência activa e esperança. Manter seus princípios éticos intocados perante qualquer provação externa.'
+      }
+    ]
   });
 
   // Glossário do Sensei IA
@@ -109,6 +215,12 @@ export default function AdminCMSPage() {
   const [glossarioForm, setGlossarioForm] = useState<GlossaryTerm>({ termo: '', definicao: '' });
   const [salvandoGlossario, setSalvandoGlossario] = useState(false);
   const [isEditingTerm, setIsEditingTerm] = useState(false);
+
+  const [dojoKunActivePrecept, setDojoKunActivePrecept] = useState(0);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const toggleSection = (sectionId: string) => {
+    setExpandedSection(prev => prev === sectionId ? null : sectionId);
+  };
 
   // Modais
   const [showModal, setShowModal] = useState(false);
@@ -164,6 +276,94 @@ export default function AdminCMSPage() {
       email: string;
       endereco: string;
       horarios: string;
+    };
+    dojo_kun?: {
+      preambulo: string;
+      preceitos: Array<{
+        numero: string;
+        kanji: string;
+        jp: string;
+        pt: string;
+        phonetic: string;
+        philosophy: string;
+        dojo: string;
+        life: string;
+      }>;
+    };
+    doc_termos?: {
+      titulo: string;
+      desc: string;
+      s1_titulo: string;
+      s1_texto: string;
+      s2_titulo: string;
+      s2_def_portal: string;
+      s2_def_usuario: string;
+      s2_def_atleta: string;
+      s3_titulo: string;
+      s3_texto: string;
+      s3_texto2: string;
+      s4_titulo: string;
+      s4_texto: string;
+      s4_lista: string;
+      s5_titulo: string;
+      s5_texto: string;
+      s6_titulo: string;
+      s6_texto: string;
+      s7_titulo: string;
+      s7_texto: string;
+      s8_titulo: string;
+      s8_texto: string;
+      secoes_extras?: Array<{ id: string; titulo: string; texto: string; lista?: string }>;
+    };
+    doc_privacidade?: {
+      titulo: string;
+      desc: string;
+      s1_titulo: string;
+      s1_texto: string;
+      s1_lista: string;
+      s2_titulo: string;
+      s2_texto: string;
+      s2_lista: string;
+      s3_titulo: string;
+      s3_texto: string;
+      s3_lista: string;
+      s4_titulo: string;
+      s4_texto: string;
+      s5_titulo: string;
+      s5_texto: string;
+      s5_lista: string;
+      s6_titulo: string;
+      s6_texto: string;
+      s7_titulo: string;
+      s7_texto: string;
+      s8_titulo: string;
+      s8_texto: string;
+      secoes_extras?: Array<{ id: string; titulo: string; texto: string; lista?: string }>;
+    };
+    doc_defesa_marca?: {
+      titulo: string;
+      desc: string;
+      s1_titulo: string;
+      s1_texto: string;
+      s2_titulo: string;
+      s2_texto: string;
+      s2_lista: string;
+      s3_titulo: string;
+      s3_texto: string;
+      s3_lista: string;
+      s4_titulo: string;
+      s4_texto: string;
+      s5_titulo: string;
+      s5_texto: string;
+      s5_lista: string;
+      s6_titulo: string;
+      s6_texto: string;
+      s7_titulo: string;
+      s7_texto: string;
+      s7_lista: string;
+      s8_titulo: string;
+      s8_texto: string;
+      secoes_extras?: Array<{ id: string; titulo: string; texto: string; lista?: string }>;
     };
   }
 
@@ -362,6 +562,26 @@ export default function AdminCMSPage() {
           endereco: siteConfig.contato.endereco || '',
           horarios: siteConfig.contato.horarios || 'Segunda e Quarta: 19:00 — 21:00\nSábado: 09:00 — 11:00'
         });
+      }
+      if (siteConfig.dojo_kun) {
+        setDocDojoKunForm({
+          preambulo: siteConfig.dojo_kun.preambulo || 'O Dojo Kun é o código de ética do karatê Goju-Ryu. Deve ser recitado ao início e término de cada treino como compromisso pessoal e coletivo.',
+          preceitos: siteConfig.dojo_kun.preceitos && siteConfig.dojo_kun.preceitos.length === 5
+            ? siteConfig.dojo_kun.preceitos
+            : docDojoKunForm.preceitos
+        });
+      }
+      if (siteConfig.doc_termos) {
+        const termos = siteConfig.doc_termos;
+        setDocTermosForm(prev => ({ ...prev, ...termos, secoes_extras: termos.secoes_extras || [] }));
+      }
+      if (siteConfig.doc_privacidade) {
+        const privacidade = siteConfig.doc_privacidade;
+        setDocPrivacidadeForm(prev => ({ ...prev, ...privacidade, secoes_extras: privacidade.secoes_extras || [] }));
+      }
+      if (siteConfig.doc_defesa_marca) {
+        const marca = siteConfig.doc_defesa_marca;
+        setDocDefesaMarcaForm(prev => ({ ...prev, ...marca, secoes_extras: marca.secoes_extras || [] }));
       }
     }
   }, [siteConfig]);
@@ -1777,21 +1997,142 @@ export default function AdminCMSPage() {
             <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
               <BookOpen className="text-gold" size={16} /> Conteúdo do Dojo Kun
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
                 <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Preâmbulo / Introdução</label>
                 <textarea value={docDojoKunForm.preambulo} onChange={e => setDocDojoKunForm({...docDojoKunForm, preambulo: e.target.value})}
-                  rows={4} placeholder="Texto introdutório do Dojo Kun..."
+                  rows={3} placeholder="Texto introdutório do Dojo Kun..."
                   className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
               </div>
-              <div>
-                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">Mandamentos (um por linha)</label>
-                <textarea value={docDojoKunForm.mandamentos} onChange={e => setDocDojoKunForm({...docDojoKunForm, mandamentos: e.target.value})}
-                  rows={8} placeholder="Ser fiel ao verdadeiro significado do Caminho do Karatê&#10;Treinar com sinceridade&#10;..."
-                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
-                <p className="text-[10px] text-zinc-600 mt-1">Cada linha será exibida como um mandamento separado no site.</p>
+
+              <div className="border-t border-zinc-800/80 pt-4">
+                <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-3">Preceitos do Dojo Kun (道場訓)</label>
+                
+                {/* Abas para seleção de preceitos */}
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-1 font-cinzel">
+                  {docDojoKunForm.preceitos?.map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setDojoKunActivePrecept(idx)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                        dojoKunActivePrecept === idx
+                          ? 'bg-primary text-white'
+                          : 'bg-zinc-950 text-zinc-500 border border-zinc-900 hover:text-white'
+                      }`}
+                    >
+                      Preceito {p.numero}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Formulário do preceito ativo */}
+                {docDojoKunForm.preceitos?.[dojoKunActivePrecept] && (
+                  <div className="bg-zinc-950/40 border border-zinc-900 p-5 rounded-2xl space-y-4">
+                    <p className="text-[10px] text-gold font-bold uppercase tracking-widest font-cinzel mb-2">Editar Preceito {docDojoKunForm.preceitos[dojoKunActivePrecept].numero}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Escrita em Japonês (Kanji)</label>
+                        <input
+                          type="text"
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].kanji || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].kanji = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Pronúncia Tradicional (Romaji)</label>
+                        <input
+                          type="text"
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].jp || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].jp = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Tradução em Português</label>
+                        <input
+                          type="text"
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].pt || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].pt = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Ajuda Fonética</label>
+                        <input
+                          type="text"
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].phonetic || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].phonetic = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Significado / Filosofia</label>
+                      <textarea
+                        value={docDojoKunForm.preceitos[dojoKunActivePrecept].philosophy || ''}
+                        onChange={e => {
+                          const newPreceitos = [...docDojoKunForm.preceitos];
+                          newPreceitos[dojoKunActivePrecept].philosophy = e.target.value;
+                          setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                        }}
+                        rows={3}
+                        className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Aplicação no Dojo</label>
+                        <textarea
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].dojo || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].dojo = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          rows={3}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-zinc-500 uppercase mb-1">Aplicação no Dia a Dia / Vida</label>
+                        <textarea
+                          value={docDojoKunForm.preceitos[dojoKunActivePrecept].life || ''}
+                          onChange={e => {
+                            const newPreceitos = [...docDojoKunForm.preceitos];
+                            newPreceitos[dojoKunActivePrecept].life = e.target.value;
+                            setDocDojoKunForm({ ...docDojoKunForm, preceitos: newPreceitos });
+                          }}
+                          rows={3}
+                          className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex justify-end pt-2 font-cinzel">
+
+              <div className="flex justify-end pt-2 font-cinzel border-t border-zinc-800/80">
                 <button type="button" onClick={() => handleSaveConfig('dojo_kun', docDojoKunForm)} disabled={salvandoConfig}
                   className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
                   <Save size={13} /> Salvar Dojo Kun
@@ -1806,29 +2147,232 @@ export default function AdminCMSPage() {
             <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
               <FileText className="text-primary" size={16} /> Termos de Serviço — Conteúdo da Página
             </h3>
-            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/termos</code>.</p>
+            <p className="text-[11px] text-zinc-500">Edite as seções da página. Clique no botão <code className="bg-zinc-950 px-1 rounded font-mono text-gold">+</code> para abrir os campos de cada seção.</p>
+            
             <div className="space-y-4">
-              {([
-                { label: 'Título da Página', field: 'titulo', type: 'input' },
-                { label: '1. Título da Seção 1', field: 's1_titulo', type: 'input' },
-                { label: '1. Texto da Seção 1', field: 's1_texto', type: 'textarea' },
-                { label: '8. Título da Seção Final', field: 's8_titulo', type: 'input' },
-                { label: '8. Texto da Seção Final', field: 's8_texto', type: 'textarea' },
-              ] as { label: string; field: keyof typeof docTermosForm; type: string }[]).map(({ label, field, type }) => (
-                <div key={field}>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
-                  {type === 'textarea' ? (
-                    <textarea value={docTermosForm[field]} onChange={e => setDocTermosForm({...docTermosForm, [field]: e.target.value})}
-                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
-                  ) : (
-                    <input value={docTermosForm[field]} onChange={e => setDocTermosForm({...docTermosForm, [field]: e.target.value})}
-                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
-                  )}
+              {/* Cabeçalho do Documento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/40 p-4 rounded-xl border border-zinc-800/60">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título do Documento</label>
+                  <input value={docTermosForm.titulo} onChange={e => setDocTermosForm({...docTermosForm, titulo: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
                 </div>
-              ))}
-              <div className="flex justify-end pt-2 font-cinzel">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                  <input value={docTermosForm.desc} onChange={e => setDocTermosForm({...docTermosForm, desc: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
+                </div>
+              </div>
+
+              {/* Seções Colapsáveis */}
+              <div className="space-y-3 pt-2">
+                {[
+                  {
+                    id: 'termos_s1',
+                    label: 'Seção 1: Aceitação dos Termos',
+                    fields: [
+                      { label: 'Título da Seção', key: 's1_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's1_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s2',
+                    label: 'Seção 2: Definições',
+                    fields: [
+                      { label: 'Título da Seção', key: 's2_titulo', type: 'input' },
+                      { label: 'Definição de Portal', key: 's2_def_portal', type: 'textarea' },
+                      { label: 'Definição de Usuário', key: 's2_def_usuario', type: 'textarea' },
+                      { label: 'Definição de Atleta', key: 's2_def_atleta', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s3',
+                    label: 'Seção 3: Cadastro e Conta',
+                    fields: [
+                      { label: 'Título da Seção', key: 's3_titulo', type: 'input' },
+                      { label: 'Texto do Parágrafo 1', key: 's3_texto', type: 'textarea' },
+                      { label: 'Texto do Parágrafo 2', key: 's3_texto2', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s4',
+                    label: 'Seção 4: Uso do Portal',
+                    fields: [
+                      { label: 'Título da Seção', key: 's4_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's4_texto', type: 'textarea' },
+                      { label: 'Itens da Lista (um por linha)', key: 's4_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'termos_s5',
+                    label: 'Seção 5: Propriedade Intelectual',
+                    fields: [
+                      { label: 'Título da Seção', key: 's5_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's5_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s6',
+                    label: 'Seção 6: Homologação de Atletas',
+                    fields: [
+                      { label: 'Título da Seção', key: 's6_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's6_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s7',
+                    label: 'Seção 7: Limitação de Responsabilidade',
+                    fields: [
+                      { label: 'Título da Seção', key: 's7_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's7_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'termos_s8',
+                    label: 'Seção 8: Disposições Gerais',
+                    fields: [
+                      { label: 'Título da Seção', key: 's8_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's8_texto', type: 'textarea' }
+                    ]
+                  }
+                ].map(sec => {
+                  const isOpen = expandedSection === sec.id;
+                  return (
+                    <div key={sec.id} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(sec.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="text-xs font-bold text-white font-cinzel">{sec.label}</span>
+                        {isOpen ? <Minus size={14} className="text-gold" /> : <Plus size={14} className="text-zinc-500 hover:text-white" />}
+                      </button>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          {sec.fields.map(f => (
+                            <div key={f.key}>
+                              <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">{f.label}</label>
+                              {f.type === 'textarea' ? (
+                                <textarea
+                                  value={(docTermosForm as any)[f.key] || ''}
+                                  onChange={e => setDocTermosForm({ ...docTermosForm, [f.key]: e.target.value })}
+                                  rows={f.rows || 3}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={(docTermosForm as any)[f.key] || ''}
+                                  onChange={e => setDocTermosForm({ ...docTermosForm, [f.key]: e.target.value })}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Seções Adicionais Dinâmicas */}
+                {docTermosForm.secoes_extras?.map((sec, idx) => {
+                  const isOpen = expandedSection === `termos_extra_${idx}`;
+                  return (
+                    <div key={sec.id || idx} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <div className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 transition-colors">
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(`termos_extra_${idx}`)}
+                          className="flex-1 text-left cursor-pointer font-cinzel text-xs font-bold text-white"
+                        >
+                          {sec.titulo || `Seção Adicional ${idx + 1}`}
+                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const extras = [...(docTermosForm.secoes_extras || [])];
+                              extras.splice(idx, 1);
+                              setDocTermosForm({ ...docTermosForm, secoes_extras: extras });
+                            }}
+                            className="text-red-400 hover:text-red-500 p-1 cursor-pointer transition"
+                            title="Remover Seção"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                          {isOpen ? (
+                            <Minus size={14} className="text-gold cursor-pointer" onClick={() => toggleSection(`termos_extra_${idx}`)} />
+                          ) : (
+                            <Plus size={14} className="text-zinc-500 hover:text-white cursor-pointer" onClick={() => toggleSection(`termos_extra_${idx}`)} />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                            <input
+                              type="text"
+                              value={sec.titulo || ''}
+                              onChange={e => {
+                                const extras = [...(docTermosForm.secoes_extras || [])];
+                                extras[idx].titulo = e.target.value;
+                                setDocTermosForm({ ...docTermosForm, secoes_extras: extras });
+                              }}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Conteúdo do Texto</label>
+                            <textarea
+                              value={sec.texto || ''}
+                              onChange={e => {
+                                const extras = [...(docTermosForm.secoes_extras || [])];
+                                extras[idx].texto = e.target.value;
+                                setDocTermosForm({ ...docTermosForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Itens da Lista (um por linha - opcional)</label>
+                            <textarea
+                              value={sec.lista || ''}
+                              onChange={e => {
+                                const extras = [...(docTermosForm.secoes_extras || [])];
+                                extras[idx].lista = e.target.value;
+                                setDocTermosForm({ ...docTermosForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const extras = [...(docTermosForm.secoes_extras || [])];
+                    extras.push({ id: Math.random().toString(), titulo: '', texto: '', lista: '' });
+                    setDocTermosForm({ ...docTermosForm, secoes_extras: extras });
+                  }}
+                  className="w-full py-2.5 border border-dashed border-zinc-800 hover:border-gold/40 hover:bg-zinc-950/40 rounded-xl text-zinc-500 hover:text-gold text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 font-cinzel"
+                >
+                  <Plus size={14} /> Adicionar Seção Adicional
+                </button>
+              </div>
+
+              <div className="flex justify-end pt-2 font-cinzel border-t border-zinc-800/80">
                 <button type="button" onClick={() => handleSaveConfig('doc_termos', docTermosForm)} disabled={salvandoConfig}
-                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
                   <Save size={13} /> Salvar Termos
                 </button>
               </div>
@@ -1841,29 +2385,232 @@ export default function AdminCMSPage() {
             <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
               <Shield className="text-emerald-500" size={16} /> Política de Privacidade — Conteúdo da Página
             </h3>
-            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/privacidade</code>.</p>
+            <p className="text-[11px] text-zinc-500">Edite as seções da página. Clique no botão <code className="bg-zinc-950 px-1 rounded font-mono text-gold">+</code> para abrir os campos de cada seção.</p>
+            
             <div className="space-y-4">
-              {([
-                { label: 'Título da Página', field: 'titulo', type: 'input' },
-                { label: '1. Título Informações Coletadas', field: 's1_titulo', type: 'input' },
-                { label: '1. Texto Informações Coletadas', field: 's1_texto', type: 'textarea' },
-                { label: '5. Título Contato / DPO', field: 's5_titulo', type: 'input' },
-                { label: '5. Texto Contato / DPO', field: 's5_texto', type: 'textarea' },
-              ] as { label: string; field: keyof typeof docPrivacidadeForm; type: string }[]).map(({ label, field, type }) => (
-                <div key={field}>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
-                  {type === 'textarea' ? (
-                    <textarea value={docPrivacidadeForm[field]} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, [field]: e.target.value})}
-                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
-                  ) : (
-                    <input value={docPrivacidadeForm[field]} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, [field]: e.target.value})}
-                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
-                  )}
+              {/* Cabeçalho do Documento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/40 p-4 rounded-xl border border-zinc-800/60">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título do Documento</label>
+                  <input value={docPrivacidadeForm.titulo} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, titulo: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
                 </div>
-              ))}
-              <div className="flex justify-end pt-2 font-cinzel">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                  <input value={docPrivacidadeForm.desc} onChange={e => setDocPrivacidadeForm({...docPrivacidadeForm, desc: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
+                </div>
+              </div>
+
+              {/* Seções Colapsáveis */}
+              <div className="space-y-3 pt-2">
+                {[
+                  {
+                    id: 'priv_s1',
+                    label: 'Seção 1: Dados Coletados',
+                    fields: [
+                      { label: 'Título da Seção', key: 's1_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's1_texto', type: 'textarea' },
+                      { label: 'Itens Coletados (um por linha)', key: 's1_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'priv_s2',
+                    label: 'Seção 2: Finalidade do Tratamento',
+                    fields: [
+                      { label: 'Título da Seção', key: 's2_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's2_texto', type: 'textarea' },
+                      { label: 'Finalidades (uma por linha)', key: 's2_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'priv_s3',
+                    label: 'Seção 3: Compartilhamento de Dados',
+                    fields: [
+                      { label: 'Título da Seção', key: 's3_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's3_texto', type: 'textarea' },
+                      { label: 'Compartilhados com (um por linha)', key: 's3_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'priv_s4',
+                    label: 'Seção 4: Segurança dos Dados',
+                    fields: [
+                      { label: 'Título da Seção', key: 's4_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's4_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'priv_s5',
+                    label: 'Seção 5: Seus Direitos (LGPD)',
+                    fields: [
+                      { label: 'Título da Seção', key: 's5_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's5_texto', type: 'textarea' },
+                      { label: 'Direitos da LGPD (um por linha)', key: 's5_lista', type: 'textarea', rows: 5 }
+                    ]
+                  },
+                  {
+                    id: 'priv_s6',
+                    label: 'Seção 6: Cookies',
+                    fields: [
+                      { label: 'Título da Seção', key: 's6_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's6_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'priv_s7',
+                    label: 'Seção 7: Contato do Encarregado (DPO)',
+                    fields: [
+                      { label: 'Título da Seção', key: 's7_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto (ex: e-mail de contato)', key: 's7_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'priv_s8',
+                    label: 'Seção 8: Alterações na Política',
+                    fields: [
+                      { label: 'Título da Seção', key: 's8_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's8_texto', type: 'textarea' }
+                    ]
+                  }
+                ].map(sec => {
+                  const isOpen = expandedSection === sec.id;
+                  return (
+                    <div key={sec.id} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(sec.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="text-xs font-bold text-white font-cinzel">{sec.label}</span>
+                        {isOpen ? <Minus size={14} className="text-gold" /> : <Plus size={14} className="text-zinc-500 hover:text-white" />}
+                      </button>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          {sec.fields.map(f => (
+                            <div key={f.key}>
+                              <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">{f.label}</label>
+                              {f.type === 'textarea' ? (
+                                <textarea
+                                  value={(docPrivacidadeForm as any)[f.key] || ''}
+                                  onChange={e => setDocPrivacidadeForm({ ...docPrivacidadeForm, [f.key]: e.target.value })}
+                                  rows={f.rows || 3}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={(docPrivacidadeForm as any)[f.key] || ''}
+                                  onChange={e => setDocPrivacidadeForm({ ...docPrivacidadeForm, [f.key]: e.target.value })}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Seções Adicionais Dinâmicas */}
+                {docPrivacidadeForm.secoes_extras?.map((sec, idx) => {
+                  const isOpen = expandedSection === `priv_extra_${idx}`;
+                  return (
+                    <div key={sec.id || idx} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <div className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 transition-colors">
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(`priv_extra_${idx}`)}
+                          className="flex-1 text-left cursor-pointer font-cinzel text-xs font-bold text-white"
+                        >
+                          {sec.titulo || `Seção Adicional ${idx + 1}`}
+                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const extras = [...(docPrivacidadeForm.secoes_extras || [])];
+                              extras.splice(idx, 1);
+                              setDocPrivacidadeForm({ ...docPrivacidadeForm, secoes_extras: extras });
+                            }}
+                            className="text-red-400 hover:text-red-500 p-1 cursor-pointer transition"
+                            title="Remover Seção"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                          {isOpen ? (
+                            <Minus size={14} className="text-gold cursor-pointer" onClick={() => toggleSection(`priv_extra_${idx}`)} />
+                          ) : (
+                            <Plus size={14} className="text-zinc-500 hover:text-white cursor-pointer" onClick={() => toggleSection(`priv_extra_${idx}`)} />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                            <input
+                              type="text"
+                              value={sec.titulo || ''}
+                              onChange={e => {
+                                const extras = [...(docPrivacidadeForm.secoes_extras || [])];
+                                extras[idx].titulo = e.target.value;
+                                setDocPrivacidadeForm({ ...docPrivacidadeForm, secoes_extras: extras });
+                              }}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Conteúdo do Texto</label>
+                            <textarea
+                              value={sec.texto || ''}
+                              onChange={e => {
+                                const extras = [...(docPrivacidadeForm.secoes_extras || [])];
+                                extras[idx].texto = e.target.value;
+                                setDocPrivacidadeForm({ ...docPrivacidadeForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Itens da Lista (um por linha - opcional)</label>
+                            <textarea
+                              value={sec.lista || ''}
+                              onChange={e => {
+                                const extras = [...(docPrivacidadeForm.secoes_extras || [])];
+                                extras[idx].lista = e.target.value;
+                                setDocPrivacidadeForm({ ...docPrivacidadeForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const extras = [...(docPrivacidadeForm.secoes_extras || [])];
+                    extras.push({ id: Math.random().toString(), titulo: '', texto: '', lista: '' });
+                    setDocPrivacidadeForm({ ...docPrivacidadeForm, secoes_extras: extras });
+                  }}
+                  className="w-full py-2.5 border border-dashed border-zinc-800 hover:border-gold/40 hover:bg-zinc-950/40 rounded-xl text-zinc-500 hover:text-gold text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 font-cinzel"
+                >
+                  <Plus size={14} /> Adicionar Seção Adicional
+                </button>
+              </div>
+
+              <div className="flex justify-end pt-2 font-cinzel border-t border-zinc-800/80">
                 <button type="button" onClick={() => handleSaveConfig('doc_privacidade', docPrivacidadeForm)} disabled={salvandoConfig}
-                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
                   <Save size={13} /> Salvar Privacidade
                 </button>
               </div>
@@ -1876,29 +2623,232 @@ export default function AdminCMSPage() {
             <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
               <AlertTriangle className="text-amber-500" size={16} /> Defesa de Marca — Conteúdo da Página
             </h3>
-            <p className="text-[11px] text-zinc-500">Edite os campos principais. As alterações serão carregadas dinamicamente pela página pública <code className="bg-zinc-950 px-1 rounded">/transparencia/defesa-marca</code>.</p>
+            <p className="text-[11px] text-zinc-500">Edite as seções da página. Clique no botão <code className="bg-zinc-950 px-1 rounded font-mono text-gold">+</code> para abrir os campos de cada seção.</p>
+            
             <div className="space-y-4">
-              {([
-                { label: 'Título da Página', field: 'titulo', type: 'input' },
-                { label: '1. Título — O que é Defesa de Marca?', field: 's1_titulo', type: 'input' },
-                { label: '1. Texto — O que é Defesa de Marca?', field: 's1_texto', type: 'textarea' },
-                { label: '8. Título — Contato para Autorização', field: 's8_titulo', type: 'input' },
-                { label: '8. Texto — Contato para Autorização', field: 's8_texto', type: 'textarea' },
-              ] as { label: string; field: keyof typeof docDefesaMarcaForm; type: string }[]).map(({ label, field, type }) => (
-                <div key={field}>
-                  <label className="block text-[10px] font-bold text-zinc-400 uppercase mb-1">{label}</label>
-                  {type === 'textarea' ? (
-                    <textarea value={docDefesaMarcaForm[field]} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, [field]: e.target.value})}
-                      rows={3} className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition-colors font-sans" />
-                  ) : (
-                    <input value={docDefesaMarcaForm[field]} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, [field]: e.target.value})}
-                      className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition-colors font-sans" />
-                  )}
+              {/* Cabeçalho do Documento */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-zinc-950/40 p-4 rounded-xl border border-zinc-800/60">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título do Documento</label>
+                  <input value={docDefesaMarcaForm.titulo} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, titulo: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
                 </div>
-              ))}
-              <div className="flex justify-end pt-2 font-cinzel">
+                <div>
+                  <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Descrição</label>
+                  <input value={docDefesaMarcaForm.desc} onChange={e => setDocDefesaMarcaForm({...docDefesaMarcaForm, desc: e.target.value})}
+                    className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans" />
+                </div>
+              </div>
+
+              {/* Seções Colapsáveis */}
+              <div className="space-y-3 pt-2">
+                {[
+                  {
+                    id: 'marca_s1',
+                    label: 'Seção 1: O que é Defesa de Marca?',
+                    fields: [
+                      { label: 'Título da Seção', key: 's1_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's1_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'marca_s2',
+                    label: 'Seção 2: Identidade da Marca',
+                    fields: [
+                      { label: 'Título da Seção', key: 's2_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's2_texto', type: 'textarea' },
+                      { label: 'Itens da Identidade (um por linha)', key: 's2_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'marca_s3',
+                    label: 'Seção 3: Registro e Propriedade',
+                    fields: [
+                      { label: 'Título da Seção', key: 's3_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's3_texto', type: 'textarea' },
+                      { label: 'Itens de Registro (um por linha)', key: 's3_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'marca_s4',
+                    label: 'Seção 4: Uso Autorizado',
+                    fields: [
+                      { label: 'Título da Seção', key: 's4_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's4_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'marca_s5',
+                    label: 'Seção 5: Diretrizes de Branding',
+                    fields: [
+                      { label: 'Título da Seção', key: 's5_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's5_texto', type: 'textarea' },
+                      { label: 'Itens das Diretrizes (um por linha)', key: 's5_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'marca_s6',
+                    label: 'Seção 6: Monitoramento e Fiscalização',
+                    fields: [
+                      { label: 'Título da Seção', key: 's6_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's6_texto', type: 'textarea' }
+                    ]
+                  },
+                  {
+                    id: 'marca_s7',
+                    label: 'Seção 7: Penalidades',
+                    fields: [
+                      { label: 'Título da Seção', key: 's7_titulo', type: 'input' },
+                      { label: 'Texto de Introdução', key: 's7_texto', type: 'textarea' },
+                      { label: 'Itens das Penalidades (um por linha)', key: 's7_lista', type: 'textarea', rows: 4 }
+                    ]
+                  },
+                  {
+                    id: 'marca_s8',
+                    label: 'Seção 8: Contato para Autorização',
+                    fields: [
+                      { label: 'Título da Seção', key: 's8_titulo', type: 'input' },
+                      { label: 'Conteúdo do Texto', key: 's8_texto', type: 'textarea' }
+                    ]
+                  }
+                ].map(sec => {
+                  const isOpen = expandedSection === sec.id;
+                  return (
+                    <div key={sec.id} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <button
+                        type="button"
+                        onClick={() => toggleSection(sec.id)}
+                        className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="text-xs font-bold text-white font-cinzel">{sec.label}</span>
+                        {isOpen ? <Minus size={14} className="text-gold" /> : <Plus size={14} className="text-zinc-500 hover:text-white" />}
+                      </button>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          {sec.fields.map(f => (
+                            <div key={f.key}>
+                              <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">{f.label}</label>
+                              {f.type === 'textarea' ? (
+                                <textarea
+                                  value={(docDefesaMarcaForm as any)[f.key] || ''}
+                                  onChange={e => setDocDefesaMarcaForm({ ...docDefesaMarcaForm, [f.key]: e.target.value })}
+                                  rows={f.rows || 3}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                                />
+                              ) : (
+                                <input
+                                  type="text"
+                                  value={(docDefesaMarcaForm as any)[f.key] || ''}
+                                  onChange={e => setDocDefesaMarcaForm({ ...docDefesaMarcaForm, [f.key]: e.target.value })}
+                                  className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Seções Adicionais Dinâmicas */}
+                {docDefesaMarcaForm.secoes_extras?.map((sec, idx) => {
+                  const isOpen = expandedSection === `marca_extra_${idx}`;
+                  return (
+                    <div key={sec.id || idx} className="border border-zinc-800/80 rounded-xl overflow-hidden bg-zinc-950/20">
+                      <div className="w-full flex items-center justify-between px-4 py-3 bg-zinc-900/60 transition-colors">
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(`marca_extra_${idx}`)}
+                          className="flex-1 text-left cursor-pointer font-cinzel text-xs font-bold text-white"
+                        >
+                          {sec.titulo || `Seção Adicional ${idx + 1}`}
+                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const extras = [...(docDefesaMarcaForm.secoes_extras || [])];
+                              extras.splice(idx, 1);
+                              setDocDefesaMarcaForm({ ...docDefesaMarcaForm, secoes_extras: extras });
+                            }}
+                            className="text-red-400 hover:text-red-500 p-1 cursor-pointer transition"
+                            title="Remover Seção"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                          {isOpen ? (
+                            <Minus size={14} className="text-gold cursor-pointer" onClick={() => toggleSection(`marca_extra_${idx}`)} />
+                          ) : (
+                            <Plus size={14} className="text-zinc-500 hover:text-white cursor-pointer" onClick={() => toggleSection(`marca_extra_${idx}`)} />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {isOpen && (
+                        <div className="p-4 space-y-3 bg-zinc-950/60 border-t border-zinc-800/60">
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Título da Seção</label>
+                            <input
+                              type="text"
+                              value={sec.titulo || ''}
+                              onChange={e => {
+                                const extras = [...(docDefesaMarcaForm.secoes_extras || [])];
+                                extras[idx].titulo = e.target.value;
+                                setDocDefesaMarcaForm({ ...docDefesaMarcaForm, secoes_extras: extras });
+                              }}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Conteúdo do Texto</label>
+                            <textarea
+                              value={sec.texto || ''}
+                              onChange={e => {
+                                const extras = [...(docDefesaMarcaForm.secoes_extras || [])];
+                                extras[idx].texto = e.target.value;
+                                setDocDefesaMarcaForm({ ...docDefesaMarcaForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold text-zinc-400 uppercase mb-1">Itens da Lista (um por linha - opcional)</label>
+                            <textarea
+                              value={sec.lista || ''}
+                              onChange={e => {
+                                const extras = [...(docDefesaMarcaForm.secoes_extras || [])];
+                                extras[idx].lista = e.target.value;
+                                setDocDefesaMarcaForm({ ...docDefesaMarcaForm, secoes_extras: extras });
+                              }}
+                              rows={3}
+                              className="w-full px-3 py-2 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none resize-none focus:border-gold transition font-sans"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const extras = [...(docDefesaMarcaForm.secoes_extras || [])];
+                    extras.push({ id: Math.random().toString(), titulo: '', texto: '', lista: '' });
+                    setDocDefesaMarcaForm({ ...docDefesaMarcaForm, secoes_extras: extras });
+                  }}
+                  className="w-full py-2.5 border border-dashed border-zinc-800 hover:border-gold/40 hover:bg-zinc-950/40 rounded-xl text-zinc-500 hover:text-gold text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 font-cinzel"
+                >
+                  <Plus size={14} /> Adicionar Seção Adicional
+                </button>
+              </div>
+
+              <div className="flex justify-end pt-2 font-cinzel border-t border-zinc-800/80">
                 <button type="button" onClick={() => handleSaveConfig('doc_defesa_marca', docDefesaMarcaForm)} disabled={salvandoConfig}
-                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
+                  className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5">
                   <Save size={13} /> Salvar Defesa de Marca
                 </button>
               </div>

@@ -167,6 +167,18 @@ def create_filial_routes(app: Flask):
             if field in data:
                 update_fil[field] = data[field]
 
+        # Se a filial foi homologada (status alterado para ativo), gera o registro_federativo ou codigo_interno
+        if (update_prof.get("status") == "ativo" or update_fil.get("status") == "ativo"):
+            existing_filial, _ = SupabaseService.get_profile_by_id(id)
+            if existing_filial and existing_filial.get("status") != "ativo":
+                from datetime import datetime
+                ano_atual = datetime.now().year
+                codigo_gerado = f"GRKK-F-{ano_atual}-{str(id)[:5].upper()}"
+                if not existing_filial.get("registro_federativo") and not update_fil.get("registro_federativo"):
+                    update_fil["registro_federativo"] = codigo_gerado
+                if not existing_filial.get("codigo_interno") or existing_filial.get("codigo_interno").startswith("MOCK-FILIAL"):
+                    update_fil["codigo_interno"] = codigo_gerado
+
         if update_fil:
             res, error = SupabaseService.update("filiais", id, update_fil)
             if error:

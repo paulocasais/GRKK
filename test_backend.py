@@ -37,7 +37,8 @@ def test_app_structure():
                               json={
                                   'nome': 'Test Atleta',
                                   'email': 'test@example.com',
-                                  'telefone': '123456789'
+                                  'telefone': '123456789',
+                                  'aceita_termos': True
                               })
         assert response.status_code == 201
         print("PASS: Rota de registro de atleta funciona corretamente")
@@ -46,7 +47,8 @@ def test_app_structure():
         response = client.post('/api/filiais', 
                               json={
                                   'nome': 'Test Filial',
-                                  'email': 'filial@example.com'
+                                  'email': 'filial@example.com',
+                                  'aceita_termos': True
                               })
         assert response.status_code == 201
         print("PASS: Rota de registro de filial funciona corretamente")

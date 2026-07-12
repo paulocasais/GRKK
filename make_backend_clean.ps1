@@ -15,7 +15,7 @@ $include = @(
     'team_gallery_routes.py',
     'check_startup.py', 'check_profiles.py',
     'requirements.txt', '.htaccess', 'index.fcgi', 'passenger_wsgi.py',
-    'forcar_reinstalacao_total.php', 'limpar_e_reinstalar.php',
+    'forcar_reinstalacao_total.php', 'limpar_e_reinstalar.php', 'diagnostico_erro.php',
     'schema.sql', '.env.production.template'
 )
 
