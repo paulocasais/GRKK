@@ -229,7 +229,7 @@ export default function AdminCMSPage() {
   // Forms
   const [bannerForm, setBannerForm] = useState({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
   const [teamForm, setTeamForm] = useState({ nome: '', cargo: '', biografia: '', foto_url: '', order: 0 });
-  const [galleryForm, setGalleryForm] = useState({ title: '', category: 'Dojo', image_url: '', order: 0 });
+  const [galleryForm, setGalleryForm] = useState({ title: '', category: 'Treinos', image_url: '', order: 0 });
 
   // Site configuration states
   interface ConfigInicial {
@@ -953,7 +953,7 @@ export default function AdminCMSPage() {
               } else {
                 setBannerForm({ titulo: '', subtitulo: '', link: '', imagem_url: '' });
                 setTeamForm({ nome: '', cargo: '', biografia: '', foto_url: '', order: equipe.length + 1 });
-                setGalleryForm({ title: '', category: 'Dojo', image_url: '', order: galeria.length + 1 });
+                setGalleryForm({ title: '', category: 'Treinos', image_url: '', order: galeria.length + 1 });
                 setShowModal(true);
               }
             }}
@@ -3053,10 +3053,10 @@ export default function AdminCMSPage() {
                         onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
                         className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none"
                       >
-                        <option value="Dojo">Dojo</option>
-                        <option value="Torneios">Torneios</option>
-                        <option value="Katas">Katas</option>
-                        <option value="Exames">Exames</option>
+                        <option value="Treinos">Treinos</option>
+                        <option value="Eventos">Eventos</option>
+                        <option value="Gasshukus">Gasshukus</option>
+                        <option value="Graduações">Graduações</option>
                       </select>
                     </div>
                     <div>
