@@ -8,7 +8,7 @@ import ImageLightbox from '@/components/ImageLightbox';
 interface GalleryItem {
   id: string | number;
   title: string;
-  url: string;
+  image_url: string;
   type: string;
   category: string;
   order: number;
@@ -95,7 +95,7 @@ export default function GaleriaPage() {
                 {filteredItems.map((item) => (
                   <div key={item.id} className="aspect-square bg-zinc-900 border border-zinc-900 rounded-3xl overflow-hidden relative group hover:border-primary/20 transition-all duration-300">
                     <ImageLightbox
-                      src={item.url}
+                      src={item.image_url}
                       alt={item.title}
                       className="w-full h-full object-cover"
                     />
