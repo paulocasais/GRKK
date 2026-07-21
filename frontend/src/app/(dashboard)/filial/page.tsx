@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { 
   Building2, Mail, Phone, MapPin, ShieldCheck,
-  Save, Loader2, CheckCircle2, AlertCircle, Award, User
+  Save, Loader2, CheckCircle2, AlertCircle, Award, User, UserCheck
 } from 'lucide-react';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 function formatarCPF(valor: string) {
   return valor
@@ -63,6 +63,21 @@ function validarCPF(cpf: string): boolean {
   return true;
 }
 
+function formatarCnpjCpf(valor: string) {
+  const limpo = valor.replace(/\D/g, '').slice(0, 14);
+  if (limpo.length <= 11) {
+    return limpo
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})/, '$1-$2');
+  }
+  return limpo
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2');
+}
+
 export default function MinhaFilialPage() {
   const { usuario, recarregarSessao, tipo } = useAuth();
   
@@ -70,6 +85,7 @@ export default function MinhaFilialPage() {
     nome: '',
     email: '',
     telefone: '',
+    cnpj_cpf: '',
     nome_fantasia: '',
     cpf_responsavel: '',
     graduacao_responsavel: '',
@@ -83,8 +99,34 @@ export default function MinhaFilialPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [registrandoAtleta, setRegistrandoAtleta] = useState(false);
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [notif, setNotif] = useState<{ type: 'success' | 'error' | null; msg: string }>({ type: null, msg: '' });
+
+  const handleSelfRegisterAtleta = async () => {
+    setRegistrandoAtleta(true);
+    setNotif({ type: null, msg: '' });
+    try {
+      const res = await fetch(`${API_URL}/api/atletas/self-register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Falha ao solicitar cadastro de atleta.');
+
+      setNotif({
+        type: 'success',
+        msg: 'Solicitação realizada com sucesso! O cadastro de atleta está aguardando homologação da Associação.'
+      });
+      await recarregarSessao();
+    } catch (err: any) {
+      setNotif({ type: 'error', msg: err.message || 'Erro ao solicitar cadastro de atleta.' });
+    } finally {
+      setRegistrandoAtleta(false);
+    }
+  };
 
   useEffect(() => {
     if (usuario) {
@@ -92,16 +134,17 @@ export default function MinhaFilialPage() {
         nome: usuario.nome || '',
         email: usuario.email || '',
         telefone: usuario.telefone ? formatarTelefone(usuario.telefone) : '',
+        cnpj_cpf: usuario.cnpj_cpf ? formatarCnpjCpf(usuario.cnpj_cpf) : '',
         nome_fantasia: usuario.nome_fantasia || '',
         cpf_responsavel: usuario.cpf_responsavel ? formatarCPF(usuario.cpf_responsavel) : '',
         graduacao_responsavel: usuario.graduacao_responsavel || '',
         registro_federativo: usuario.registro_federativo || '',
         cep: usuario.cep ? formatarCEP(usuario.cep) : '',
-        rua: usuario.rua || usuario.endereco || '', // fallback
+        rua: usuario.rua || usuario.endereco || '',
         numero: usuario.numero || '',
         bairro: usuario.bairro || '',
-        municipio: usuario.municipio || usuario.cidade || '', // fallback
-        estado: usuario.estado || usuario.uf || '', // fallback
+        municipio: usuario.municipio || usuario.cidade || '',
+        estado: usuario.estado || usuario.uf || '',
       });
     }
   }, [usuario]);
@@ -158,6 +201,7 @@ export default function MinhaFilialPage() {
       const payload = {
         ...form,
         telefone: form.telefone.replace(/\D/g, ''),
+        cnpj_cpf: form.cnpj_cpf.replace(/\D/g, ''),
         cpf_responsavel: form.cpf_responsavel.replace(/\D/g, ''),
         cep: form.cep.replace(/\D/g, ''),
       };
@@ -244,6 +288,17 @@ export default function MinhaFilialPage() {
                   value={form.nome_fantasia}
                   onChange={set('nome_fantasia')}
                   placeholder="Ex: Dojo Goju-Ryu Salvador"
+                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5 col-span-full">
+                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">CNPJ ou CPF da Filial / Dojo *</label>
+                <input
+                  required
+                  value={form.cnpj_cpf}
+                  onChange={setFormatado('cnpj_cpf', formatarCnpjCpf)}
+                  placeholder="00.000.000/0001-00 ou 000.000.000-00"
                   className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
                 />
               </div>
@@ -406,6 +461,40 @@ export default function MinhaFilialPage() {
           </div>
 
         </div>
+
+        {/* Card: Perfil de Atleta Unificado */}
+        {!usuario?.tambem_atleta ? (
+          <div className="bg-zinc-900 border border-cobalt-500/20 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+              <UserCheck className="text-cobalt-400" size={16} /> TAMBÉM SOU ATLETA ATIVO
+            </h3>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Se você, além de responsável técnico do dojo, também treina e compete como atleta ativo da Associação, pode solicitar o seu cadastro como atleta vinculado à sua própria filial. Após a solicitação, o perfil será disponibilizado para homologação.
+            </p>
+            <button
+              type="button"
+              onClick={handleSelfRegisterAtleta}
+              disabled={registrandoAtleta}
+              className="bg-cobalt-500 hover:bg-cobalt-600 text-white font-bold px-6 py-3 rounded-xl text-xs tracking-wider uppercase transition-all flex items-center gap-2 cursor-pointer"
+            >
+              {registrandoAtleta ? (
+                <><Loader2 size={14} className="animate-spin" /> Processando...</>
+              ) : (
+                <><UserCheck size={14} /> Solicitar Cadastro como Atleta</>
+              )}
+            </button>
+          </div>
+        ) : (
+          <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-5 flex items-center gap-3">
+            <CheckCircle2 className="text-emerald-400 shrink-0" size={20} />
+            <div>
+              <p className="text-xs font-bold text-emerald-400">Cadastro de Atleta Ativo Vinculado</p>
+              <p className="text-[10px] text-zinc-400 mt-0.5">
+                Sua conta possui perfil unificado. Utilize o botão de alternância de perfil na barra lateral ou no topo para acessar a interface de Atleta.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Botão de Submissão */}
         <div className="flex justify-end pt-4 border-t border-zinc-900 font-cinzel">

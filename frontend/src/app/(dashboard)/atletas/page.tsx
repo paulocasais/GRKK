@@ -46,21 +46,26 @@ interface Atleta {
   autoriza_uso_imagem?: boolean;
   registro_federacao?: string;
   documentos_entregues?: boolean;
+  ja_praticou_artes_marciais?: string;
+  federacao?: string;
 }
 
-import { FAIXAS, FAIXAS_INFANTIL, FAIXAS_ADULTO, CORES_FAIXAS } from '@/constants/faixas';
+import { FAIXAS, FAIXAS_INFANTIL, FAIXAS_ADULTO, CORES_FAIXAS, obterEstiloFaixa } from '@/constants/faixas';
 
 function renderFaixaBadge(faixa: string) {
-  const cor = CORES_FAIXAS[faixa] || { bg: 'bg-zinc-800', border: 'border-zinc-700', text: 'text-white' };
+  const cor = obterEstiloFaixa(faixa);
 
   return (
-    <div className={`relative flex items-center justify-between px-2.5 py-1 rounded border text-[9px] font-black uppercase tracking-wider ${cor.bg} ${cor.border} ${cor.text} shadow-sm overflow-hidden h-[22px] w-[95px] select-none`}>
-      <span className="truncate pr-1">{faixa}</span>
-      {cor.stripe ? (
-        <div className={`absolute right-0 top-0 bottom-0 w-2.5 ${cor.stripe}`} title="Ponteira de Graduação" />
-      ) : (
-        <div className="absolute right-0 top-0 bottom-0 w-1 bg-zinc-950/20" />
+    <div className={`relative flex items-center justify-between px-2.5 py-1 rounded border text-[9px] font-black uppercase tracking-wider ${cor.bg} ${cor.border} ${cor.text} shadow-sm overflow-hidden h-[22px] min-w-[95px] select-none`}>
+      {cor.centerStripe && (
+        <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 ${cor.centerStripe} pointer-events-none opacity-90`} />
       )}
+      <span className="relative z-10 truncate pr-1 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">{faixa || 'Branca'}</span>
+      {cor.tipStripe ? (
+        <div className={`relative z-10 w-2.5 h-full ${cor.tipStripe}`} title="Ponteira de Graduação" />
+      ) : !cor.centerStripe ? (
+        <div className="relative z-10 w-1 h-full bg-zinc-950/20" />
+      ) : null}
     </div>
   );
 }
@@ -81,6 +86,7 @@ export default function AtletasPage() {
   const [viewingAtleta, setViewingAtleta] = useState<Atleta | null>(null);
   const [novaFaixa, setNovaFaixa] = useState('');
   const [novaFilialId, setNovaFilialId] = useState('');
+  const [novaFederacao, setNovaFederacao] = useState('');
   const [salvando, setSalvando] = useState(false);
 
   const carregarAtletas = async () => {
@@ -524,7 +530,8 @@ export default function AtletasPage() {
         body: JSON.stringify({ 
           faixa: novaFaixa,
           filial_id: novaFilialId || null,
-          filial_nome: novaFilialId ? filialNome : null
+          filial_nome: novaFilialId ? filialNome : null,
+          federacao: novaFederacao || null
         })
       });
       if (res.ok) {
@@ -532,7 +539,8 @@ export default function AtletasPage() {
           ...a, 
           faixa: novaFaixa,
           filial_id: novaFilialId || undefined,
-          filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial'
+          filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial',
+          federacao: novaFederacao || undefined
         } : a));
         setSelectedAtleta(null);
       }
@@ -543,7 +551,8 @@ export default function AtletasPage() {
         ...a, 
         faixa: novaFaixa,
         filial_id: novaFilialId || undefined,
-        filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial'
+        filial_nome: novaFilialId ? filialNome : 'Dojo Central / Sem Filial',
+        federacao: novaFederacao || undefined
       } : a));
       setSelectedAtleta(null);
     } finally {
@@ -628,12 +637,19 @@ export default function AtletasPage() {
                     <p className="text-[10px] text-zinc-500">{atleta.filial_nome || 'Dojo Central'}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border ${
-                  atleta.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                  atleta.status === 'pendente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
-                }`}>
-                  {atleta.status}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border ${
+                    atleta.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                    atleta.status === 'pendente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
+                  }`}>
+                    {atleta.status}
+                  </span>
+                  {atleta.status === 'pendente' && !atleta.cpf && (
+                    <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border bg-red-950/40 text-red-400 border-red-500/30" title="Cadastro sem CPF preenchido">
+                      Falta CPF
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-zinc-800/50">
@@ -713,6 +729,7 @@ export default function AtletasPage() {
                     setSelectedAtleta(atleta);
                     setNovaFaixa(atleta.faixa);
                     setNovaFilialId((atleta as any).filial_id || '');
+                    setNovaFederacao(atleta.federacao || '');
                   }}
                   className="flex-1 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer text-center"
                 >
@@ -777,6 +794,19 @@ export default function AtletasPage() {
                   ))}
                 </select>
               </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-zinc-450 uppercase mb-1.5">Federação</label>
+                <select
+                  value={novaFederacao}
+                  onChange={(e) => setNovaFederacao(e.target.value)}
+                  className="w-full px-3.5 py-2.5 text-xs bg-zinc-950 border border-zinc-800 rounded-xl text-white outline-none focus:border-gold"
+                >
+                  <option value="">Não filiado a nenhuma federação</option>
+                  <option value="FKBA">Filiado a FKBA</option>
+                  <option value="IOGKF Brasil">Filiado a IOGKF Brasil</option>
+                </select>
+              </div>
  
               <div className="flex gap-2.5 pt-2">
                 <button
@@ -834,7 +864,16 @@ export default function AtletasPage() {
                   <p className="text-zinc-400">Celular: <strong className="text-white font-mono">{viewingAtleta.telefone || 'Não informado'}</strong></p>
                   <p className="text-zinc-400">E-mail: <strong className="text-white font-mono">{viewingAtleta.email}</strong></p>
                   <p className="text-zinc-400">Dojo / Filial: <strong className="text-white">{viewingAtleta.filial_nome || 'Dojo Central'}</strong></p>
-                  <p className="text-zinc-400">Professor / Sensei: <strong className="text-white">{viewingAtleta.nome_professor || 'Não informado'}</strong></p>
+                  <p className="text-zinc-400">Federação: <strong className="text-white">{viewingAtleta.federacao ? (viewingAtleta.federacao.startsWith('Filiado') ? viewingAtleta.federacao : `Filiado a ${viewingAtleta.federacao}`) : 'Não filiado'}</strong></p>
+                  <p className="text-zinc-400">Já praticou artes marciais antes?: <strong className="text-white">{viewingAtleta.ja_praticou_artes_marciais || (viewingAtleta.nome_professor ? 'Sim' : 'Não')}</strong></p>
+                  {(viewingAtleta.ja_praticou_artes_marciais === 'Sim' || viewingAtleta.nome_professor) && (
+                    <div className="bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/80 space-y-1 my-1">
+                      <p className="text-zinc-400">Sensei / Professor: <strong className="text-white">{viewingAtleta.nome_professor || 'Não informado'}</strong></p>
+                      <p className="text-zinc-400">Arte Marcial: <strong className="text-white">{viewingAtleta.arte_marcial || 'Karate'}</strong></p>
+                      <p className="text-zinc-400">Estilo: <strong className="text-white">{viewingAtleta.estilo || 'Goju-Ryu'}</strong></p>
+                      <p className="text-zinc-400">Academia / Clube: <strong className="text-white">{viewingAtleta.academia_clube || 'Associação Goju-Ryu Karate Kai'}</strong></p>
+                    </div>
+                  )}
                   <p className="text-zinc-400">Endereço: <strong className="text-white leading-relaxed">{viewingAtleta.endereco || 'Não cadastrado'} {viewingAtleta.cidade ? `, ${viewingAtleta.cidade} - ${viewingAtleta.uf || 'BA'}` : ''}</strong></p>
                 </div>
               </div>

@@ -41,11 +41,11 @@ export default function GaleriaPage() {
 
   const filteredItems = items.filter((item) => {
     if (activeCategory === 'Todos') return true;
-    
+
     // Normalização básica de acentos para comparação
     const normActive = activeCategory.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const normItem = item.category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    
+
     return normActive === normItem;
   });
 
@@ -71,11 +71,10 @@ export default function GaleriaPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`font-cinzel text-xs tracking-widest uppercase px-5 py-2 border rounded-full transition-all duration-200 cursor-pointer ${
-                    cat === activeCategory
+                  className={`font-cinzel text-xs tracking-widest uppercase px-5 py-2 border rounded-full transition-all duration-200 cursor-pointer ${cat === activeCategory
                       ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
                       : 'border-zinc-900 text-gray-400 hover:border-primary hover:text-primary'
-                  }`}
+                    }`}
                 >
                   {cat}
                 </button>

@@ -44,6 +44,9 @@ def create_exam_routes(app: Flask):
             exames, error = SupabaseService.get_all("exames", order_by="data_exame", ascending=False)
             if error:
                 return jsonify({"error": error}), 500
+            for ex in (exames or []):
+                if not ex.get("faixa_alvo"):
+                    ex["faixa_alvo"] = "Todas as Faixas"
             return jsonify({"exames": exames}), 200
 
         elif request.method == "POST":
@@ -466,6 +469,9 @@ def create_exam_routes(app: Flask):
             exame = next((ex for ex in (exames or []) if str(ex["id"]) == id), None)
             if not exame:
                 return jsonify({"error": "Exame não encontrado"}), 404
+
+            if not exame.get("faixa_alvo"):
+                exame["faixa_alvo"] = "Todas as Faixas"
 
             vinculos, _ = SupabaseService.get_all("examinadores_exame", filter_dict={"exame_id": id})
             examinadores_ids = [v["examinador_id"] for v in (vinculos or [])]

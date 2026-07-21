@@ -1,19 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashTopBar from '@/components/dashboard/DashTopBar';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { carregando, autenticado } = useAuth();
+  const { carregando, autenticado, cadastroIncompleto, tipo, isAdmin } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,16 @@ export default function DashboardLayout({
       router.push('/auth');
     }
   }, [carregando, autenticado, router]);
+
+  // Trava de Cadastro Incompleto: força o usuário a ir para /configuracoes (atleta) ou /filial (filial)
+  useEffect(() => {
+    if (!carregando && autenticado && cadastroIncompleto && !isAdmin) {
+      const targetPage = tipo === 'filial' ? '/filial' : '/configuracoes';
+      if (pathname !== targetPage) {
+        router.push(targetPage);
+      }
+    }
+  }, [carregando, autenticado, cadastroIncompleto, isAdmin, tipo, pathname, router]);
 
   if (carregando) {
     return (
@@ -80,6 +91,17 @@ export default function DashboardLayout({
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen overflow-x-hidden">
         <DashTopBar onMenuOpen={() => setSidebarOpen(true)} />
+        
+        {/* Banner de Cadastro Incompleto */}
+        {cadastroIncompleto && !isAdmin && (
+          <div className="bg-amber-950/40 border-b border-amber-500/30 px-4 py-3 text-amber-300 text-xs flex items-center justify-center gap-2 font-medium">
+            <AlertTriangle size={16} className="text-amber-400 shrink-0 animate-bounce" />
+            <span>
+              <strong>Atenção:</strong> Seu cadastro está incompleto. Por favor, preencha os dados obrigatórios (CPF, endereço e dados pessoais) e salve para liberar o acesso total ao sistema.
+            </span>
+          </div>
+        )}
+
         <div className="flex-1 w-full bg-zinc-950">
           {children}
         </div>

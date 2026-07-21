@@ -180,7 +180,7 @@ def create_atleta_routes(app: Flask):
             "arte_marcial", "estilo", "academia_clube", "medico_tipo_sanguineo", "medico_fator_rh",
             "medico_sus", "medico_emergencia_nome", "medico_emergencia_telefone", "medico_medicacao_uso",
             "medico_medicacao_lista", "medico_alergia_medicamento", "fisico_peso", "fisico_altura",
-            "autoriza_uso_imagem", "registro_federacao", "documentos_entregues"
+            "autoriza_uso_imagem", "registro_federacao", "documentos_entregues", "ja_praticou_artes_marciais"
         ]
         for field in fields_to_update:
             if field in data:
@@ -271,3 +271,94 @@ def create_atleta_routes(app: Flask):
         )
 
         return jsonify({"sucesso": True}), 200
+
+    @app.route("/api/atletas/self-register", methods=["POST"])
+    def self_register_as_atleta():
+        from app import get_current_user
+        from services.audit_service import registrar_log_auditoria
+
+        user = get_current_user()
+        if not user:
+            return jsonify({"error": "Não autenticado"}), 401
+
+        data = request.get_json(silent=True) or {}
+        target_id = data.get("filial_id") if (user.get("tipo") == "admin" and data.get("filial_id")) else user["id"]
+
+        is_filial_user = False
+        if user.get("tipo") in ["filial", "admin"]:
+            is_filial_user = True
+        else:
+            filial_rec, _ = SupabaseService.get_all("filiais", filter_dict={"id": target_id})
+            if filial_rec:
+                is_filial_user = True
+
+        if not is_filial_user:
+            return jsonify({"error": "Sua conta não possui papel de filial/dojo credenciado."}), 403
+
+        filial_info, _ = SupabaseService.get_profile_by_id(target_id)
+        if not filial_info:
+            filial_info = user
+
+        # Verifica se já possui registro como atleta
+        existing, _ = SupabaseService.get_all("atletas", filter_dict={"id": target_id})
+        if existing:
+            return jsonify({"error": "Esta conta já possui um registro de atleta vinculado."}), 400
+
+        cpf_consolidado = (
+            filial_info.get("cpf_responsavel")
+            or filial_info.get("cnpj_cpf")
+            or filial_info.get("cpf")
+            or user.get("cpf_responsavel")
+            or user.get("cnpj_cpf")
+            or user.get("cpf")
+            or ""
+        )
+
+        nome_atleta = (
+            filial_info.get("nome_responsavel")
+            or filial_info.get("nome")
+            or user.get("nome")
+            or "Sensei / Atleta"
+        )
+
+        atleta_item = {
+            "id": target_id,
+            "nome": nome_atleta,
+            "email": filial_info.get("email", ""),
+            "telefone": filial_info.get("telefone", ""),
+            "status": "pendente",
+            "faixa": filial_info.get("graduacao_responsavel") or "Branca",
+            "cpf": cpf_consolidado,
+            "filial_id": target_id,
+            "filial_nome": filial_info.get("nome_fantasia") or filial_info.get("nome", ""),
+            "cep": filial_info.get("cep", ""),
+            "endereco": filial_info.get("rua") or filial_info.get("endereco") or "",
+            "cidade": filial_info.get("municipio") or filial_info.get("cidade") or "",
+            "uf": filial_info.get("estado") or filial_info.get("uf") or "",
+            "data_nascimento": filial_info.get("data_nascimento") or user.get("data_nascimento") or "1990-01-01",
+            "categoria": "Adulto",
+            "documentos_entregues": False
+        }
+        atleta, error = SupabaseService.insert("atletas", atleta_item)
+        if error:
+            return jsonify({"error": error}), 500
+
+        registrar_log_auditoria(
+            user,
+            "Auto-solicitação de Atleta",
+            f"Solicitado vínculo de atleta ativo para o responsável da filial '{filial_info.get('nome')}' ({target_id})."
+        )
+
+        try:
+            from notif_routes import criar_notificacao
+            criar_notificacao(
+                destinatario_id=None,
+                titulo="Nova Solicitação de Atleta (Filial)",
+                mensagem=f"O Sensei/Responsável da filial '{filial_info.get('nome')}' solicitou cadastro de atleta.",
+                tipo="alerta"
+            )
+        except Exception:
+            pass
+
+        return jsonify({"success": True, "atleta": atleta}), 201
+

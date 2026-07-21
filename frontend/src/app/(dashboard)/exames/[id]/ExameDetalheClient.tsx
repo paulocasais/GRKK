@@ -357,7 +357,7 @@ export default function ExameDetalheClient({ id: idProp }: { id: string }) {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: 'Modalidade', value: exame.modalidade },
-          { label: 'Graduação Pretendida', value: exame.faixa_alvo },
+          { label: 'Graduação Pretendida', value: exame.faixa_alvo || 'Todas as Faixas' },
           { label: 'Taxa de Inscrição', value: exame.taxa_valor ? `R$ ${Number(exame.taxa_valor).toFixed(2)}` : 'Gratuito' },
           { label: 'Aprovados', value: `${aprovados} / ${candidatos.length}` },
         ].map(({ label, value }) => (

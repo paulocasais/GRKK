@@ -16,7 +16,7 @@ import {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
-import { FAIXAS, CORES_FAIXAS } from '@/constants/faixas';
+import { FAIXAS, CORES_FAIXAS, obterEstiloFaixa } from '@/constants/faixas';
 
 function formatDate(iso: string) {
   if (!iso) return 'A definir';
@@ -376,8 +376,8 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
   const nome = usuario?.nome ?? 'Atleta';
   const iniciais = nome.split(' ').filter(Boolean).slice(0, 2).map((p: string) => p[0]).join('').toUpperCase();
   const cpfMask = usuario?.cpf ? usuario.cpf.replace(/(\d{3})\.\d{3}\.(\d{3})-(\d{2})/, '$1.***.***-$3') : '—';
-  const regNum = usuario?.id ? `GRKK-${usuario.id.slice(0, 8).toUpperCase()}` : '—';
-  const faixa = usuario?.faixa ?? 'Branca';
+  const regNum = usuario?.registro_federacao || usuario?.dados_atleta?.registro_federacao || (usuario?.id ? `GRKK-${usuario.id.slice(0, 8).toUpperCase()}` : '—');
+  const faixa = usuario?.faixa || usuario?.dados_atleta?.faixa || 'Branca';
   const faixaIdx = FAIXAS.indexOf(faixa);
   const [avisos, setAvisos] = useState<Aviso[]>([]);
   const [loadingAvisos, setLoadingAvisos] = useState(true);
@@ -586,7 +586,19 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
             </p>
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className={`w-12 h-4 rounded-full ${CORES_FAIXAS[faixa]?.progressClass ?? 'bg-zinc-800'}`} />
+                {(() => {
+                  const est = obterEstiloFaixa(faixa);
+                  return (
+                    <div className={`w-12 h-4 rounded-full relative overflow-hidden border ${est.bg} ${est.border}`}>
+                      {est.centerStripe && (
+                        <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 ${est.centerStripe}`} />
+                      )}
+                      {est.tipStripe && (
+                        <div className={`absolute right-0 top-0 bottom-0 w-1.5 ${est.tipStripe}`} />
+                      )}
+                    </div>
+                  );
+                })()}
                 <span className="font-bold text-white font-cinzel">{faixa}</span>
               </div>
               <div className="flex gap-1 mb-2">
@@ -836,18 +848,18 @@ function AtletaDashboard({ usuario }: { usuario: any }) {
 
 /* --- CORE PAGE DIRECTIVE --- */
 export default function HomeDashboardPage() {
-  const { usuario, carregando } = useAuth();
+  const { usuario, tipo, carregando } = useAuth();
 
   if (carregando) {
     return <PageLoader />;
   }
 
-  // Renderiza conforme o papel logado
-  if (usuario?.tipo === 'admin') {
+  // Renderiza conforme o papel ativo selecionado
+  if (tipo === 'admin') {
     return <AdminDashboard usuario={usuario} />;
   }
   
-  if (usuario?.tipo === 'filial') {
+  if (tipo === 'filial') {
     return <FilialDashboard usuario={usuario} />;
   }
 

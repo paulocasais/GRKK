@@ -44,7 +44,7 @@ export default function FormAvaliacao({
   const [isSaved, setIsSaved] = useState(false);
 
   // Determina se é exame para Faixa Preta (Yudansha)
-  const isYudansha = faixaAlvo.toLowerCase().includes('preta') || faixaAlvo.toLowerCase().includes('dan');
+  const isYudansha = (faixaAlvo || '').toLowerCase().includes('preta') || (faixaAlvo || '').toLowerCase().includes('dan');
   const activeTests = ALL_TESTS.filter(t => !t.yudanshaOnly || isYudansha);
   const totalActiveTests = activeTests.length;
 

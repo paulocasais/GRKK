@@ -281,6 +281,20 @@ class SupabaseService:
                                 user_data.update(filial_data)
                                 user_data["tipo"] = "filial"
                                 break
+                        # Verifica se também possui registro na tabela de atletas
+                        atletas = mock_db.data.get("atletas", [])
+                        atleta_match = next((a for a in atletas if a["id"] == p["id"]), None)
+                        if atleta_match:
+                            if not atleta_match.get("cpf"):
+                                cpf_fallback = user_data.get("cpf_responsavel") or user_data.get("cnpj_cpf") or ""
+                                if cpf_fallback:
+                                    atleta_match["cpf"] = cpf_fallback
+                            user_data["tambem_atleta"] = True
+                            user_data["dados_atleta"] = atleta_match
+                            if "autoriza_uso_imagem" in atleta_match:
+                                user_data["autoriza_uso_imagem"] = atleta_match["autoriza_uso_imagem"]
+                        else:
+                            user_data["tambem_atleta"] = False
                     return user_data, None
             return None, "Usuário não encontrado."
         else:
@@ -307,6 +321,14 @@ class SupabaseService:
                                     filial_data["tipo_filial"] = filial_data.pop("tipo")
                                 user_data.update(filial_data)
                                 user_data["tipo"] = "filial"
+                            atleta_res = supabase.table("atletas").select("*").eq("id", res.user.id).maybe_single().execute()
+                            if atleta_res.data:
+                                user_data["tambem_atleta"] = True
+                                user_data["dados_atleta"] = atleta_res.data
+                                if "autoriza_uso_imagem" in atleta_res.data:
+                                    user_data["autoriza_uso_imagem"] = atleta_res.data["autoriza_uso_imagem"]
+                            else:
+                                user_data["tambem_atleta"] = False
                         return user_data, None
                 return None, "Credenciais inválidas."
             except Exception as e:
@@ -336,6 +358,19 @@ class SupabaseService:
                                 user_data.update(filial_data)
                                 user_data["tipo"] = "filial"
                                 break
+                        atletas = mock_db.data.get("atletas", [])
+                        atleta_match = next((a for a in atletas if a["id"] == p["id"]), None)
+                        if atleta_match:
+                            if not atleta_match.get("cpf"):
+                                cpf_fallback = user_data.get("cpf_responsavel") or user_data.get("cnpj_cpf") or ""
+                                if cpf_fallback:
+                                    atleta_match["cpf"] = cpf_fallback
+                            user_data["tambem_atleta"] = True
+                            user_data["dados_atleta"] = atleta_match
+                            if "autoriza_uso_imagem" in atleta_match:
+                                user_data["autoriza_uso_imagem"] = atleta_match["autoriza_uso_imagem"]
+                        else:
+                            user_data["tambem_atleta"] = False
                     return user_data, None
             return None, "Perfil não encontrado."
         else:
@@ -355,6 +390,14 @@ class SupabaseService:
                                 filial_data["tipo_filial"] = filial_data.pop("tipo")
                             user_data.update(filial_data)
                             user_data["tipo"] = "filial"
+                        atleta_res = supabase.table("atletas").select("*").eq("id", user_id).maybe_single().execute()
+                        if atleta_res.data:
+                            user_data["tambem_atleta"] = True
+                            user_data["dados_atleta"] = atleta_res.data
+                            if "autoriza_uso_imagem" in atleta_res.data:
+                                user_data["autoriza_uso_imagem"] = atleta_res.data["autoriza_uso_imagem"]
+                        else:
+                            user_data["tambem_atleta"] = False
                     return user_data, None
                 return None, "Perfil não encontrado."
             except Exception as e:

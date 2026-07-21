@@ -9,7 +9,7 @@ import {
   FileText, LogOut, ChevronRight, X,
   Building2, UserCheck, ClipboardList, Newspaper, Settings,
   Medal, CreditCard, MessageSquare, BookOpen, Package, BarChart3,
-  CalendarCheck
+  CalendarCheck, RefreshCw
 } from 'lucide-react';
 
 const NAV_ADMIN = [
@@ -20,6 +20,7 @@ const NAV_ADMIN = [
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/noticias', label: 'Notícias', icon: Newspaper },
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
+  { href: '/curriculo', label: 'Grade Curricular', icon: BookOpen },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/estoque', label: 'Estoque', icon: Package },
@@ -37,6 +38,7 @@ const NAV_FILIAL = [
   { href: '/frequencia', label: 'Frequência', icon: CalendarCheck },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
+  { href: '/curriculo', label: 'Grade Curricular', icon: BookOpen },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/estoque', label: 'Estoque', icon: Package },
@@ -49,14 +51,13 @@ const NAV_ATLETA = [
   { href: '/home', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/eventos-dash', label: 'Eventos', icon: CalendarDays },
   { href: '/exames', label: 'Exames de Graduação', icon: Trophy },
+  { href: '/curriculo', label: 'Grade Curricular', icon: BookOpen },
   { href: '/ranking', label: 'Ranking Interno', icon: Medal },
   { href: '/financeiro', label: 'Financeiro', icon: CreditCard },
   { href: '/documentos', label: 'Documentos', icon: FileText },
   { href: '/sensei-ia', label: 'Sensei IA', icon: MessageSquare },
   { href: '/configuracoes', label: 'Configurações', icon: Settings },
 ];
-
-
 
 interface SidebarProps {
   open: boolean;
@@ -73,7 +74,7 @@ export function obterIniciais(nome: string) {
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { usuario, tipo, isAdmin, isFilial, isAtleta, logout } = useAuth();
+  const { usuario, tipo, isAdmin, isFilial, isAtleta, isPerfilUnificado, alternarPerfil, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
@@ -165,7 +166,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         {/* User Profile */}
-        <div className="p-3 border-t border-zinc-900">
+        <div className="p-3 border-t border-zinc-900 space-y-1">
           <div className="flex items-center gap-3 px-3 py-3 rounded-xl bg-zinc-900/40 mb-1">
             <div className={`w-8 h-8 bg-gradient-to-br ${accentColor} rounded-xl flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-sm`}>
               {iniciais}
@@ -175,6 +176,19 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               <p className="text-[10px] text-zinc-500 capitalize mt-0.5">{papelExibido}</p>
             </div>
           </div>
+
+          {isPerfilUnificado && (
+            <button
+              onClick={alternarPerfil}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-gold border border-gold-500/20 bg-gold-500/5 hover:bg-gold-500/15 transition-all duration-200 group cursor-pointer"
+            >
+              <RefreshCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+              <span className="text-[12px]">
+                {tipo === 'filial' ? 'Acessar como Atleta' : 'Acessar como Dojo'}
+              </span>
+            </button>
+          )}
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-500 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group cursor-pointer"

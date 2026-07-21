@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS filiais (
     nome VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     telefone VARCHAR(50),
+    cnpj_cpf VARCHAR(50),
     status VARCHAR(50) DEFAULT 'pendente',
     codigo_interno VARCHAR(100) UNIQUE,
     nome_fantasia VARCHAR(255),
@@ -42,6 +43,9 @@ CREATE TABLE IF NOT EXISTS filiais (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+ALTER TABLE filiais ADD COLUMN IF NOT EXISTS cnpj_cpf VARCHAR(50);
+
 
 -- 3. Tabela ATLETAS
 CREATE TABLE IF NOT EXISTS atletas (
@@ -84,9 +88,12 @@ CREATE TABLE IF NOT EXISTS atletas (
     fisico_peso VARCHAR(20),
     fisico_altura VARCHAR(20),
     autoriza_uso_imagem BOOLEAN DEFAULT TRUE,
+    ja_praticou_artes_marciais VARCHAR(10) DEFAULT 'Não',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
+
+ALTER TABLE atletas ADD COLUMN IF NOT EXISTS ja_praticou_artes_marciais VARCHAR(10) DEFAULT 'Não';
 
 -- 4. Tabela EVENTOS
 CREATE TABLE IF NOT EXISTS eventos (

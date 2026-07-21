@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { 
   Menu, Bell, ArrowUpRight, Check, AlertCircle, Clock, 
-  CreditCard, Award, UserCheck, Building2, Sparkles, ChevronRight 
+  CreditCard, Award, UserCheck, Building2, Sparkles, ChevronRight, RefreshCw 
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { obterIniciais } from './Sidebar';
@@ -132,7 +132,7 @@ function resolveNotificationDetails(n: Notificacao, userType: string | null): Re
 }
 
 export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
-  const { usuario, isAdmin, isFilial, isAtleta } = useAuth();
+  const { usuario, isAdmin, isFilial, isAtleta, isPerfilUnificado, alternarPerfil, tipo } = useAuth();
   const router = useRouter();
   const nomeExibido = usuario?.nome ?? usuario?.name ?? "Usuário";
   const iniciais = obterIniciais(nomeExibido);
@@ -179,7 +179,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
       ];
 
       // Adiciona notificações específicas por perfil
-      if (usuario?.tipo === 'admin') {
+      if (tipo === 'admin') {
         mockData.unshift({
           id: 'mock-admin-1',
           titulo: "Nova Solicitação de Filial",
@@ -188,7 +188,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
           lida: false,
           created_at: new Date().toISOString()
         });
-      } else if (usuario?.tipo === 'atleta') {
+      } else if (tipo === 'atleta') {
         mockData.unshift({
           id: 'mock-atleta-1',
           titulo: "Cadastro de Atleta Homologado",
@@ -354,7 +354,7 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
                 </div>
               ) : (
                 notifs.map((n) => {
-                  const details = resolveNotificationDetails(n, usuario?.tipo || null);
+                  const details = resolveNotificationDetails(n, tipo || null);
                   return (
                     <div
                       key={n.id}
@@ -426,6 +426,19 @@ export default function DashTopBar({ onMenuOpen }: DashTopBarProps) {
           </div>
         )}
       </div>
+
+      {isPerfilUnificado && (
+        <button
+          onClick={alternarPerfil}
+          className="flex items-center gap-1.5 text-xs px-3 py-2 rounded-xl border border-gold-500/20 bg-gold-500/5 text-gold-400 hover:bg-gold-500/15 transition-all cursor-pointer font-bold"
+          title={tipo === 'filial' ? 'Mudar para Atleta' : 'Mudar para Dojo'}
+        >
+          <RefreshCw size={13} />
+          <span className="hidden sm:inline">
+            {tipo === 'filial' ? 'Atleta' : 'Dojo'}
+          </span>
+        </button>
+      )}
 
       <div className="flex items-center gap-2.5 bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2">
         <div className={`w-6 h-6 bg-gradient-to-br ${accentColor} rounded-lg flex items-center justify-center text-white text-[9px] font-black`}>

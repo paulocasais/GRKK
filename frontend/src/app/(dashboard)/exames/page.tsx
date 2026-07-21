@@ -309,7 +309,7 @@ export default function ExamesPage() {
                       </td>
                       <td className="px-6 py-5 hidden lg:table-cell text-xs space-y-1">
                         <p className="text-zinc-350">{exame.modalidade}</p>
-                        <p className="text-zinc-500">Graduação: <strong className="text-gold font-normal">{exame.faixa_alvo}</strong></p>
+                        <p className="text-zinc-500">Graduação: <strong className="text-gold font-normal">{exame.faixa_alvo || 'Todas as Faixas'}</strong></p>
                       </td>
                       <td className="px-6 py-5">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg ${cfg.color}`}>

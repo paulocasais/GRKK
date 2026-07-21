@@ -6,7 +6,7 @@ import {
   User, Mail, Phone, Calendar, ShieldAlert, 
   Activity, HeartPulse, Stethoscope, FileHeart,
   Save, Loader2, CheckCircle2, AlertCircle, HeartHandshake,
-  Send, Smartphone, ShieldCheck, X
+  Send, Smartphone, ShieldCheck, X, MapPin
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
@@ -100,9 +100,9 @@ export default function ConfiguracoesPage() {
     medico_plano: '',
     medico_restricoes: '',
     medico_diagnosticos: '',
-    arte_marcial: 'Karate',
-    estilo: 'Goju-Ryu',
-    academia_clube: 'Associação Goju-Ryu Karate Kai',
+    arte_marcial: '',
+    estilo: '',
+    academia_clube: '',
     medico_tipo_sanguineo: '',
     medico_fator_rh: '',
     medico_sus: '',
@@ -114,6 +114,7 @@ export default function ConfiguracoesPage() {
     fisico_peso: '',
     fisico_altura: '',
     autoriza_uso_imagem: true,
+    ja_praticou_artes_marciais: 'Não',
   });
 
   const [loading, setLoading] = useState(false);
@@ -160,9 +161,9 @@ export default function ConfiguracoesPage() {
         medico_plano: usuario.medico_plano || '',
         medico_restricoes: usuario.medico_restricoes || '',
         medico_diagnosticos: usuario.medico_diagnosticos || '',
-        arte_marcial: usuario.arte_marcial || 'Karate',
-        estilo: usuario.estilo || 'Goju-Ryu',
-        academia_clube: usuario.academia_clube || 'Associação Goju-Ryu Karate Kai',
+        arte_marcial: usuario.arte_marcial || '',
+        estilo: usuario.estilo || '',
+        academia_clube: usuario.academia_clube || '',
         medico_tipo_sanguineo: usuario.medico_tipo_sanguineo || '',
         medico_fator_rh: usuario.medico_fator_rh || '',
         medico_sus: usuario.medico_sus || '',
@@ -173,7 +174,11 @@ export default function ConfiguracoesPage() {
         medico_alergia_medicamento: usuario.medico_alergia_medicamento || '',
         fisico_peso: usuario.fisico_peso || '',
         fisico_altura: usuario.fisico_altura || '',
-        autoriza_uso_imagem: usuario.autoriza_uso_imagem !== false,
+        autoriza_uso_imagem: (
+          (usuario.dados_atleta?.autoriza_uso_imagem !== undefined ? usuario.dados_atleta.autoriza_uso_imagem : usuario.autoriza_uso_imagem)
+          === false
+        ) ? false : true,
+        ja_praticou_artes_marciais: usuario.ja_praticou_artes_marciais || (usuario.nome_professor ? 'Sim' : 'Não'),
       });
       if (usuario.data_nascimento) {
         setIdade(calcularIdade(usuario.data_nascimento));
@@ -387,48 +392,75 @@ export default function ConfiguracoesPage() {
                   <option value="O">Outro</option>
                 </select>
               </div>
+            </div>
 
+            {/* Sub-Card: Já praticou artes marciais antes? */}
+            <div className="space-y-4 border-t border-zinc-800/80 pt-5">
+              <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3 uppercase">
+                <ShieldAlert className="text-gold" size={16} /> JÁ PRATICOU ARTES MARCIAIS ANTES?
+              </h3>
+              
               <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Professor / Sensei</label>
-                <input
-                  value={form.nome_professor}
-                  onChange={set('nome_professor')}
-                  placeholder="Nome do Sensei"
-                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
-                />
+                <select
+                  value={form.ja_praticou_artes_marciais}
+                  onChange={set('ja_praticou_artes_marciais')}
+                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors font-semibold"
+                >
+                  <option value="Não">Não</option>
+                  <option value="Sim">Sim</option>
+                </select>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Arte Marcial</label>
-                <input
-                  value={form.arte_marcial}
-                  onChange={set('arte_marcial')}
-                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
-                />
-              </div>
+              {form.ja_praticou_artes_marciais === 'Sim' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-zinc-950/60 p-4 rounded-xl border border-zinc-800/80 animate-in fade-in duration-200">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Nome do Professor / Sensei</label>
+                    <input
+                      value={form.nome_professor}
+                      onChange={set('nome_professor')}
+                      placeholder="Ex: Sensei Fulano de Tal"
+                      className="w-full bg-zinc-900 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Estilo</label>
-                <input
-                  value={form.estilo}
-                  onChange={set('estilo')}
-                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
-                />
-              </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Arte Marcial / Luta</label>
+                    <input
+                      value={form.arte_marcial}
+                      onChange={set('arte_marcial')}
+                      placeholder="Ex: Karate, Judô, Jiu-Jitsu"
+                      className="w-full bg-zinc-900 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
 
-              <div className="flex flex-col gap-1.5 col-span-full">
-                <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Academia / Clube / Associação</label>
-                <input
-                  value={form.academia_clube}
-                  onChange={set('academia_clube')}
-                  className="w-full bg-zinc-950 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
-                />
-              </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Estilo / Modalidade</label>
+                    <input
+                      value={form.estilo}
+                      onChange={set('estilo')}
+                      placeholder="Ex: Goju-Ryu, Shotokan, Shorin-Ryu"
+                      className="w-full bg-zinc-900 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
 
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Academia / Clube / Associação</label>
+                    <input
+                      value={form.academia_clube}
+                      onChange={set('academia_clube')}
+                      placeholder="Ex: Associação de Karatê Centro"
+                      className="w-full bg-zinc-900 border border-zinc-850 text-white px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-gold transition-colors"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             
-            <div className="space-y-4 border-t border-zinc-800/50 pt-4">
-              <h4 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Endereço</h4>
+            {/* Sub-Card: Endereço */}
+            <div className="space-y-4 border-t border-zinc-800/80 pt-5">
+              <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3 uppercase">
+                <MapPin className="text-primary" size={16} /> ENDEREÇO
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1.5 col-span-full">
                   <label className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider flex items-center justify-between">
@@ -708,54 +740,70 @@ export default function ConfiguracoesPage() {
             ) : null}
 
             {/* Card 4: Consentimento de Uso de Imagem */}
-            {usuario?.autoriza_uso_imagem === null || usuario?.autoriza_uso_imagem === undefined ? (
-              <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-4">
-                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
-                  <HeartPulse className="text-gold" size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
-                </h3>
-                <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Ao preencher este formulário, autorizo a Associação Goju-Ryu Karatê-Kai, utilizar a imagem dos atletas para fins institucionais, promocionais e de divulgação das atividades esportivas. A imagem poderá ser usada em materiais impressos, redes sociais, sites ou qualquer outro meio de comunicação da associação. A utilização da imagem será exclusivamente relacionada às atividades promovidas pela associação. A criança não será identificada pessoalmente nas publicações, a menos que expressamente autorizado. A autorização é concedida de forma gratuita, sem qualquer expectativa de compensação financeira. Caso não deseje autorizar o uso de imagem, por favor, marque a opção de não autorização no campo abaixo.
-                </p>
-                <div className="flex gap-6 pt-2">
-                  <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
-                    <input
-                      type="radio"
-                      name="autoriza_uso_imagem"
-                      checked={form.autoriza_uso_imagem === true}
-                      onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: true }))}
-                      className="accent-gold h-4 w-4"
-                    />
-                    <span>Autorizo o uso da imagem.</span>
-                  </label>
-                  <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
-                    <input
-                      type="radio"
-                      name="autoriza_uso_imagem"
-                      checked={form.autoriza_uso_imagem === false}
-                      onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: false }))}
-                      className="accent-gold h-4 w-4"
-                    />
-                    <span>Não autorizo o uso da imagem.</span>
-                  </label>
+            {(() => {
+              const valAutorizaSalvo = usuario?.dados_atleta?.autoriza_uso_imagem !== undefined
+                ? usuario.dados_atleta.autoriza_uso_imagem
+                : usuario?.autoriza_uso_imagem;
+
+              if (valAutorizaSalvo === null || valAutorizaSalvo === undefined) {
+                return (
+                  <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-4">
+                    <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+                      <HeartPulse className="text-gold" size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
+                    </h3>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed">
+                      Ao preencher este formulário, autorizo a Associação Goju-Ryu Karatê-Kai, utilizar a imagem dos atletas para fins institucionais, promocionais e de divulgação das atividades esportivas. A imagem poderá ser usada em materiais impressos, redes sociais, sites ou qualquer outro meio de comunicação da associação. A utilização da imagem será exclusivamente relacionada às atividades promovidas pela associação. A criança não será identificada pessoalmente nas publicações, a menos que expressamente autorizado. A autorização é concedida de forma gratuita, sem qualquer expectativa de compensação financeira. Caso não deseje autorizar o uso de imagem, por favor, marque a opção de não autorização no campo abaixo.
+                    </p>
+                    <div className="flex gap-6 pt-2">
+                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="autoriza_uso_imagem"
+                          checked={form.autoriza_uso_imagem === true}
+                          onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: true }))}
+                          className="accent-gold h-4 w-4"
+                        />
+                        <span>Autorizo o uso da imagem.</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="autoriza_uso_imagem"
+                          checked={form.autoriza_uso_imagem === false}
+                          onChange={() => setForm(prev => ({ ...prev, autoriza_uso_imagem: false }))}
+                          className="accent-gold h-4 w-4"
+                        />
+                        <span>Não autorizo o uso da imagem.</span>
+                      </label>
+                    </div>
+                  </div>
+                );
+              }
+
+              const isAutorizado = valAutorizaSalvo !== false && valAutorizaSalvo !== 'false' && valAutorizaSalvo !== 0;
+
+              return (
+                <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-3">
+                  <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
+                    <ShieldCheck className={isAutorizado ? "text-emerald-400" : "text-red-400"} size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
+                  </h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed pt-1">
+                    Sua opção de consentimento para uso de imagem foi registrada em nosso banco de dados.
+                  </p>
+                  <div className={`inline-flex items-center gap-2 text-xs font-bold px-3.5 py-1.5 rounded-xl mt-1 select-none pointer-events-none ${
+                    isAutorizado
+                      ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
+                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                  }`}>
+                    {isAutorizado ? <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" /> : <AlertCircle className="w-4.5 h-4.5 text-red-400" />}
+                    {isAutorizado ? 'TERMO AUTORIZADO' : 'TERMO NÃO AUTORIZADO'}
+                  </div>
+                  <p className="text-[10px] text-zinc-500 leading-relaxed pt-2.5 border-t border-zinc-800/60">
+                    Para fins de segurança jurídica, a alteração desta preferência após a primeira escolha deve ser solicitada à secretaria do seu Dojo.
+                  </p>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 space-y-3">
-                <h3 className="text-sm font-bold text-white font-cinzel flex items-center gap-2 border-b border-zinc-800 pb-3">
-                  <ShieldCheck className="text-emerald-400" size={16} /> AUTORIZAÇÃO DE USO DE IMAGEM
-                </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed pt-1">
-                  Sua opção de consentimento para uso de imagem foi registrada em nosso banco de dados.
-                </p>
-                <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-xl mt-1 select-none pointer-events-none">
-                  <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" />
-                  {usuario?.autoriza_uso_imagem ? 'TERMO AUTORIZADO' : 'TERMO NÃO AUTORIZADO'}
-                </div>
-                <p className="text-[10px] text-zinc-500 leading-relaxed pt-2.5 border-t border-zinc-800/60">
-                  Para fins de segurança jurídica, a alteração desta preferência após a primeira escolha deve ser solicitada à secretaria do seu Dojo.
-                </p>
-              </div>
-            )}
+              );
+            })()}
 
           </div>
 

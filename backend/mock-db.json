@@ -60,10 +60,12 @@
       "id": "atleta-6hs7wr0vy9o",
       "nome": "GRKK CABULA",
       "email": "paulorobertocasais@gmail.com",
-      "telefone": "",
+      "telefone": "71987414819",
       "tipo": "filial",
       "status": "ativo",
-      "updated_at": "2026-06-01T21:51:33.816Z"
+      "updated_at": "2026-06-01T21:51:33.816Z",
+      "nome_fantasia": "PAULO ROBERTO CASAIS DE CARVALHO",
+      "cidade": "Salvador"
     },
     {
       "id": "atleta-s9rxjaztv1q",
@@ -954,6 +956,17 @@
       "tipo": "filial",
       "status": "pendente",
       "created_at": "2026-07-12T11:08:02.036577"
+    },
+    {
+      "id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "nome": "Paulo Casais",
+      "email": "paulodetal@yahoo.com",
+      "telefone": "71999999999",
+      "tipo": "filial",
+      "status": "ativo",
+      "created_at": "2026-07-20T21:40:26.894322",
+      "nome_fantasia": "",
+      "cidade": "Salvador"
     }
   ],
   "documentos": [
@@ -1472,13 +1485,14 @@
       "email": "atleta-test-7e9d9a16@example.com",
       "telefone": "",
       "nome_professor": "Mestre Teste",
-      "faixa": "Amarela",
+      "faixa": "Amarela/Laranja",
       "status": "ativo",
       "created_at": "2026-06-14T18:29:33.607718",
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "filial_nome": "Dojo Central / Sem Filial"
     },
     {
       "id": "eb6172e3-6ef8-4272-8a3a-91e36789bf18",
@@ -1486,13 +1500,14 @@
       "email": "atleta-test-eb6172e3@example.com",
       "telefone": "",
       "nome_professor": "Mestre Teste",
-      "faixa": "Amarela",
+      "faixa": "Verde/Azul",
       "status": "ativo",
       "created_at": "2026-06-14T18:31:01.932091",
       "medico_alergias": "",
       "medico_plano": "",
       "medico_restricoes": "",
-      "medico_diagnosticos": ""
+      "medico_diagnosticos": "",
+      "filial_nome": "Dojo Central / Sem Filial"
     },
     {
       "id": "b26cfdf0-dd90-4c45-8754-d7be7bc96f80",
@@ -1871,6 +1886,80 @@
       "fisico_peso": "100",
       "fisico_altura": "1,79",
       "autoriza_uso_imagem": true
+    },
+    {
+      "id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "email": "filial@grkk.com.br",
+      "telefone": "(71) 99999-0002",
+      "status": "pendente",
+      "faixa": "Preta 3º Dan",
+      "cpf": "111.222.333-44",
+      "filial_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "filial_nome": "Goju-Ryu Salvador",
+      "cep": "40000-000",
+      "endereco": "Avenida Sete de Setembro",
+      "cidade": "Salvador",
+      "uf": "BA",
+      "documentos_entregues": false,
+      "created_at": "2026-07-20T18:38:23.388354"
+    },
+    {
+      "id": "atleta-6hs7wr0vy9o",
+      "email": "paulorobertocasais@gmail.com",
+      "telefone": "",
+      "status": "pendente",
+      "faixa": "Branca",
+      "cpf": "07046622051",
+      "filial_id": "atleta-6hs7wr0vy9o",
+      "filial_nome": "GRKK CABULA",
+      "cep": "",
+      "endereco": "",
+      "cidade": "",
+      "uf": "",
+      "documentos_entregues": false,
+      "created_at": "2026-07-20T18:45:55.113444"
+    },
+    {
+      "id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "email": "paulodetal@yahoo.com",
+      "telefone": "71999999999",
+      "status": "ativo",
+      "faixa": "Preta I",
+      "cpf": "33767795035",
+      "filial_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "filial_nome": "Paulo Casais",
+      "cep": "41385040",
+      "endereco": "Rua Nossa Senhora do Carmo",
+      "cidade": "Salvador",
+      "uf": "BA",
+      "documentos_entregues": false,
+      "created_at": "2026-07-20T21:43:40.620740",
+      "sexo": "M",
+      "data_nascimento": "1976-09-09",
+      "nome_professor": "",
+      "responsavel_nome": "",
+      "responsavel_cpf": "",
+      "responsavel_email": "",
+      "responsavel_telefone": "",
+      "medico_alergias": "",
+      "medico_plano": "",
+      "medico_restricoes": "",
+      "medico_diagnosticos": "",
+      "arte_marcial": "",
+      "estilo": "",
+      "academia_clube": "",
+      "medico_tipo_sanguineo": "",
+      "medico_fator_rh": "",
+      "medico_sus": "",
+      "medico_emergencia_nome": "",
+      "medico_emergencia_telefone": "",
+      "medico_medicacao_uso": "Não",
+      "medico_medicacao_lista": "",
+      "medico_alergia_medicamento": "",
+      "fisico_peso": "",
+      "fisico_altura": "",
+      "autoriza_uso_imagem": true,
+      "ja_praticou_artes_marciais": "Não"
     }
   ],
   "filiais": [
@@ -1919,7 +2008,19 @@
       "status": "ativo",
       "created_at": "2026-06-01T05:26:18.340Z",
       "updated_at": "2026-06-01T21:51:33.824Z",
-      "motivo_reprovacao": null
+      "motivo_reprovacao": null,
+      "telefone": "71987414819",
+      "nome_fantasia": "PAULO ROBERTO CASAIS DE CARVALHO",
+      "cnpj_cpf": "46405102000198",
+      "cpf_responsavel": "07046622051",
+      "graduacao_responsavel": "2º DAN",
+      "registro_federativo": "",
+      "cep": "41385040",
+      "rua": "Rua Nossa Senhora do Carmo",
+      "numero": "32",
+      "bairro": "Sete de Abril",
+      "municipio": "Salvador",
+      "estado": "BA"
     },
     {
       "id": "9910e2a2-577e-4fca-88ff-c74a074c925a",
@@ -2271,6 +2372,26 @@
       "status": "pendente",
       "codigo_interno": "MOCK-FILIAL-38F7E",
       "created_at": "2026-07-12T11:08:02.156205"
+    },
+    {
+      "id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "nome": "Paulo Casais",
+      "email": "paulodetal@yahoo.com",
+      "telefone": "71999999999",
+      "cnpj_cpf": "69679142000123",
+      "status": "ativo",
+      "codigo_interno": "GRKK-F-2026-0D2D1",
+      "created_at": "2026-07-20T21:40:26.974831",
+      "registro_federativo": "GRKK-F-2026-0D2D1",
+      "nome_fantasia": "",
+      "cpf_responsavel": "33767795035",
+      "graduacao_responsavel": "2 º DAN",
+      "cep": "41385040",
+      "rua": "Rua Nossa Senhora do Carmo",
+      "numero": "32 E",
+      "bairro": "Sete de Abril",
+      "municipio": "Salvador",
+      "estado": "BA"
     }
   ],
   "eventos": [
@@ -2303,21 +2424,24 @@
       "titulo": "Exame de Kyu - Primeiro Semestre 2026",
       "descricao": "Avaliação oficial para todas as faixas coloridas (Kyus). Local: Sede Central.",
       "data_exame": "2026-06-25",
-      "status": "publicado"
+      "status": "publicado",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "id": "exame-2",
       "titulo": "Exame Nacional de Faixas Pretas (Dan)",
       "descricao": "Banca especial para candidatos a Shodan, Nidan e Sandan. IOGKF Brasil.",
       "data_exame": "2026-08-15",
-      "status": "rascunho"
+      "status": "rascunho",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "id": "exame-3",
       "titulo": "Exame de Graduação de Lauro de Freitas",
       "descricao": "Exame descentralizado. Instrutor Responsável: Sensei Paulo.",
       "data_exame": "2026-04-10",
-      "status": "realizado"
+      "status": "realizado",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2325,7 +2449,8 @@
       "status": "agendado",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "2963177f-c2e6-41a8-9cfc-60aef8e196bc",
-      "created_at": "2026-06-14T16:58:24.892669"
+      "created_at": "2026-06-14T16:58:24.892669",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2333,7 +2458,8 @@
       "status": "concluido",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "0c7e512e-5b1e-4fae-8525-627da6669a5d",
-      "created_at": "2026-06-14T16:59:04.566365"
+      "created_at": "2026-06-14T16:59:04.566365",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2341,7 +2467,8 @@
       "status": "em_andamento",
       "titulo": "E",
       "id": "eac41a07-223e-495a-bce0-ea2000b9b897",
-      "created_at": "2026-06-14T17:00:27.703866"
+      "created_at": "2026-06-14T17:00:27.703866",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2349,7 +2476,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "3074b030-3aa3-40ff-aa48-0060f6b12448",
-      "created_at": "2026-06-14T17:01:32.376032"
+      "created_at": "2026-06-14T17:01:32.376032",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2357,7 +2485,8 @@
       "status": "em_andamento",
       "titulo": "E2",
       "id": "7209448b-66b3-42c6-9192-b6f49e1dffcc",
-      "created_at": "2026-06-14T17:02:11.581680"
+      "created_at": "2026-06-14T17:02:11.581680",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2365,7 +2494,8 @@
       "status": "em_andamento",
       "titulo": "E2",
       "id": "cd11d313-ce4b-4367-881f-61625083dd82",
-      "created_at": "2026-06-14T17:02:55.267897"
+      "created_at": "2026-06-14T17:02:55.267897",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2373,7 +2503,8 @@
       "status": "em_andamento",
       "titulo": "E2",
       "id": "9629aede-2bbf-4107-a8d6-a0d0671e81eb",
-      "created_at": "2026-06-14T17:03:16.008971"
+      "created_at": "2026-06-14T17:03:16.008971",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2381,7 +2512,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "d6a339df-4dfb-4512-9298-5e937099ba92",
-      "created_at": "2026-06-14T18:01:56.745710"
+      "created_at": "2026-06-14T18:01:56.745710",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2389,7 +2521,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "f37df09b-17fc-4a10-8e48-d4a2bbef87d9",
-      "created_at": "2026-06-14T18:02:48.252827"
+      "created_at": "2026-06-14T18:02:48.252827",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2397,7 +2530,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "8d4b7895-5b67-40d9-b943-5c6877f4dcb5",
-      "created_at": "2026-06-14T18:03:17.597009"
+      "created_at": "2026-06-14T18:03:17.597009",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2405,7 +2539,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "1747c5ec-df6a-460b-8971-57d221b5d5c2",
-      "created_at": "2026-06-14T18:03:44.738485"
+      "created_at": "2026-06-14T18:03:44.738485",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2413,7 +2548,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "ddf7c4ca-7842-4688-beef-36b91b0a4c9c",
-      "created_at": "2026-06-14T18:25:33.652278"
+      "created_at": "2026-06-14T18:25:33.652278",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2421,7 +2557,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "9b3fb9b1-6da6-44cf-aaa7-6338d51ae0b1",
-      "created_at": "2026-06-14T18:28:33.562726"
+      "created_at": "2026-06-14T18:28:33.562726",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2429,7 +2566,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "45a4de3c-3c92-4a9d-8daf-be264c88bc5b",
-      "created_at": "2026-06-14T18:29:33.528435"
+      "created_at": "2026-06-14T18:29:33.528435",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2437,7 +2575,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "dd96e184-514a-4704-a6cd-985801f90fa4",
-      "created_at": "2026-06-14T18:31:01.826491"
+      "created_at": "2026-06-14T18:31:01.826491",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2445,7 +2584,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "ecd00367-7313-451e-acb3-472a044dcb40",
-      "created_at": "2026-06-14T18:57:26.459718"
+      "created_at": "2026-06-14T18:57:26.459718",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2453,7 +2593,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "2abc73b8-4f14-4e0b-a870-69cf073a5f9d",
-      "created_at": "2026-06-14T19:52:01.969266"
+      "created_at": "2026-06-14T19:52:01.969266",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-01",
@@ -2461,7 +2602,8 @@
       "status": "em_andamento",
       "titulo": "Exame de Faixa - Teste E2",
       "id": "66b0701a-dc74-4879-9db9-c929bb9cf15a",
-      "created_at": "2026-06-14T19:52:12.652153"
+      "created_at": "2026-06-14T19:52:12.652153",
+      "faixa_alvo": "Todas as Faixas"
     },
     {
       "data_exame": "2026-07-15",
@@ -8959,6 +9101,51 @@
       "tipo": "alerta",
       "lida": false,
       "created_at": "2026-07-12T11:08:02.271108"
+    },
+    {
+      "id": "537428d9-c74d-4014-a218-7510778af6a4",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Atleta (Filial)",
+      "mensagem": "O Sensei/Responsável da filial 'Filial Salvador Centro' solicitou cadastro de atleta.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-20T18:38:23.660415"
+    },
+    {
+      "id": "bb16553d-2a2e-4a82-8e0c-108befe1bf64",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Atleta (Filial)",
+      "mensagem": "O Sensei/Responsável da filial 'GRKK CABULA' solicitou cadastro de atleta.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-20T18:45:55.232433"
+    },
+    {
+      "id": "bce6a1cb-0665-445b-a12c-18f8dfe4459f",
+      "destinatario_id": null,
+      "titulo": "Nova Filial Cadastrada",
+      "mensagem": "O dojo/filial Paulo Casais solicitou credenciamento no sistema.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-20T21:40:27.035226"
+    },
+    {
+      "id": "339fac63-b025-4449-aeef-859feced4dfd",
+      "destinatario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "titulo": "Credenciamento Aprovado",
+      "mensagem": "O credenciamento do seu dojo/filial foi homologado pela Associação com sucesso!",
+      "tipo": "sucesso",
+      "lida": false,
+      "created_at": "2026-07-20T21:41:17.304242"
+    },
+    {
+      "id": "8f9ef814-44ff-4637-a298-dab6cb65f0be",
+      "destinatario_id": null,
+      "titulo": "Nova Solicitação de Atleta (Filial)",
+      "mensagem": "O Sensei/Responsável da filial 'Paulo Casais' solicitou cadastro de atleta.",
+      "tipo": "alerta",
+      "lida": false,
+      "created_at": "2026-07-20T21:43:40.763165"
     }
   ],
   "certificados": [
@@ -14424,6 +14611,204 @@
       "detalhes": "Perfil do atleta Paulocasais (ID: atleta-flyf7ymhpad) atualizado. Campos: medico_emergencia_nome, medico_sus, medico_alergia_medicamento, uf, medico_tipo_sanguineo, medico_emergencia_telefone, fisico_peso, cep, medico_plano, medico_medicacao_lista, nome, fisico_altura, nome_professor, estilo, medico_medicacao_uso, responsavel_email, responsavel_cpf, telefone, email, sexo, data_nascimento, cpf, responsavel_nome, medico_restricoes, academia_clube, responsavel_telefone, medico_fator_rh, medico_alergias, medico_diagnosticos, endereco, cidade, arte_marcial, autoriza_uso_imagem",
       "ip": "127.0.0.1",
       "created_at": "2026-07-12T16:46:19.653911"
+    },
+    {
+      "id": "81d6ed4c-31ec-4f41-824b-8fc47e96cc6c",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Login",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:10:23.487451"
+    },
+    {
+      "id": "997598a5-e40a-4364-8117-cfe55919bc0c",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Login",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:15:03.728855"
+    },
+    {
+      "id": "c11b6c91-f180-4d7e-8b31-b04184123582",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Login",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:20:54.694434"
+    },
+    {
+      "id": "9d5e5596-9100-4c99-8da4-a35ee1e9bef5",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Login",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:28:58.637154"
+    },
+    {
+      "id": "e8e827a6-fea0-4015-a95a-2f194627e57c",
+      "usuario_id": "7513aa27-452f-462e-8f5a-b3f2052612f0",
+      "usuario_nome": "Filial Salvador Centro",
+      "acao": "Auto-solicitação de Atleta",
+      "detalhes": "Solicitado vínculo de atleta ativo para o responsável da filial 'Filial Salvador Centro' (7513aa27-452f-462e-8f5a-b3f2052612f0).",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:38:23.530788"
+    },
+    {
+      "id": "367a69be-8d0f-4ea1-8d60-c5455db1b664",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Login",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:41:51.022338"
+    },
+    {
+      "id": "4d262a5d-9535-42dd-80bc-4b58547ec23e",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Auto-solicitação de Atleta",
+      "detalhes": "Solicitado vínculo de atleta ativo para o responsável da filial 'GRKK CABULA' (atleta-6hs7wr0vy9o).",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:45:55.173479"
+    },
+    {
+      "id": "96dbf3cf-259a-461e-8608-bab963edbe7e",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Atualização de Filial",
+      "detalhes": "Filial GRKK CABULA (ID: atleta-6hs7wr0vy9o) atualizada.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T18:46:20.258998"
+    },
+    {
+      "id": "f3341ead-f8a0-40ae-9715-04f94cadb993",
+      "usuario_id": "atleta-6hs7wr0vy9o",
+      "usuario_nome": "GRKK CABULA",
+      "acao": "Logout",
+      "detalhes": "Usuário paulorobertocasais@gmail.com realizou logout",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T19:47:09.946389"
+    },
+    {
+      "id": "eefa11be-fa18-46c3-a220-0aab2b6d0836",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Login",
+      "detalhes": "Usuário admin@grkk.com.br realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:03:39.260410"
+    },
+    {
+      "id": "3c5a173b-9828-47a9-831d-03fdc6147c69",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Filial",
+      "detalhes": "Filial Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizada.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:41:17.348061"
+    },
+    {
+      "id": "dbc385fe-506b-43b5-897f-f10372a32c19",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Login",
+      "detalhes": "Usuário paulodetal@yahoo.com realizou login com sucesso",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:41:21.427432"
+    },
+    {
+      "id": "2c9ec425-6000-4cdc-baaa-d82b631444ed",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Auto-solicitação de Atleta",
+      "detalhes": "Solicitado vínculo de atleta ativo para o responsável da filial 'Paulo Casais' (0d2d11f0-2a33-403c-8c8b-bb8a18ff3511).",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:43:40.697642"
+    },
+    {
+      "id": "adfc7e3f-194e-491b-b225-dc4efad6b8e0",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Atualização de Filial",
+      "detalhes": "Filial Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizada.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:44:41.968814"
+    },
+    {
+      "id": "a1acfaad-4f73-48b8-b99f-b5cbc7d88350",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizado. Campos: status",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:45:17.576391"
+    },
+    {
+      "id": "16431b0f-e46b-4410-89ec-2146ddfcfd07",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "AUTORIZACAO_IMAGEM_ACEITA",
+      "detalhes": "O atleta Paulo Casais (0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) autorizou o termo de uso de imagem.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:48:41.561019"
+    },
+    {
+      "id": "37e8dc48-7262-418e-b7e4-b747b681bac6",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizado. Campos: arte_marcial, medico_tipo_sanguineo, medico_alergia_medicamento, cpf, medico_diagnosticos, responsavel_cpf, email, autoriza_uso_imagem, nome, cidade, sexo, responsavel_email, responsavel_telefone, medico_emergencia_nome, telefone, fisico_peso, medico_sus, estilo, medico_medicacao_uso, medico_emergencia_telefone, medico_alergias, academia_clube, endereco, responsavel_nome, cep, medico_restricoes, medico_fator_rh, nome_professor, medico_medicacao_lista, medico_plano, data_nascimento, uf, fisico_altura",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T21:48:41.611298"
+    },
+    {
+      "id": "03776e19-a562-46f7-b6d0-8f1422aee4d2",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "AUTORIZACAO_IMAGEM_ACEITA",
+      "detalhes": "O atleta Paulo Casais (0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) autorizou o termo de uso de imagem.",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T22:22:17.836399"
+    },
+    {
+      "id": "01689310-1734-4ac4-bf33-d71e3d32fb6c",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizado. Campos: medico_diagnosticos, responsavel_telefone, medico_medicacao_uso, responsavel_email, medico_alergias, sexo, academia_clube, medico_alergia_medicamento, ja_praticou_artes_marciais, nome_professor, uf, medico_plano, responsavel_cpf, fisico_altura, arte_marcial, telefone, cep, cidade, endereco, medico_fator_rh, medico_restricoes, responsavel_nome, data_nascimento, medico_tipo_sanguineo, fisico_peso, medico_sus, cpf, estilo, autoriza_uso_imagem, nome, medico_emergencia_telefone, medico_medicacao_lista, medico_emergencia_nome, email",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T22:22:17.881395"
+    },
+    {
+      "id": "19f5f8c2-7424-4aa2-acd2-d4fd15df1cec",
+      "usuario_id": "0d2d11f0-2a33-403c-8c8b-bb8a18ff3511",
+      "usuario_nome": "Paulo Casais",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Paulo Casais (ID: 0d2d11f0-2a33-403c-8c8b-bb8a18ff3511) atualizado. Campos: filial_nome, filial_id, faixa",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-20T22:38:49.212361"
+    },
+    {
+      "id": "1d2df9bf-0a25-4443-a577-87faf24db5a1",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Atleta Teste Fluxo (ID: 7e9d9a16-bb5f-400d-a03c-fc0eb6adb1ef) atualizado. Campos: filial_nome, filial_id, faixa",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-21T01:13:38.771374"
+    },
+    {
+      "id": "434a33ec-c827-4e19-8963-5726bec7b287",
+      "usuario_id": "6513aa27-452f-462e-8f5a-b3f2052612f9",
+      "usuario_nome": "Super Administrador",
+      "acao": "Atualização de Atleta",
+      "detalhes": "Perfil do atleta Atleta Teste Fluxo (ID: eb6172e3-6ef8-4272-8a3a-91e36789bf18) atualizado. Campos: filial_nome, filial_id, faixa",
+      "ip": "127.0.0.1",
+      "created_at": "2026-07-21T01:13:48.095762"
     }
   ],
   "cms_config": [

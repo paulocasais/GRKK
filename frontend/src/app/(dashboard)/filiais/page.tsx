@@ -14,6 +14,7 @@ interface Filial {
   nome_fantasia?: string;
   codigo_interno?: string;
   status: 'ativo' | 'pendente' | 'inativo' | 'reprovado';
+  cpf_responsavel?: string;
   graduacao_responsavel?: string;
   municipio?: string;
   estado?: string;
@@ -135,12 +136,19 @@ export default function FiliaisPage() {
                     <p className="text-[10px] text-zinc-500">Cód: {filial.codigo_interno || 'N/A'}</p>
                   </div>
                 </div>
-                <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border ${
-                  filial.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                  filial.status === 'pendente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
-                }`}>
-                  {filial.status}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border ${
+                    filial.status === 'ativo' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                    filial.status === 'pendente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'
+                  }`}>
+                    {filial.status}
+                  </span>
+                  {filial.status === 'pendente' && !filial.cpf_responsavel && (
+                    <span className="px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider rounded-md border bg-red-950/40 text-red-400 border-red-500/30" title="Cadastro sem CPF do responsável">
+                      Falta CPF
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5 pt-2 border-t border-zinc-800/50 text-[11px] text-zinc-400">

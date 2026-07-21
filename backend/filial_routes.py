@@ -97,6 +97,7 @@ def create_filial_routes(app: Flask):
             "nome": nome,
             "email": email,
             "telefone": telefone or "",
+            "cnpj_cpf": data.get("cnpj_cpf", ""),
             "status": "pendente",
             "codigo_interno": "MOCK-FILIAL-" + user_id[:5].upper()
         }
@@ -156,7 +157,7 @@ def create_filial_routes(app: Flask):
         # Campos permitidos na tabela de filiais
         update_fil = {}
         fields_to_update = [
-            "nome", "email", "telefone", "nome_fantasia", "cpf_responsavel", "graduacao_responsavel",
+            "nome", "email", "telefone", "nome_fantasia", "cnpj_cpf", "cpf_responsavel", "graduacao_responsavel",
             "registro_federativo", "cep", "rua", "numero", "bairro", "municipio", "estado"
         ]
         
@@ -183,6 +184,13 @@ def create_filial_routes(app: Flask):
             res, error = SupabaseService.update("filiais", id, update_fil)
             if error:
                 return jsonify({"error": error}), 500
+
+            # Sincronização automática para contas com perfil unificado (também atleta)
+            novo_cpf = update_fil.get("cpf_responsavel") or update_fil.get("cnpj_cpf")
+            if novo_cpf:
+                atletas, _ = SupabaseService.get_all("atletas", filter_dict={"id": id})
+                if atletas:
+                    SupabaseService.update("atletas", id, {"cpf": novo_cpf})
 
         updated_filial, _ = SupabaseService.get_profile_by_id(id)
 
